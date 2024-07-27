@@ -1,0 +1,49 @@
+version: '3.9'
+services:
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+
+  client-service:
+    build: ./clients
+    ports:
+      - "3001:3000"
+    environment:
+      - DB_URI=mongodb://mongo:27017/clientDB
+    depends_on:
+      - mongo
+    restart: always
+
+  supplier-service:
+    build: ./suppliers
+    ports:
+      - "3002:3000"
+    environment:
+      - DB_URI=mongodb://mongo:27017/supplierDB
+    depends_on:
+      - mongo
+    restart: always
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "5000:5000"
+    depends_on:
+      - client-service
+      - supplier-service
+    restart: always
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_GATEWAY_URL=http://api-gateway:5000
+    depends_on:
+      - api-gateway
+    restart: always
+volumes:
+  mongo-data:
