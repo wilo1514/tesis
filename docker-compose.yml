@@ -4,7 +4,7 @@ services:
   api-gateway:
     build: ./api-gateway
     ports:
-      - '5000:3000'
+      - '4000:4000'
     environment:
       - CLIENT_SERVICE_URL=http://clients:3005
       - SUPPLIER_SERVICE_URL=http://suppliers:3003
@@ -15,7 +15,7 @@ services:
   clients:
     build: ./clients
     ports:
-      - '3005:3000'
+      - '3005:3005'
     environment:
       - DB_URI=mongodb://mongo:27017/clientsDB
     depends_on:
