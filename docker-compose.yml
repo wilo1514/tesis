@@ -5,9 +5,6 @@ services:
     build: ./api-gateway
     ports:
       - '4000:4000'
-    environment:
-      - CLIENT_SERVICE_URL=http://clients:3005
-      - SUPPLIER_SERVICE_URL=http://suppliers:3003
     depends_on:
       - clients
       - suppliers
@@ -24,19 +21,11 @@ services:
   suppliers:
     build: ./suppliers
     ports:
-      - '3003:3000'
+      - '3003:3003'
     environment:
       - DB_URI=mongodb://mongo:27017/suppliersDB
     depends_on:
       - mongo
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    environment:
-      - REACT_APP_API_GATEWAY_URL=http://api-gateway:5000
-    depends_on:
-      - api-gateway
 
   mongo:
     image: mongo

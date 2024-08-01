@@ -1,7 +1,3 @@
-FROM node:16
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-EXPOSE 5000
-CMD ["node", "src/index.js"]
+FROM nginx:alpine
+
+COPY nginx.conf /etc/nginx/nginx.conf
