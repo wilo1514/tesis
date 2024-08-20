@@ -1,37 +1,75 @@
-const xml2js = require('xml2js');
-const builder = new xml2js.Builder({ headless: true });
+const { create } = require('xmlbuilder2');
 
-exports.generateXML = (invoice) => {
+function generarXMLFactura(factura) {
     const obj = {
         factura: {
+            '@id': 'comprobante',
+            '@version': '1.0.0',
             infoTributaria: {
-                ruc: invoice.customerRuc,
-                claveAcceso: 'clave_generada',
+                ambiente: factura.emisor.ambiente,
+                tipoEmision: factura.emisor.tipoEmision,
+                razonSocial: factura.emisor.razonSocial,
+                nombreComercial: factura.emisor.nombreComercial,
+                ruc: factura.emisor.ruc,
+                claveAcceso: factura.claveAcceso,
                 codDoc: '01',
-                estab: '001',
-                ptoEmi: '001',
-                secuencial: '000000123',
-                dirMatriz: 'Dirección de la matriz'
+                estab: factura.emisor.estab,
+                ptoEmi: factura.emisor.ptoEmi,
+                secuencial: factura.emisor.secuencial,
+                dirMatriz: factura.emisor.direccionMatriz
             },
             infoFactura: {
-                fechaEmision: new Date(invoice.issueDate).toISOString().split('T')[0],
-                dirEstablecimiento: 'Dirección del establecimiento',
-                totalSinImpuestos: invoice.details.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2),
-                importeTotal: invoice.details.reduce((sum, item) => sum + (item.price * item.quantity * 1.12), 0).toFixed(2)
+                fechaEmision: factura.fechaEmision,
+                dirEstablecimiento: factura.emisor.direccionEstablecimiento,
+                contribuyenteEspecial: factura.emisor.contribuyenteEspecial,
+                obligadoContabilidad: factura.emisor.obligadoContabilidad,
+                tipoIdentificacionComprador: factura.receptor.tipoIdentificacion,
+                razonSocialComprador: factura.receptor.razonSocial,
+                identificacionComprador: factura.receptor.identificacion,
+                totalSinImpuestos: factura.totalSinImpuestos,
+                totalDescuento: factura.totalDescuento,
+                totalConImpuestos: {
+                    totalImpuesto: factura.detalles.map(detalle => ({
+                        codigo: detalle.impuestos[0].codigo,
+                        codigoPorcentaje: detalle.impuestos[0].codigoPorcentaje,
+                        baseImponible: detalle.impuestos[0].baseImponible,
+                        valor: detalle.impuestos[0].valor
+                    }))
+                },
+                propina: factura.propina,
+                importeTotal: factura.importeTotal,
+                moneda: factura.moneda
             },
             detalles: {
-                detalle: invoice.details.map(item => ({
-                    descripcion: item.description,
-                    cantidad: item.quantity,
-                    precioUnitario: item.price.toFixed(2),
-                    precioTotalSinImpuesto: (item.price * item.quantity).toFixed(2)
+                detalle: factura.detalles.map(detalle => ({
+                    codigoPrincipal: detalle.codigoPrincipal,
+                    descripcion: detalle.descripcion,
+                    cantidad: detalle.cantidad,
+                    precioUnitario: detalle.precioUnitario,
+                    descuento: detalle.descuento,
+                    precioTotalSinImpuesto: detalle.precioTotalSinImpuesto,
+                    impuestos: {
+                        impuesto: detalle.impuestos.map(impuesto => ({
+                            codigo: impuesto.codigo,
+                            codigoPorcentaje: impuesto.codigoPorcentaje,
+                            tarifa: impuesto.tarifa,
+                            baseImponible: impuesto.baseImponible,
+                            valor: impuesto.valor
+                        }))
+                    }
+                }))
+            },
+            infoAdicional: {
+                campoAdicional: factura.informacionAdicional.map(info => ({
+                    '@nombre': info.nombre,
+                    '#text': info.valor
                 }))
             }
         }
     };
-    return builder.buildObject(obj);
-};
 
-exports.signXML = (xml) => {
-    return `<signedXml>${xml}</signedXml>`;
-};
+    const xml = create(obj).end({ prettyPrint: true });
+    return xml;
+}
+
+module.exports = generarXMLFactura;

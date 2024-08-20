@@ -18,6 +18,17 @@ exports.getClients = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+exports.getClient = async (req, res) => {
+    try {
+        const client = await Client.findById(req.params.id);
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+        res.status(200).json(client);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 exports.updateClient = async (req, res) => {
     try {

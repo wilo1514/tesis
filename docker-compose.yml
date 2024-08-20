@@ -26,6 +26,16 @@ services:
       - DB_URI=mongodb://mongo:27017/suppliersDB
     depends_on:
       - mongo
+  facturacion:
+    build: ./facturacion
+    ports:
+      - '3001:3001'
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/facturacionDB
+      - P12_PASSWORD=qweqweqwe
+      - AMBIENTE=pruebas # o 'produccion'
+    depends_on:
+      - mongo
 
   mongo:
     image: mongo
