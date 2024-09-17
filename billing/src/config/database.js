@@ -9,9 +9,11 @@ const connectDB = async () => {
         });
         console.log('MongoDB connected');
     } catch (err) {
-        console.error(err.message);
+        console.error('Error connecting to MongoDB:', err.message);
+        console.error('Stack Trace:', err.stack);
         process.exit(1);
     }
 };
+
 
 module.exports = connectDB;

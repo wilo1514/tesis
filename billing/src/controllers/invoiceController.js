@@ -1,5 +1,5 @@
 const Factura = require('../models/invoice');
-const FacturaPendiente = require('../models/facturaPendiente');
+const FacturaPendiente = require('../models/pendingInvoice');
 const generarXMLFactura = require('../utils/xmlGenerator');
 const firmarxml = require('../utils/firmarXML');
 const reintentarEnvio = require('../utils/reintentarEnvio');

@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   api-gateway:
@@ -26,13 +26,13 @@ services:
       - DB_URI=mongodb://mongo:27017/suppliersDB
     depends_on:
       - mongo
-  facturacion:
-    build: ./facturacion
+  billing:
+    build: ./billing
     ports:
       - '3001:3001'
     environment:
       - MONGO_URI=mongodb://mongo:27017/facturacionDB
-      - P12_PASSWORD=qweqweqwe
+      - P12_PASSWORD=HJWvWIzJXs71
       - AMBIENTE=pruebas # o 'produccion'
     depends_on:
       - mongo

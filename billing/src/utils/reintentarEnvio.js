@@ -1,9 +1,9 @@
-const FacturaPendiente = require('../models/facturaPendiente');
-const enviarFactura = require('./enviarFactura');
+const FacturaPendiente = require('../models/pendingInvoice');
+const enviarFactura = require('./sriClient');
 
 async function reintentarEnvio(factura, xmlFirmado, ambiente) {
     const maxReintentos = 2;
-
+    S
     for (let i = 0; i < maxReintentos; i++) {
         const enviado = await enviarFactura(xmlFirmado, ambiente);
 
