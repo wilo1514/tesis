@@ -1,5 +1,35 @@
 const mongoose = require('mongoose');
 
+const ImpuestoSchema = new mongoose.Schema({
+    codigo: String,
+    codigoPorcentaje: String,
+    tarifa: Number,
+    baseImponible: Number,
+    valor: Number
+});
+
+const DetalleSchema = new mongoose.Schema({
+    codigoPrincipal: String,
+    descripcion: String,
+    cantidad: Number,
+    precioUnitario: Number,
+    descuento: Number,
+    precioTotalSinImpuesto: Number,
+    impuestos: [ImpuestoSchema]
+});
+
+const PagoSchema = new mongoose.Schema({
+    formaPago: String,
+    total: Number,
+    plazo: String,
+    unidadTiempo: String
+});
+
+const InformacionAdicionalSchema = new mongoose.Schema({
+    nombre: String,
+    valor: String
+});
+
 const FacturaSchema = new mongoose.Schema({
     claveAcceso: { type: String, required: true, unique: true },
     emisor: {
@@ -17,42 +47,15 @@ const FacturaSchema = new mongoose.Schema({
         email: String
     },
     fechaEmision: { type: Date, default: Date.now },
-    detalles: [
-        {
-            codigoPrincipal: String,
-            descripcion: String,
-            cantidad: Number,
-            precioUnitario: Number,
-            descuento: Number,
-            precioTotalSinImpuesto: Number,
-            impuestos: [
-                {
-                    codigo: String,
-                    codigoPorcentaje: String,
-                    tarifa: Number,
-                    baseImponible: Number,
-                    valor: Number
-                }
-            ]
-        }
-    ],
-    informacionAdicional: [
-        {
-            nombre: String,
-            valor: String
-        }
-    ],
+    detalles: [DetalleSchema],
+    informacionAdicional: [InformacionAdicionalSchema],
     totalSinImpuestos: Number,
     totalDescuento: Number,
     propina: Number,
     importeTotal: Number,
     moneda: { type: String, default: 'USD' },
-    pagos: [
-        {
-            formaPago: String,
-            total: Number
-        }
-    ]
+    pagos: [PagoSchema],
+    firma: { type: String }
 });
 
 module.exports = mongoose.model('Factura', FacturaSchema);

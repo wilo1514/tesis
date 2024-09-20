@@ -4,7 +4,7 @@ function generarXMLFactura(factura) {
     const obj = {
         factura: {
             '@id': 'comprobante',
-            '@version': '1.0.0',
+            '@version': '1.1.0',
             infoTributaria: {
                 ambiente: factura.emisor.ambiente,
                 tipoEmision: factura.emisor.tipoEmision,
@@ -16,12 +16,12 @@ function generarXMLFactura(factura) {
                 estab: factura.emisor.estab,
                 ptoEmi: factura.emisor.ptoEmi,
                 secuencial: factura.emisor.secuencial,
-                dirMatriz: factura.emisor.direccionMatriz
+                dirMatriz: factura.emisor.direccionMatriz,
+                contribuyenteRimpe: factura.emisor.contribuyenteRimpe
             },
             infoFactura: {
                 fechaEmision: factura.fechaEmision,
                 dirEstablecimiento: factura.emisor.direccionEstablecimiento,
-                contribuyenteEspecial: factura.emisor.contribuyenteEspecial,
                 obligadoContabilidad: factura.emisor.obligadoContabilidad,
                 tipoIdentificacionComprador: factura.receptor.tipoIdentificacion,
                 razonSocialComprador: factura.receptor.razonSocial,
@@ -38,11 +38,20 @@ function generarXMLFactura(factura) {
                 },
                 propina: factura.propina,
                 importeTotal: factura.importeTotal,
-                moneda: factura.moneda
+                moneda: factura.moneda,
+                pagos: {
+                    pago: factura.pagos.map(pago => ({
+                        formaPago: pago.formaPago,
+                        total: pago.total,
+                        plazo: pago.plazo,
+                        unidadTiempo: pago.unidadTiempo
+                    }))
+                }
             },
             detalles: {
                 detalle: factura.detalles.map(detalle => ({
                     codigoPrincipal: detalle.codigoPrincipal,
+                    codigoAuxiliar: detalle.codigoAuxiliar,
                     descripcion: detalle.descripcion,
                     cantidad: detalle.cantidad,
                     precioUnitario: detalle.precioUnitario,
@@ -58,17 +67,12 @@ function generarXMLFactura(factura) {
                         }))
                     }
                 }))
-            },
-            infoAdicional: {
-                campoAdicional: factura.informacionAdicional.map(info => ({
-                    '@nombre': info.nombre,
-                    '#text': info.valor
-                }))
             }
         }
     };
 
-    const xml = create(obj).end({ prettyPrint: true });
+    // Generar el XML con formato y líneas en blanco entre elementos
+    const xml = create(obj).end({ prettyPrint: true, gap: '\n\n\n' });
     return xml;
 }
 
