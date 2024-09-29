@@ -32,9 +32,15 @@ const InformacionAdicionalSchema = new mongoose.Schema({
 
 const FacturaSchema = new mongoose.Schema({
     claveAcceso: { type: String, required: true, unique: true },
+    amb: String,
+    tipoEmision: String,
+    estab: String,
+    ptoEmi: String,
+    secuencial: String,
     emisor: {
         ruc: String,
         razonSocial: String,
+        nombreComercial: String,
         direccionMatriz: String,
         direccionEstablecimiento: String,
         contribuyenteEspecial: String,
@@ -42,11 +48,13 @@ const FacturaSchema = new mongoose.Schema({
     },
     receptor: {
         identificacion: String,
+        tipoIdentificacion: String,
         razonSocial: String,
         direccion: String,
+        telefono: String,
         email: String
     },
-    fechaEmision: { type: Date, default: Date.now },
+    fechaEmision: { type: String, required: true },
     detalles: [DetalleSchema],
     informacionAdicional: [InformacionAdicionalSchema],
     totalSinImpuestos: Number,

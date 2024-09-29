@@ -1,21 +1,42 @@
 const { create } = require('xmlbuilder2');
 
 function generarXMLFactura(factura) {
+    // Agrupar y sumar los impuestos por código y códigoPorcentaje
+    const totalImpuestos = factura.detalles.reduce((acum, detalle) => {
+        detalle.impuestos.forEach((impuesto) => {
+            const key = `${impuesto.codigo}-${impuesto.codigoPorcentaje}`;
+            if (!acum[key]) {
+                acum[key] = {
+                    codigo: impuesto.codigo,
+                    codigoPorcentaje: impuesto.codigoPorcentaje,
+                    baseImponible: 0,
+                    valor: 0,
+                };
+            }
+            acum[key].baseImponible += impuesto.baseImponible;
+            acum[key].valor += impuesto.valor;
+        });
+        return acum;
+    }, {});
+
+    // Convertir el objeto de impuestos a un array
+    const totalConImpuestos = Object.values(totalImpuestos);
+
     const obj = {
         factura: {
             '@id': 'comprobante',
             '@version': '1.1.0',
             infoTributaria: {
-                ambiente: factura.emisor.ambiente,
-                tipoEmision: factura.emisor.tipoEmision,
+                ambiente: factura.amb,
+                tipoEmision: factura.tipoEmision,
                 razonSocial: factura.emisor.razonSocial,
                 nombreComercial: factura.emisor.nombreComercial,
                 ruc: factura.emisor.ruc,
                 claveAcceso: factura.claveAcceso,
                 codDoc: '01',
-                estab: factura.emisor.estab,
-                ptoEmi: factura.emisor.ptoEmi,
-                secuencial: factura.emisor.secuencial,
+                estab: factura.estab,
+                ptoEmi: factura.ptoEmi,
+                secuencial: factura.secuencial,
                 dirMatriz: factura.emisor.direccionMatriz,
                 contribuyenteRimpe: factura.emisor.contribuyenteRimpe
             },
@@ -29,11 +50,11 @@ function generarXMLFactura(factura) {
                 totalSinImpuestos: factura.totalSinImpuestos,
                 totalDescuento: factura.totalDescuento,
                 totalConImpuestos: {
-                    totalImpuesto: factura.detalles.map(detalle => ({
-                        codigo: detalle.impuestos[0].codigo,
-                        codigoPorcentaje: detalle.impuestos[0].codigoPorcentaje,
-                        baseImponible: detalle.impuestos[0].baseImponible,
-                        valor: detalle.impuestos[0].valor
+                    totalImpuesto: totalConImpuestos.map(impuesto => ({
+                        codigo: impuesto.codigo,
+                        codigoPorcentaje: impuesto.codigoPorcentaje,
+                        baseImponible: impuesto.baseImponible,
+                        valor: impuesto.valor
                     }))
                 },
                 propina: factura.propina,

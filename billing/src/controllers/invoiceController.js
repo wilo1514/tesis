@@ -7,6 +7,7 @@ const firmarxml = require('../utils/firmarXML');
 const reintentarEnvio = require('../utils/reintentarEnvio');
 const enviarFactura = require('../utils/sriClient');
 const path = require('path');
+const generarClaveAcceso = require('../utils/generarClave'); // Importar la función de generar clave de acceso
 
 // async function obtenerDatosReceptor(clienteId) {
 //     try {
@@ -18,22 +19,72 @@ const path = require('path');
 //         throw new Error('No se pudo obtener datos del cliente');
 //     }
 // }
+
 // exports.crearYEnviarFactura = async (req, res) => {
 //     try {
-//         const clienteId = req.body.clienteId; // Aquí tomamos el clienteId de la solicitud
+//         const ambiente = process.env.AMBIENTE;
+//         const tipoEmision = process.env.EMISION;
+//         const estab = process.env.ESTAB;
+//         const ptoEmi = process.env.PTOEMI;
+//         const clienteId = req.body.clienteId;
 //         console.log(`Intentando obtener datos del cliente con ID: ${clienteId}`);
-//         const receptor = await obtenerDatosReceptor(clienteId); // Pasamos el clienteId a la función
+//         const receptor = await obtenerDatosReceptor(clienteId);
 
+//         // Generar la fecha de emisión en formato DD/MM/AAAA
+//         const fechaEmision = new Date();
+//         const fechaEmisionFormateada = fechaEmision.toLocaleDateString('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' });
+
+//         // Generar la clave de acceso
+//         const amb = ambiente === 'produccion' ? '2' : '1';
+//         const claveAcceso = generarClaveAcceso(
+//             fechaEmisionFormateada,
+//             '01',
+//             req.body.emisor.ruc,
+//             amb,
+//             estab,
+//             ptoEmi,
+//             req.body.emisor.fac,
+//             tipoEmision
+//         );
+//         console.log('Clave de Acceso Generada:', claveAcceso);
+
+//         // Crear la factura con la clave de acceso y la fecha de emisión
+//         const secuencial = req.body.emisor.fac
 //         const factura = new Factura({
 //             ...req.body,
-//             receptor
+//             amb: amb, // Corregido para asegurar que sea '1' o '2'
+//             tipoEmision: tipoEmision, // Asegurando que se pase '1' como tipo de emisión
+//             estab: estab,
+//             ptoEmi: ptoEmi,
+//             secuencial: secuencial,
+//             receptor,
+//             fechaEmision: fechaEmisionFormateada,
+//             claveAcceso
 //         });
 //         await factura.save();
 //         console.log('Factura guardada en la base de datos:', factura._id);
 
 //         // Generar XML
 //         const xml = generarXMLFactura(factura);
-//         console.log('XML generado:', xml);
+//         //console.log('XML generado:', xml);
+
+//         const dirPath = path.join('C:', 'temp', 'xmlsinf');
+
+
+//         // Verificar si el directorio existe, si no, crearlo
+//         if (!fs.existsSync(dirPath)) {
+//             fs.mkdirSync(dirPath, { recursive: true });
+//             console.log(`Directorio creado: ${dirPath}`);
+//         }
+
+//         const filePath = path.join(dirPath, `${claveAcceso}.xml`);
+
+//         try {
+//             fs.writeFileSync(filePath, xml, 'utf8');
+//             console.log(`XML guardado en: ${filePath}`);
+//         } catch (error) {
+//             console.error('Error al guardar el XML:', error);
+//         }
 
 //         // Firmar XML
 //         const p12Path = path.join(__dirname, '../firmas/certificado.pfx');
@@ -42,7 +93,6 @@ const path = require('path');
 //         console.log('XML firmado:', xmlFirmado);
 
 //         // Reintentar envío o almacenar en caso de fallo
-//         const ambiente = process.env.AMBIENTE;
 //         const enviado = await reintentarEnvio(factura, xmlFirmado, ambiente);
 
 //         if (enviado) {
@@ -63,7 +113,7 @@ const path = require('path');
 // };
 
 
-// // Función para reenviar facturas pendientes manualmente
+// Función para reenviar facturas pendientes manualmente
 // exports.reenviarFacturasPendientes = async (req, res) => {
 //     try {
 //         const facturasPendientes = await FacturaPendiente.find();
@@ -96,7 +146,7 @@ const path = require('path');
 async function enviarXMLFirmado() {
     try {
         // Ruta del archivo XML firmado
-        const xmlPath = path.join(__dirname, '../firmas/code.xml');
+        const xmlPath = path.join(__dirname, '../firmas/firmado13.xml');
         console.log(`Ruta del archivo XML firmado: ${xmlPath}`);
 
         // Leer el archivo XML firmado
