@@ -8,6 +8,15 @@ services:
       - clients
       - suppliers
 
+  auth:
+    build: ./auth
+    ports:
+      - '3000:3000'
+    environment:
+      - DB_URI=mongodb://mongo:27017/authDB
+    depends_on:
+      - mongo
+
   clients:
     build: ./clients
     ports:
