@@ -7,7 +7,6 @@ services:
     depends_on:
       - clients
       - suppliers
-
   auth:
     build: ./auth
     ports:
@@ -47,7 +46,6 @@ services:
       - PTOEMI=101
     depends_on:
       - mongo
-
   mongo:
     image: mongo
     ports:
