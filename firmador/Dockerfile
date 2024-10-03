@@ -1,22 +1,28 @@
-# Usamos una imagen base de Python con Java
+# Base de la imagen
 FROM openjdk:11-jre-slim
 
-# Instalar dependencias de Python
-RUN apt-get update && apt-get install -y python3 python3-pip
+# Instalar dependencias de Python y Flask
+RUN apt-get update && apt-get install -y python3 python3-pip && pip3 install flask
 
-# Crear el directorio de trabajo
-WORKDIR /app
+# Crear directorios de trabajo
+RUN mkdir -p /app/firmador
 
-# Copiar el script y las dependencias
-COPY org /app/org
-COPY Firma /app/Firma
-COPY firma_server.py /app/firma_server.py
+# Copiar los archivos del firmador .jar y dependencias
+COPY ./MMfirma/firmar.jar /app/firmador/
+COPY ./MMfirma/lib /app/firmador/lib/
 
-# Instalar Flask
-RUN pip3 install flask
+# Copiar los certificados y claves
+COPY ./Firma/certificado.p12 /app/firmador/Firma/
+COPY ./Firma/clave.txt /app/firmador/Firma/
 
-# Exponer el puerto del servidor
-EXPOSE 8080
+# Copiar el archivo Python que servirá como API
+COPY ./firmador.py /app/firmador/
 
-# Comando para ejecutar el servidor Python
-CMD ["python3", "/app/firma_server.py"]
+# Establecer el directorio de trabajo
+WORKDIR /app/firmador
+
+# Exponer el puerto para Flask
+EXPOSE 8081
+
+# Comando para iniciar el servidor Flask
+CMD ["python3", "firmador.py"]

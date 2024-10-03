@@ -7,6 +7,7 @@ services:
     depends_on:
       - clients
       - suppliers
+      - billing # Aseguramos que api-gateway depende de billing para estar listo
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
@@ -19,6 +20,9 @@ services:
       - DB_URI=mongodb://mongo:27017/authDB
     depends_on:
       - mongo
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
   clients:
     build: ./clients
@@ -55,25 +59,26 @@ services:
       - EMISION=1
       - ESTAB=001
       - PTOEMI=101
+      - FIRMADOR_HOST=firmador
     volumes:
       - C:/Users/willi/OneDrive/Escritorio/account-system/billing/src/firmas:/app/firmas
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     depends_on:
       - mongo
+      - firmador
 
   firmador:
     build: ./firmador
-    ports:
-      - '8080:8080'
+    container_name: firmador
     volumes:
-      - ./org:/app/org
-      - ./Firma:/app/Firma
+      - ./Firma:/app/firmador/Firma # Certificados para la firma
+    ports:
+      - '8081:8081'
     environment:
-      - CERT_PATH=/app/Firma/certificado.p12
-      - CLAVE_PATH=/app/Firma/clave.txt
-    depends_on:
-      - billing
+      - JAVA_OPTS=-Xmx512m
+    networks:
+      - app-network
 
   mongo:
     image: mongo
@@ -84,7 +89,11 @@ services:
     environment:
       - TZ=America/Guayaquil
     command: >
-      sh -c " apt-get update && apt-get install -y tzdata && ln -fs /usr/share/zoneinfo/America/Guayaquil /etc/localtime && dpkg-reconfigure --frontend noninteractive tzdata && mongod --bind_ip_all "
+      sh -c "apt-get update && apt-get install -y tzdata && ln -fs /usr/share/zoneinfo/America/Guayaquil /etc/localtime && dpkg-reconfigure --frontend noninteractive tzdata && mongod --bind_ip_all "
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   mongo-data:

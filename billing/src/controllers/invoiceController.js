@@ -67,7 +67,7 @@ exports.crearYEnviarFactura = async (req, res) => {
         // Generar XML
         const xml = generarXMLFactura(factura);
 
-        const dirPath = path.join('C:', 'temp', 'xmlsinf');
+        const dirPath = path.join('/app/xmls');
 
         // Verificar si el directorio existe, si no, crearlo
         if (!fs.existsSync(dirPath)) {
@@ -84,27 +84,24 @@ exports.crearYEnviarFactura = async (req, res) => {
             console.error('Error al guardar el XML:', error);
         }
 
-        // Llamar al servicio de firmador para firmar el XML
-        const firmadorUrl = 'http://172.22.0.1:8080/firmar'; // Asegúrate de que la ruta sea correcta
-        const response = await axios.post(firmadorUrl, {
-            xmlPath: filePath,
-            rucEmpresa: req.body.emisor.ruc
+        // Llamada al servicio de firmador
+        const response = await axios.post(`http://firmador:8081/firmar`, {
+            xmlFilePath: filePath,
+            ruc_empresa: req.body.ruc_empresa
         });
 
         if (response.data.success) {
-            const xmlFirmado = response.data.signedXml;
-
-            // Enviar el XML firmado al SRI
+            const xmlFirmado = response.data.xmlFirmado;
+            // Ahora enviar el XML firmado al SRI
             const enviado = await enviarFactura(xmlFirmado, process.env.AMBIENTE);
             if (enviado) {
                 res.status(201).send(factura);
             } else {
-                res.status(500).send({ message: 'Error enviando la factura' });
+                res.status(500).send({ message: 'Error al enviar la factura al SRI.' });
             }
         } else {
-            throw new Error('Error firmando el XML');
+            res.status(500).send({ message: 'Error al firmar la factura.' });
         }
-
         // // Verificar que el archivo P12 existe antes de intentar firmar
         // const p12Path = path.join('/app/firmas/7537024_identity_0104065461.p12');
         // if (fs.existsSync(p12Path)) {
