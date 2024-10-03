@@ -1,0 +1,57 @@
+{
+    "factura": [
+        {
+            "ruc_empresa": "0104807342001",
+            "razonSocial_empresa": "CABRERA SARMIENTO JORGE ESTEBAN",
+            "dir_empresa": "AZOGUES-GENERAL VINTIMILLA S-N Y ORIENTE",
+            "contribuyenteRimpe": "SI",
+            "fechaEmision": "2024-09-28",
+            "dirEstablecimiento": "AZOGUES-GENERAL VINTIMILLA S-N Y ORIENTE",
+            "tipo_identificacionComprador": "05",
+            "razonSocialComprador": "Bryam Cabrera",
+            "identificacionComprador": "0105246318",
+            "totalSinImpuestos": "10.00",
+            "baseimponibleimpuestos": "10.00",
+            "iva": "1.50",
+            "importeTotal": "11.50",
+            "direccionComprador": "CUENCA",
+            "nombreComprador": "Bryam Cabrera",
+            "telefonoComprador": "0979236837",
+            "id_comprador": "0105246318",
+            "email": "cx.practica@gmail.com",
+            "usuario": "cx.practica",
+            "numeroFactura": "001-100-000000032"
+        }
+    ],
+    "productos": [
+        [
+            {
+                "precio": "11.5",
+                "descuento": "0.00",
+                "valor subtotal": "10.0",
+                "valor del iva": "1.50",
+                "iva": "0.15",
+                "cantidad": "1.0",
+                "sku": "SERV-001",
+                "nombre": "Servicios Varios"
+            },
+            {
+                "precio": "0.00",
+                "descuento": "0.00",
+                "valor subtotal": "0.00",
+                "valor del iva": "0.00",
+                "iva": "0.00",
+                "cantidad": "1.0",
+                "sku": "AA-NOTA",
+                "nombre": "[SERV-001] Servicios Varios"
+            }
+        ]
+    ],
+    "forma_pago": [
+        {
+            "valor": "11.50",
+            "tipo": "20 Otros con utilización del sistema financiero FA 001-100-000000032",
+            "plazo": 0
+        }
+    ]
+}

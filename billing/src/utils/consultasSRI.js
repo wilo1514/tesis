@@ -48,5 +48,5 @@ async function consultarAutorizacion(claveAcceso) {
 }
 
 // Ejemplo de uso
-const claveAcceso = '2809202401010480734200110011010000000210000002115';
+const claveAcceso = '0210202401010406546100110011010000000600000006010';
 consultarAutorizacion(claveAcceso);
