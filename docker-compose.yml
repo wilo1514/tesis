@@ -11,6 +11,15 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
 
+  auth:
+    build: ./auth
+    ports:
+      - '3000:3000'
+    environment:
+      - DB_URI=mongodb://mongo:27017/authDB
+    depends_on:
+      - mongo
+
   clients:
     build: ./clients
     ports:
@@ -54,7 +63,7 @@ services:
       - mongo
 
   firmador:
-    build: ./firmador # Ruta donde está el Dockerfile del firmador
+    build: ./firmador
     ports:
       - '8080:8080'
     volumes:
