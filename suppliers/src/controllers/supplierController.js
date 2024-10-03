@@ -9,6 +9,19 @@ exports.getSuppliers = async (req, res) => {
     }
 };
 
+exports.getSupplier = async (req, res) => {
+    try {
+        const suppliers = await Supplier.findById(req.params.id);
+        if (!suppliers) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+        res.status(200).json(suppliers);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 exports.createSupplier = async (req, res) => {
     const supplier = new Supplier(req.body);
     try {
