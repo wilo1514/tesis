@@ -5,15 +5,18 @@ FROM openjdk:11-jre-slim
 RUN apt-get update && apt-get install -y python3 python3-pip && pip3 install flask
 
 # Crear directorios de trabajo
-RUN mkdir -p /app/firmador
+RUN mkdir -p /app/firmador /c/0104065461001/firma
+
+# Crear enlace simbólico de c:/ hacia /c
+RUN ln -s /c /c:
 
 # Copiar los archivos del firmador .jar y dependencias
-COPY ./MMfirma/firmar.jar /app/firmador/
-COPY ./MMfirma/lib /app/firmador/lib/
+COPY ./org/MMfirma/firmar.jar /app/firmador/
+COPY ./org/MMfirma/lib /app/firmador/lib/
 
 # Copiar los certificados y claves
-COPY ./Firma/certificado.p12 /app/firmador/Firma/
-COPY ./Firma/clave.txt /app/firmador/Firma/
+COPY ./firma/certificado.p12 /c/0104065461001/firma/
+COPY ./firma/clave.txt /c/0104065461001/firma/
 
 # Copiar el archivo Python que servirá como API
 COPY ./firmador.py /app/firmador/

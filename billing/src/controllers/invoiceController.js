@@ -102,43 +102,6 @@ exports.crearYEnviarFactura = async (req, res) => {
         } else {
             res.status(500).send({ message: 'Error al firmar la factura.' });
         }
-        // // Verificar que el archivo P12 existe antes de intentar firmar
-        // const p12Path = path.join('/app/firmas/7537024_identity_0104065461.p12');
-        // if (fs.existsSync(p12Path)) {
-        //     console.log('Archivo de firma encontrado en:', p12Path);
-        // } else {
-        //     console.error('Archivo de firma NO encontrado en:', p12Path);
-        //     throw new Error('No se pudo encontrar el archivo .p12 para firmar el XML.');
-        // }
-
-        // // Firmar XML usando la ruta del archivo generado
-        // try {
-        //     const p12Password = process.env.P12_PASSWORD;
-        //     const xmlFirmado = firmarxml(filePath, p12Path, p12Password); // Se pasa filePath en lugar de xml
-        //     console.log('XML firmado:', xmlFirmado);
-        // } catch (error) {
-        //     console.error('Error al firmar el XML:', error.message);
-        //     throw new Error('Error al firmar el XML: ' + error.message);
-        // }
-
-        // // Reintentar envío o almacenar en caso de fallo
-        // const signedXmlPath = path.join(dirPath, `${claveAcceso}_signed.xml`); // Ruta del archivo XML firmado
-
-        // try {
-        //     const xmlFirmado = fs.readFileSync(signedXmlPath, 'utf8'); // Leer el XML firmado desde el archivo
-        //     const enviado = await enviarFactura(xmlFirmado, ambiente); // Enviar el XML firmado al SRI
-
-        //     if (enviado) {
-        //         console.log('Factura enviada exitosamente:', factura._id);
-        //         res.status(201).send(factura);
-        //     } else {
-        //         console.log('Factura no pudo ser enviada, almacenada para reintento:', factura._id);
-        //         res.status(500).send({ message: 'Factura no pudo ser enviada. Almacenada para reintento.' });
-        //     }
-        // } catch (error) {
-        //     console.error('Error al enviar el XML firmado:', error.message);
-        //     res.status(500).send({ message: 'Error al enviar el XML firmado', error: error.message });
-        // }
     } catch (error) {
         console.error('Error al crear y enviar la factura:', error);
         res.status(500).send({
@@ -177,32 +140,3 @@ exports.reenviarFacturasPendientes = async (req, res) => {
         res.status(500).send({ message: 'Error al reenviar facturas pendientes', error: error.message, stack: error.stack });
     }
 };
-
-
-// async function enviarXMLFirmado() {
-//     try {
-//         // Ruta del archivo XML firmado
-//         const xmlPath = path.join(__dirname, '../firmas/0110202401010406546100110011010000000500000005015_signed.xml');
-//         console.log(`Ruta del archivo XML firmado: ${xmlPath}`);
-
-//         // Leer el archivo XML firmado
-//         const xmlFirmado = fs.readFileSync(xmlPath, 'utf8');
-
-//         // Ambiente de pruebas o producción
-//         const ambiente = 'pruebas'; // Cambiar a 'produccion' cuando corresponda
-
-//         // Enviar el XML al SRI
-//         const enviado = await enviarFactura(xmlFirmado, ambiente);
-
-//         if (enviado) {
-//             console.log('Factura enviada exitosamente al SRI.');
-//         } else {
-//             console.log('Error al enviar la factura al SRI.');
-//         }
-//     } catch (error) {
-//         console.error('Error al enviar el XML firmado al SRI:', error.message);
-//     }
-// }
-
-// // Ejecutar la función para enviar el XML
-// enviarXMLFirmado();
