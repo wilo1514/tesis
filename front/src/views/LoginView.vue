@@ -126,10 +126,14 @@ export default {
     toPageAfterNotification() {
       if (this.isLogged) {
         setTimeout(() => {
-          this.$router.push({ name: 'UserDashboard' });
+          if (this.$route.name !== 'UserDashboard') {
+            this.$router.replace({ name: 'UserDashboard' });
+
+          }
         }, 2000);
       }
-    },
+    }
+
 
   },
   watch: {

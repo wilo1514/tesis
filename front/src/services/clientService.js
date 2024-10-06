@@ -15,6 +15,18 @@ export const getClients = async () => {
   });
   return response.data;
 };
+// Crear un nuevo cliente
+export const createClient = async (clientData) => {
+  const { token } = getAuthData();
+  const response = await clientClient.post("/clients", clientData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return response.data;
+};
+
 
 // Obtener cliente por razón social
 export const getClientByRazonSocial = async (razonSocial) => {
