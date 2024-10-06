@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const clientController = require('../controllers/clientController');
+const clientController = require('../controllers/productController');
 
 router.get('/', clientController.getClients);
 router.get('/razonSocial/:razonSocial', clientController.getClientByRazonSocial);

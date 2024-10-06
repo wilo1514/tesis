@@ -12,4 +12,4 @@ const clientSchema = new Schema({
     obligadoContabilidad: { type: String, enum: ['SI', 'NO'], default: 'NO' } // Obligado a llevar contabilidad
 });
 
-module.exports = mongoose.model('Client', clientSchema);
+module.exports = mongoose.model('Product', clientSchema);
