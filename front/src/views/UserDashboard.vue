@@ -8,30 +8,31 @@
         <MenuView :items="navigationItems" @selectItem="handleNavigation" class="col bg-light mt-2" />
 
         <div :class="['col-lg-7', !selectedTask ? 'col-lg-10' : 'col-lg-7']">
-          <div v-show="activeNavItem === 'Todo'">
-            <TaskForm @show-task-detail="handleShowTaskDetail" @task-added="handleTaskAdded" @update-task="actualizar" />
-            <b-card class="mt-1">
-              <TaskList :tasks="tasks" @edit-task="handleEditTask" @edit-task-hidden="handleEditTaskHidden"
-                :menu="activeNavItem" :selectedTask="selectedTask" :refresh="refresh" />
-              <!-- {{ showTaskDetail }} -->
+          <div v-show="activeNavItem === 'Home'">
+            <PrincipalComponent></PrincipalComponent>
+            
+          </div>
+          <div v-show="activeNavItem === 'Clientes'">
+            <ClientComponent></ClientComponent>
+
+          </div>
+          <div v-show="activeNavItem === 'Proveedores'">
+            <b-card class="mt-3">
+
+              <!-- <TaskList :tasks="tasks" @edit-task="handleEditTask" @edit-task-hidden="handleEditTaskHidden"
+                :menu="activeNavItem" :selectedTask="selectedTask" :refresh="refresh" /> -->
             </b-card>
           </div>
-          <div v-show="activeNavItem === 'Important'">
+          <div v-show="activeNavItem === 'Registros contables'">
             <b-card class="mt-3">
-              <TaskList :tasks="tasks" @edit-task="handleEditTask" @edit-task-hidden="handleEditTaskHidden"
-                :menu="activeNavItem" :selectedTask="selectedTask" :refresh="refresh" />
-            </b-card>
-          </div>
-          <div v-show="activeNavItem === 'All Tasks'">
-            <b-card class="mt-3">
-              <TaskList :tasks="tasks" @edit-task="handleEditTask" @edit-task-hidden="handleEditTaskHidden"
-                :menu="activeNavItem" :selectedTask="selectedTask" :refresh="refresh" />
+              <!-- <TaskList :tasks="tasks" @edit-task="handleEditTask" @edit-task-hidden="handleEditTaskHidden"
+                :menu="activeNavItem" :selectedTask="selectedTask" :refresh="refresh" /> -->
             </b-card>
           </div>
         </div>
         <div class="col-lg-3">
           <div v-if="selectedTask">
-            <TaskListDetail :selectedTask="selectedTask" />
+            <!-- <TaskListDetail :selectedTask="selectedTask" /> -->
           </div>
 
         </div>
@@ -50,6 +51,8 @@ import HeaderView from './general/HeaderView';
 import FooterView from './general/FooterView';
 import MenuView from './general/MenuView';
 import store from '@/store/index';
+import ClientComponent from '@/components/clientes/ClientComponent.vue';
+import PrincipalComponent from '@/components/principal/principalComponent.vue';
 export default {
   components: {
     TaskForm,
@@ -57,16 +60,19 @@ export default {
     FooterView,
     MenuView,
     TaskList,
-    TaskListDetail
+    TaskListDetail,
+    ClientComponent,
+    PrincipalComponent
   },
   data() {
     return {
       navigationItems: [
-        { id: 1, name: 'Todo', icon: 'book', color: 'success' },
-        { id: 2, name: 'Important', icon: 'exclamation-circle', color: 'warning' },
-        { id: 3, name: 'All Tasks', icon: 'list-ul', color: 'secondary' }
+        { id: 0, name: 'Home', icon: 'house', color: 'primary' },
+        { id: 1, name: 'Clientes', icon: 'person', color: 'primary' },
+        { id: 2, name: 'Proveedores', icon: 'people', color: 'primary' },
+        { id: 3, name: 'Registros contables', icon: 'files', color: 'primary' }
       ],
-      activeNavItem: 'Todo',
+      activeNavItem: 'Home',
       showTaskDetail: false,
       selectedTask: null,
       tasks: [], 

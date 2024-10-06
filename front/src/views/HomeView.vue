@@ -6,12 +6,17 @@
             <div class="row flex-grow-1">
                 <div class="col-lg-9 bg-white d-flex justify-content-center align-items-center">
                     <div class="row text-center">
+                        <h3>Sistema Contable</h3>
 
                         <div class="col-12">
                             <div class="div">
-                                <img src="./../assets/inicio.png" alt="" style="width: 25vw">
+                                <video  autoplay muted width="100%">
+                                    <source src="https://accescont.com/files/videoportadapginaweb2.mp4"
+                                        type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+
                             </div>
-                            <h1>¡One simple to do list for you!</h1>
                         </div>
                         <div class="col-12">
 
@@ -20,18 +25,15 @@
                 </div>
 
                 <div class="row col-lg-3 p-3 ">
-                    <div class="col-12 tabs-height mt-4 border-left border border-light bg-white">
-                        <br>
-                        <b-tabs align="end" content-class="tabs-end">
-                            <b-tab active title="Login">
-                                <LoginInicial />
-                            </b-tab>
-                            <b-tab title="Register">
-                                <RegisterView />
-                            </b-tab>
-                        </b-tabs>
+                    <div class="col-12 d-flex justify-content-center align-items-center">
+                              
+                        <div class="">
+
+                            <LoginInicial />
+                        </div>
+                           
                     </div>
-                    
+
 
                 </div>
             </div>
@@ -40,10 +42,9 @@
 
     </div>
 </template>
-  
+
 <script>
 import LoginInicial from './LoginView.vue'
-import RegisterView from './RegisterView.vue';
 import FooterView from './general/FooterView.vue';
 import HeaderView from './general/HeaderView.vue';
 
@@ -51,7 +52,6 @@ export default {
     name: 'App',
     components: {
         LoginInicial,
-        RegisterView,
         FooterView,
         HeaderView,
     },
@@ -62,5 +62,3 @@ export default {
 <style lang="scss">
 @import "@/styles/inicio.scss";
 </style>
-  
-  

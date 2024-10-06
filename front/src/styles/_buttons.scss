@@ -1,0 +1,15 @@
+@import 'variables';
+
+$success-acc-bg: $primary-color;
+$success-acc-border: $primary-color;
+
+
+.btn-success-acc {
+    background-color: $success-acc-bg !important;
+    border-color: $success-acc-border !important;
+    color: #fff; // Mantener el texto blanco para el contraste
+    &:hover {
+      background-color: darken($success-acc-bg, 10%) !important; // Hacerlo más oscuro en hover
+      border-color: darken($success-acc-border, 10%) !important;
+    }
+  }
