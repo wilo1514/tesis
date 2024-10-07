@@ -145,7 +145,7 @@ export default {
 
     <div class="d-flex justify-content-between align-items-center p-3">
       <div>
-        <h2 class="mb-0 text-primary">Lista de Clientes</h2>
+        <h2 class="mb-0 text-primary">Lista de Productos</h2>
       </div>
       <b-button variant="primary" class="align-self-center" @click="openModal('crear')">Nuevo cliente</b-button>
     </div>
@@ -180,6 +180,7 @@ export default {
         align="center"
         class="mt-3"
     ></b-pagination>
+    <pre>{{ clients }}</pre>
 
     <b-modal id="modal-nuevo-cliente" title="Nuevo Cliente" centered size="xl">
       <b-form @submit.stop.prevent="saveNewClient">
