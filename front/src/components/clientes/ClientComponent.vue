@@ -7,6 +7,7 @@ import {
   getClientByIdentificacion,
   getClientByRazonSocial
 } from "@/services/clientService";
+import * as XLSX from "xlsx";
 
 export default {
   data() {
@@ -90,6 +91,42 @@ export default {
       this.searchQuery = "";
       this.fetchClients();
     },
+
+
+    getMappedClientData() {
+      // Crear un mapa de los valores a su respectivo texto para tipoIdentificacion y contribuyenteRimpe
+      const tipoIdentificacionMap = this.tipoIdentificacionOptions.reduce((map, option) => {
+        map[option.value] = option.text;
+        return map;
+      }, {});
+
+      const contribuyenteRimpeMap = this.contribuyenteRimpeOptions.reduce((map, option) => {
+        map[option.value] = option.text;
+        return map;
+      }, {});
+
+      // Mapear los valores de cada cliente a su correspondiente texto
+      return this.filteredClients.map(client => ({
+        Identificación: client.identificacion,
+        "Razón Social": client.razonSocial,
+        Email: client.email,
+        Teléfono: client.telefono,
+        Dirección: client.direccion,
+        "Tipo de Identificación": tipoIdentificacionMap[client.tipoIdentificacion] || client.tipoIdentificacion,
+        "Contribuyente RIMPE": contribuyenteRimpeMap[client.contribuyenteRimpe] || client.contribuyenteRimpe,
+        "Obligado Contabilidad": client.obligadoContabilidad === 'SI' ? 'Sí' : 'No',
+      }));
+    },
+    exportToExcel() {
+      const data = this.getMappedClientData(); // Obtener los datos ya mapeados
+
+      const ws = XLSX.utils.json_to_sheet(data); // Convierte los datos a una hoja de Excel
+      const wb = XLSX.utils.book_new(); // Crea un nuevo libro de Excel
+      XLSX.utils.book_append_sheet(wb, ws, "Clientes"); // Agrega la hoja al libro
+
+      XLSX.writeFile(wb, "clientes.xlsx"); // Genera y descarga el archivo Excel
+    },
+
     async fetchClients() {
       try {
         if (this.searchQuery) {
@@ -124,19 +161,6 @@ export default {
     },
 
 
-    openModal(mode, client = null) {
-      if (mode === 'crear') {
-        this.modalTitle = 'Nuevo Cliente';
-        this.editMode = false;
-        this.resetClient()
-      } else {
-        this.modalTitle = 'Editar Cliente';
-        this.editMode = true;
-        this.clienteActual = {...client}; // Cargar los datos del cliente
-      }
-
-
-    },
     async saveClient() {
       try {
         if (this.editMode) {
@@ -215,7 +239,6 @@ export default {
       </div>
     </div>
 
-
     <div class="d-flex justify-content-center w-100">
       <b-row class="w-100 d-flex justify-content-center align-items-center">
         <b-col lg="3"></b-col>
@@ -235,7 +258,7 @@ export default {
             <b-icon icon="file-excel" variant="success"></b-icon>
           </b-button>
 
-          <b-button variant="outline-secondary" size="sm"> Exportar
+          <b-button variant="outline-secondary" size="sm" @click="exportToExcel"> Exportar
             <b-icon icon="file-excel" variant="success"></b-icon>
           </b-button>
         </b-col>
