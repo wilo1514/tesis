@@ -42,6 +42,20 @@ services:
     networks:
       - app-network
 
+  products:
+    build: ./products
+    ports:
+      - '3002:3002'
+    environment:
+      - DB_URI=mongodb://mongo:27017/productsDB
+    depends_on:
+      - mongo
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    networks:
+      - app-network
+
   suppliers:
     build: ./suppliers
     ports:
