@@ -1,26 +1,23 @@
 <template>
   <div>
-    <b-container>
       <div class="text-center">
-        <h3 class="mb-4">Sign in</h3>
-
-        <small class="mb-2">Sign in and start managing your tasks!</small>
+        <h3 class="mb-4">Ingresar</h3>
+        <small class="mb-2">Inicia sesión y comienza a gestionar tus tareas!</small>
       </div>
       <b-form @submit.prevent="login">
         <b-form-group label-for="username-input">
-          <b-form-input v-model="identificationUser" id="username-input" placeholder="Identification" type="text"
+          <b-form-input v-model="identificationUser" id="username-input" placeholder="Ingrese su correo" type="text"
             required class="m-2"></b-form-input>
         </b-form-group>
         <b-form-group>
-          <b-form-input v-model="passwordUser" placeholder="Password" type="password" required
+          <b-form-input v-model="passwordUser" placeholder="Ingrese su contraseña" type="password" required
             class="m-2"></b-form-input>
         </b-form-group>
         <div class="text-end">
           <small :class="messageClass">{{ loginMessage }}</small>
-          <b-button type="submit" variant="success" class="m-2 w-100">Login</b-button>
+          <b-button type="submit" variant="success" class="m-2 w-100">Ingresar</b-button>
         </div>
       </b-form>
-    </b-container>
     <AvisoModal :aviso="aviso" />
 
     <HeaderView :name-user="loggedInUserName" />
@@ -28,7 +25,7 @@
 </template>
 
 <script>
-import { login } from '@/services/api';
+import { login, identifyLogin } from '@/services/api';
 import HeaderView from './general/HeaderView.vue';
 import { setAuthData } from '@/services/auth';
 
@@ -45,9 +42,12 @@ export default {
       aviso: {
         titulo: '',
         texto: '',
-        type: 'success'
+        type: 'success',
       },
-      isLogged: false
+      isLogged: false,
+      responseIdLogin: [],
+      isLoggingIn: false,
+
     };
   },
   computed: {
@@ -57,38 +57,83 @@ export default {
 
   },
   methods: {
-    async login() {
+
+    async Identifylogin() {
       try {
-        const userData = await login(this.identificationUser, this.passwordUser);
-        console.log("user", userData);
-        this.loggedInUserName = userData.result.usuario.nameUser;
-
-        localStorage.setItem('token', userData.result.token);
-
-        const loggedInUserName = userData.result.usuario.nameUser;
-        const loggedIdUser = userData.result.usuario.idUser;
-
-        setAuthData(userData.result.token, loggedInUserName, loggedIdUser);
-        this.aviso.titulo = 'Welcome!';
-        this.aviso.texto = loggedInUserName;
-        this.aviso.type = 'success';
-
-        this.isLogged = true;
-
+        const userLoeado = await identifyLogin();
+        console.log("user identifyLogin", userLoeado);
+        this.responseIdLogin = userLoeado;
       } catch (error) {
+        if (error.response) {
+          // El servidor respondió pero hubo un problema con los datos
+          this.loginMessage = 'Invalid username or password, please try again!';
+        } else if (error.request) {
+          // El servidor no respondió (problema de red)
+          this.loginMessage = 'Network error, please check your connection!';
+        } else {
+          // Otro tipo de error
+          this.loginMessage = 'An unexpected error occurred!';
+        }
         console.error('Login error:', error);
-        this.loginMessage = 'Invalid username or password, please try again!';
       }
-    },
-
+    }
+    ,
+    async login() {
+  this.isLoggingIn = true;
+  try {
+    // Hacer el login usando la función de servicio 'login' y pasando el email y contraseña
+    const userData = await login(this.identificationUser, this.passwordUser);
     
+    // Revisar si el login fue exitoso y la data tiene el token
+    if (userData && userData.token && userData.user) {
+      console.log("user", userData);
+      
+      // Extraer datos del usuario
+      const token = userData.token;
+      const loggedInUserName = userData.user.username;
+      const loggedIdUser = userData.user.id;  // Suponiendo que 'id' es el identificador del usuario
+
+      // Guardar token en localStorage
+      localStorage.setItem('token', token);
+
+      // Establecer los datos de autenticación
+      setAuthData(token, loggedInUserName, loggedIdUser);
+
+      // Mostrar notificación de éxito
+      this.aviso.titulo = 'Welcome!';
+      this.aviso.texto = loggedInUserName;
+      this.aviso.type = 'success';
+
+      // Cambiar el estado de logueo
+      this.isLogged = true;
+
+      // Redirigir a la página correspondiente después del login exitoso
+      this.toPageAfterNotification();
+    } else {
+      throw new Error('Invalid login response');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+
+    // Mensaje de error al usuario
+    this.loginMessage = 'Invalid username or password, please try again!';
+  } finally {
+    this.isLoggingIn = false;
+  }
+},
+
+
     toPageAfterNotification() {
       if (this.isLogged) {
         setTimeout(() => {
-          this.$router.push({ name: 'UserDashboard' });
+          if (this.$route.name !== 'UserDashboard') {
+            this.$router.replace({ name: 'UserDashboard' });
+
+          }
         }, 2000);
       }
-    },
+    }
+
 
   },
   watch: {
@@ -98,6 +143,9 @@ export default {
       },
       deep: true
     }
+  },
+  mounted() {
+    this.Identifylogin();
   }
 };
 </script>

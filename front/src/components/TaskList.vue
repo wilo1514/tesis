@@ -171,9 +171,9 @@ export default {
         async fetchTaskImportant() {
             await getTasksPriority(this.$store, this.idUser);
         },
-        async fetchTaskTodo() {
-            await getTasksTodo(this.$store, this.idUser);
-        },
+        // async fetchTaskTodo() {
+        //     await getTasksTodo(this.$store, this.idUser);
+        // },
         async updatePriorityTask(dataTask) {
             try {
                 const oppositeStatus = dataTask.statusTask === "true" ? '"false"' : '"true"';
@@ -269,7 +269,7 @@ export default {
     },
 
     created() {
-        this.fetchTaskTodo();
+        //this.fetchTaskTodo();
     },
 };
 </script>

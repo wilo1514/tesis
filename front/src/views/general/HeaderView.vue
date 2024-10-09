@@ -4,10 +4,10 @@
             <b-navbar-brand class="d-flex align-items-center justify-content-between w-100 text-primary ">
                 <div style="margin-left: 20px !important;">
                     <a href="/">
-                        <img src="../../assets/logoTodoList2.png" width="70" alt="Logo" class="" />
+                        <img src="https://accescont.com/images/logo.svg" width="80" alt="Logo" class="" />
                     </a>
                 </div>
-                <h4 class="text-center mx-auto">TodoList | Secure software</h4>
+                <!-- <h4 class="text-center mx-auto">ACCESSCONT</h4> -->
                 <div v-if="isAuthenticated">
                     <b-row>
                         <b-col class="mt-1">
