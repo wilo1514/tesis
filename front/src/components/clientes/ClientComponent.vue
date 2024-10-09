@@ -58,6 +58,9 @@ export default {
       perPage: 10,
       currentPage: 1,
       modalTitle: '',
+      file: null,
+      importMessage: '',
+
     };
   },
   computed: {
@@ -85,6 +88,15 @@ export default {
       const end = start + this.perPage;
       return this.filteredClients.slice(start, end);
     },
+    selectedFile: {
+      get() {
+        return this.file; // Retorna el archivo seleccionado
+      },
+      set(file) {
+        this.file = file; // Actualiza el archivo seleccionado
+      }
+    }
+
   },
   methods: {
     resetSearch() {
@@ -92,6 +104,16 @@ export default {
       this.fetchClients();
     },
 
+    fileInputChange(event) {
+      this.file = event.target.files[0]; // Guardar el archivo seleccionado
+      this.importMessage = ''; // Resetear el mensaje cuando se selecciona un archivo
+    },
+    showModalImport() {
+      this.$refs['my-modal-import'].show()
+    },
+    hideModalImport() {
+      this.$refs['my-modal-import'].hide()
+    },
 
     getMappedClientData() {
       // Crear un mapa de los valores a su respectivo texto para tipoIdentificacion y contribuyenteRimpe
@@ -126,6 +148,73 @@ export default {
 
       XLSX.writeFile(wb, "clientes.xlsx"); // Genera y descarga el archivo Excel
     },
+
+
+    async importFromExcel() {
+      if (!this.file) {
+        this.importMessage = "Por favor selecciona un archivo primero";
+        return;
+      }
+
+      try {
+        const file = this.file;
+        const data = await file.arrayBuffer(); // Leer el archivo
+        const workbook = XLSX.read(data); // Leer el archivo Excel
+        const sheet = workbook.Sheets[workbook.SheetNames[0]]; // Obtener la primera hoja
+        const jsonData = XLSX.utils.sheet_to_json(sheet); // Convertir a JSON
+
+        let successfullyAdded = 0;
+        let failedClients = 0; // Contador de clientes fallidos (errores)
+
+        // Procesar los datos y crear los clientes
+        for (const clientData of jsonData) {
+          const newClient = {
+            razonSocial: clientData.razonSocial || '',
+            email: clientData.email || '',
+            telefono: clientData.telefono || '',
+            identificacion: clientData.identificacion || '',
+            direccion: clientData.direccion || '',
+            tipoIdentificacion: clientData.tipoIdentificacion || '01',
+            contribuyenteRimpe: clientData.contribuyenteRimpe || '0',
+            obligadoContabilidad: clientData.obligadoContabilidad || 'NO'
+          };
+
+          // Validar si los campos requeridos están presentes
+          if (!newClient.razonSocial || !newClient.email || !newClient.identificacion) {
+            console.warn("Faltan datos obligatorios para el cliente:", newClient);
+            failedClients++; // Contar los fallidos debido a datos incompletos
+            continue; // Saltar este cliente si faltan datos
+          }
+
+          try {
+            // Intentar crear un nuevo cliente
+            await createClient(newClient);
+            successfullyAdded++; // Incrementar el contador de clientes agregados exitosamente
+          } catch (error) {
+            console.error("Error al crear el cliente:", error.response ? error.response.data.message : error);
+            failedClients++; // Contar los errores
+          }
+        }
+
+        // Actualizar el mensaje de éxito o error basado en los resultados de la importación
+        if (successfullyAdded > 0) {
+          // Mostrar cuántos clientes fueron cargados y cuántos fallaron
+          this.importMessage = `Se cargaron ${successfullyAdded} clientes exitosamente. <br> No se cargaron ${failedClients} clientes.`;
+        } else {
+          // Si no se cargó ninguno, mostrar mensaje de error
+          this.importMessage = `No se cargó ninguno. Los ${failedClients} clientes ya existen.`;
+        }
+
+        // Refrescar la lista de clientes después de la importación
+        this.fetchClients();
+
+      } catch (error) {
+        this.importMessage = "Error al importar clientes desde Excel. Verifica el archivo y vuelve a intentarlo.";
+        console.error("Error al importar clientes desde Excel:", error);
+      }
+    },
+
+
 
     async fetchClients() {
       try {
@@ -241,7 +330,6 @@ export default {
 
     <div class="d-flex justify-content-center w-100">
       <b-row class="w-100 d-flex justify-content-center align-items-center">
-        <b-col lg="3"></b-col>
         <b-col lg="6">
           <b-form-input
               v-model="searchQuery"
@@ -254,13 +342,18 @@ export default {
 
         </b-col>
         <b-col class="text-end">
-          <b-button variant="outline-secondary" class="m-1" size="sm"> Importar
+
+
+
+
+          <b-button variant="outline-secondary" class="m-1" size="sm" @click="showModalImport"> Importar
             <b-icon icon="file-excel" variant="success"></b-icon>
           </b-button>
 
           <b-button variant="outline-secondary" size="sm" @click="exportToExcel"> Exportar
             <b-icon icon="file-excel" variant="success"></b-icon>
           </b-button>
+
         </b-col>
 
 
@@ -350,6 +443,23 @@ export default {
         <b-button class="mt-2" v-if="editMode" variant="outline-success" block @click="saveClient">Actualizar cliente
         </b-button>
 
+      </template>
+    </b-modal>
+
+    <b-modal ref="my-modal-import" title="Importar clientes" centered hide-header-close>
+      <div class="d-block text-center">
+        <div class="mb-3">
+          <!-- Input para cargar el archivo Excel -->
+          <input class="form-control" type="file" id="formFile" @change="fileInputChange">
+          <!-- Mensaje de error o éxito debajo del input file -->
+          <span v-if="importMessage" class="text-danger" v-html="importMessage"></span>
+
+        </div>
+      </div>
+
+      <template #modal-footer>
+        <b-button class="mt-2" variant="outline-secondary" block @click="hideModalImport">Cancelar</b-button>
+        <b-button class="mt-2" variant="outline-success" block @click="importFromExcel">Cargar clientes</b-button>
       </template>
     </b-modal>
   </b-container>
