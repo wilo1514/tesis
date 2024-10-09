@@ -86,9 +86,9 @@ exports.crearYEnviarFactura = async (req, res) => {
         // Llamada al servicio de firmador
         const response = await axios.post(`http://firmador:8081/firmar`, {
             xmlFilePath: filePath,
-            ruc_empresa: req.body.ruc_empresa
+            ruc_empresa: req.body.emisor.ruc
         });
-
+        
         if (response.data.success) {
             const xmlFirmado = response.data.xmlFirmado;
             // Ahora enviar el XML firmado al SRI

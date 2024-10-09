@@ -21,5 +21,5 @@ COPY ./firmador.py /app/firmador/
 # Exponer el puerto para Flask
 EXPOSE 8081
 
-# Ejecutar tanto el JAR como el servicio de Flask
+# Ejecutar el servicio de Flask
 CMD ["python3", "firmador.py"]
