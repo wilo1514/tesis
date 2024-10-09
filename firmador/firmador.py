@@ -13,8 +13,11 @@ def firmar():
         xml_file_path = data['xmlFilePath']
         ruc_empresa = data['ruc_empresa']
 
-        # Cambié la ruta del archivo de clave para que coincida con la estructura correcta
-        clave_file_path = f"/c/0104065461001/firma/clave.txt"  # Ruta del archivo de clave
+        # Leer variables de entorno para las rutas de los certificados y claves
+        certificado_path = os.getenv(
+            'CERTIFICADO_PATH', '/app/firmador/Firma/certificado.p12')
+        clave_file_path = os.getenv(
+            'CLAVE_PATH', '/app/firmador/Firma/clave.txt')
 
         # Verificar si existe el archivo de clave
         if not os.path.exists(clave_file_path):
@@ -24,23 +27,24 @@ def firmar():
         with open(clave_file_path, 'r', encoding='utf-8') as clave_file:
             clave = clave_file.readline().strip()
 
+        # Ruta del archivo .jar ajustada
         jar_path = "/app/firmador/firmar.jar"
 
         # Extraer el número de comprobante (estab, ptoEmi, secuencial)
         nombre_archivo = os.path.basename(xml_file_path).replace('.xml', '')
         numero_comprobante = f"{nombre_archivo[24:27]}-{nombre_archivo[27:30]}-{nombre_archivo[30:39]}"
 
-        # Asegurarse de que la carpeta para el archivo firmado exista
-        output_dir = f"/c/0104065461001/FACT/"  # Ajusté la ruta de salida también
+        # Ruta de salida del archivo firmado
+        output_dir = f"/app/firmador/FACT/{ruc_empresa}/"
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
         # Ejecutar el firmador .jar
-        subprocess.run(['java', '-jar', jar_path, 'FACT',
-                        numero_comprobante, clave, ruc_empresa])
+        subprocess.run(['java', '-jar', jar_path, 'FACT',numero_comprobante, clave, ruc_empresa])
 
         # Ruta del archivo firmado
-        signed_file_path = os.path.join(output_dir, f"{numero_comprobante}.xml")
+        signed_file_path = os.path.join(
+            output_dir, f"{numero_comprobante}.xml")
 
         # Verificar si el archivo firmado existe
         if os.path.exists(signed_file_path):

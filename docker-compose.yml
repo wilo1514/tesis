@@ -1,4 +1,5 @@
 version: '3.9'
+
 services:
   api-gateway:
     build: ./api-gateway
@@ -8,6 +9,7 @@ services:
       - clients
       - suppliers
       - billing
+      - products
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
@@ -34,6 +36,20 @@ services:
       - '3005:3005'
     environment:
       - DB_URI=mongodb://mongo:27017/clientsDB
+    depends_on:
+      - mongo
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    networks:
+      - app-network
+
+  products:
+    build: ./products
+    ports:
+      - '3006:3006'
+    environment:
+      - DB_URI=mongodb://mongo:27017/productsDB
     depends_on:
       - mongo
     volumes:
@@ -69,7 +85,6 @@ services:
       - PTOEMI=101
       - FIRMADOR_HOST=firmador
     volumes:
-      - C:/Users/willi/OneDrive/Escritorio/account-system/billing/src/firmas:/app/firmas
       - ./xmls:/app/xmls # Compartir la carpeta de XMLs entre billing y firmador
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
@@ -83,12 +98,13 @@ services:
     build: ./firmador
     container_name: firmador
     volumes:
-      - C:/Users/willi/OneDrive/Escritorio/account-system/firmador/firma:/c/0104065461001/firma # Certificados para la firma
       - ./xmls:/app/xmls # Compartir la carpeta de XMLs entre billing y firmador
+      - C:/Users/willi/OneDrive/Escritorio/account-system/firmador/firma:/app/0104065461001/firma/
     ports:
       - '8081:8081'
     environment:
-      - JAVA_OPTS=-Xmx512m
+      - CERTIFICADO_PATH=/app/firmador/Firma/certificado.p12
+      - CLAVE_PATH=/app/firmador/Firma/clave.txt
     networks:
       - app-network
 
@@ -101,7 +117,7 @@ services:
     environment:
       - TZ=America/Guayaquil
     command: >
-      sh -c "apt-get update && apt-get install -y tzdata && ln -fs /usr/share/zoneinfo/America/Guayaquil /etc/localtime && dpkg-reconfigure --frontend noninteractive tzdata && mongod --bind_ip_all "
+      sh -c "apt-get update && apt-get install -y tzdata && ln -fs /usr/share/zoneinfo/America/Guayaquil /etc/localtime && dpkg-reconfigure --frontend noninteractive tzdata && mongod --bind_ip_all"
     networks:
       - app-network
 

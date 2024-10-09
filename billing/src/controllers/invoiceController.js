@@ -61,7 +61,6 @@ exports.crearYEnviarFactura = async (req, res) => {
             fechaEmision: fechaEmisionFormateada,
             claveAcceso
         });
-        await factura.save();
         console.log('Factura guardada en la base de datos:', factura._id);
 
         // Generar XML
@@ -96,6 +95,7 @@ exports.crearYEnviarFactura = async (req, res) => {
             const enviado = await enviarFactura(xmlFirmado, process.env.AMBIENTE);
             if (enviado) {
                 res.status(201).send(factura);
+                await factura.save();
             } else {
                 res.status(500).send({ message: 'Error al enviar la factura al SRI.' });
             }
