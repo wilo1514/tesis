@@ -97,7 +97,7 @@ services:
     container_name: firmador
     volumes:
       - ./xmls:/app/xmls # Compartir la carpeta de XMLs entre billing y firmador
-      - C:/Users/willi/OneDrive/Escritorio/account-system/firmador/firma:/app/firmador/Firma/ # Ruta para certificado y clave
+      - C:/Users/willi/OneDrive/Escritorio/account-system/firmador/firma:/app/firmador/firma/ # Ruta para certificado y clave
     ports:
       - '8081:8081'
     environment:
