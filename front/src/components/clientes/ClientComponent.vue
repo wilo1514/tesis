@@ -60,6 +60,7 @@ export default {
       modalTitle: '',
       file: null,
       importMessage: '',
+      failedClientsData: [],
 
     };
   },
@@ -99,6 +100,21 @@ export default {
 
   },
   methods: {
+
+    downloadFailedClients() {
+      if (this.failedClientsData.length === 0) {
+        this.importMessage = "No hay clientes fallidos para descargar.";
+        return;
+      }
+      this.importMessage = "";
+      // Crear el archivo Excel con los clientes fallidos
+      const ws = XLSX.utils.json_to_sheet(this.failedClientsData); // Convierte los datos de clientes fallidos en una hoja de Excel
+      const wb = XLSX.utils.book_new(); // Crea un nuevo libro de Excel
+      XLSX.utils.book_append_sheet(wb, ws, "Clientes Fallidos"); // Agregar la hoja con el nombre "Clientes Fallidos"
+
+      // Descargar el archivo Excel con el nombre 'clientes_fallidos.xlsx'
+      XLSX.writeFile(wb, "clientes_fallidos.xlsx");
+    },
     resetSearch() {
       this.searchQuery = "";
       this.fetchClients();
@@ -112,6 +128,7 @@ export default {
       this.$refs['my-modal-import'].show()
     },
     hideModalImport() {
+      this.importMessage = "";
       this.$refs['my-modal-import'].hide()
     },
 
@@ -165,6 +182,7 @@ export default {
 
         let successfullyAdded = 0;
         let failedClients = 0; // Contador de clientes fallidos (errores)
+        this.failedClientsData = []; // Array para almacenar los datos de clientes fallidos
 
         // Procesar los datos y crear los clientes
         for (const clientData of jsonData) {
@@ -183,6 +201,7 @@ export default {
           if (!newClient.razonSocial || !newClient.email || !newClient.identificacion) {
             console.warn("Faltan datos obligatorios para el cliente:", newClient);
             failedClients++; // Contar los fallidos debido a datos incompletos
+            this.failedClientsData.push(newClient); // Agregar cliente fallido a la lista
             continue; // Saltar este cliente si faltan datos
           }
 
@@ -193,6 +212,7 @@ export default {
           } catch (error) {
             console.error("Error al crear el cliente:", error.response ? error.response.data.message : error);
             failedClients++; // Contar los errores
+            this.failedClientsData.push(newClient); // Agregar cliente fallido a la lista
           }
         }
 
@@ -202,7 +222,7 @@ export default {
           this.importMessage = `Se cargaron ${successfullyAdded} clientes exitosamente. <br> No se cargaron ${failedClients} clientes.`;
         } else {
           // Si no se cargó ninguno, mostrar mensaje de error
-          this.importMessage = `No se cargó ninguno. Los ${failedClients} clientes ya existen.`;
+          this.importMessage = `No se cargó ninguno. Los ${failedClients} clientes ya existen o tienen errores.`;
         }
 
         // Refrescar la lista de clientes después de la importación
@@ -214,6 +234,48 @@ export default {
       }
     },
 
+
+    downloadFormatoImportar() {
+      const data = [
+        {
+          razonSocial: 'Cliente A',
+          email: 'clienteA@example.com',
+          telefono: '0991234567',
+          identificacion: '0123456789',
+          direccion: 'Direccion 1',
+          tipoIdentificacion: '01',
+          contribuyenteRimpe: '0',
+          obligadoContabilidad: 'SI'
+        },
+        {
+          razonSocial: 'Cliente B',
+          email: 'clienteB@example.com',
+          telefono: '0997654321',
+          identificacion: '0123456790',
+          direccion: 'Direccion 2',
+          tipoIdentificacion: '01',
+          contribuyenteRimpe: '0',
+          obligadoContabilidad: 'SI'
+        },
+        {
+          razonSocial: 'Cliente C',
+          email: 'clienteC@example.com',
+          telefono: '0992345678',
+          identificacion: '0123456791',
+          direccion: 'Direccion 3',
+          tipoIdentificacion: '01',
+          contribuyenteRimpe: '0',
+          obligadoContabilidad: 'SI'
+        }
+      ];
+
+      const ws = XLSX.utils.json_to_sheet(data); // Convierte los datos en una hoja de Excel
+      const wb = XLSX.utils.book_new(); // Crea un nuevo libro de Excel
+      XLSX.utils.book_append_sheet(wb, ws, "Formato Clientes"); // Agrega la hoja al libro con el nombre "Formato Clientes"
+
+      // Descargar el archivo Excel con el nombre 'formato_importar_clientes.xlsx'
+      XLSX.writeFile(wb, "formato_importar_clientes.xlsx");
+    },
 
 
     async fetchClients() {
@@ -344,8 +406,6 @@ export default {
         <b-col class="text-end">
 
 
-
-
           <b-button variant="outline-secondary" class="m-1" size="sm" @click="showModalImport"> Importar
             <b-icon icon="file-excel" variant="success"></b-icon>
           </b-button>
@@ -449,10 +509,21 @@ export default {
     <b-modal ref="my-modal-import" title="Importar clientes" centered hide-header-close>
       <div class="d-block text-center">
         <div class="mb-3">
+
+
           <!-- Input para cargar el archivo Excel -->
           <input class="form-control" type="file" id="formFile" @change="fileInputChange">
-          <!-- Mensaje de error o éxito debajo del input file -->
+
           <span v-if="importMessage" class="text-danger" v-html="importMessage"></span>
+          <div v-if="failedClientsData.length > 0" class="mt-1">
+            <b-button variant="danger" size="sm" @click="downloadFailedClients"> Descargar clientes fallidos
+              <b-icon icon="download" variant="danger"></b-icon>
+            </b-button>
+          </div>
+          <hr>
+          <b-button variant="light" size="sm" @click="downloadFormatoImportar"> Descargar plantilla
+            <b-icon icon="download" variant="success"></b-icon>
+          </b-button>
 
         </div>
       </div>

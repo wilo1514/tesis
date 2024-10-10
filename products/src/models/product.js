@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const ImpuestoSchema = new mongoose.Schema({
+const ImpuestoSchema = new Schema({
     codigo: String,
     codigoPorcentaje: String,
     tarifa: Number,
@@ -9,7 +9,7 @@ const ImpuestoSchema = new mongoose.Schema({
     valor: Number
 });
 
-const productSchema = new mongoose.Schema({
+const productSchema = new Schema({
     codigoPrincipal: String,
     descripcion: String,
     precioUnitario: Number,
