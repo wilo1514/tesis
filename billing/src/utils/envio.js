@@ -1,8 +1,9 @@
 const axios = require('axios');
 const fs = require('fs');
+const path = require('path');
 
 // Función para enviar el archivo XML firmado al SRI
-async function enviarFactura(filePath, ambiente) {
+async function enviarFacturaManual(filePath, ambiente) {
     const url = ambiente === 'produccion'
         ? 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline'
         : 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline';
@@ -45,4 +46,14 @@ async function enviarFactura(filePath, ambiente) {
     }
 }
 
-module.exports = enviarFactura;
+// Ejecutar la función manualmente
+const xmlFilePath = path.join('C:', 'Users', 'willi', 'OneDrive', 'Escritorio', 'firmado0910202401010406546100110011010000000740000007414.xml');
+const ambiente = 'pruebas';  // Cambia a 'produccion' cuando sea necesario
+
+enviarFacturaManual(xmlFilePath, ambiente)
+    .then(result => {
+        console.log('Resultado del envío:', result);
+    })
+    .catch(error => {
+        console.error('Error inesperado:', error);
+    });

@@ -1,8 +1,10 @@
 const axios = require('axios');
 const { parseStringPromise } = require('xml2js');
 
-async function consultarAutorizacion(claveAcceso) {
-    const url = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
+async function consultarAutorizacion(claveAcceso, ambiente) {
+    const url = ambiente === 'produccion'
+        ? 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl'
+        : 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
 
     const soapRequest = `
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ec="http://ec.gob.sri.ws.autorizacion">
@@ -23,30 +25,40 @@ async function consultarAutorizacion(claveAcceso) {
             }
         });
 
-        // Imprimir la respuesta completa para analizar su estructura
-        console.log('Respuesta completa del SRI:', data);
-
-        // Intentar parsear la respuesta XML
+        // Parsear la respuesta SOAP
         const parsedResult = await parseStringPromise(data, { explicitArray: false });
 
-        // Imprimir el resultado parseado para ver la estructura
-        console.log('Resultado parseado:', JSON.stringify(parsedResult, null, 2));
+        // Acceder al resultado de autorización
+        const autorizacion = parsedResult['soap:Envelope']['soap:Body']['ns2:autorizacionComprobanteResponse']['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion'];
 
-        // Acceder a la estructura esperada
-        const autorizacion = parsedResult['soapenv:Envelope']['soapenv:Body']['ns2:autorizacionComprobanteResponse']['autorizaciones']['autorizacion'];
-
-        // Verificar si está autorizado
-        if (autorizacion.estado === 'AUTORIZADO') {
-            console.log('Factura autorizada:', autorizacion);
+        // Verificar si está autorizado y devolver clave de acceso y estado
+        const estado = autorizacion.estado;
+        if (estado === 'AUTORIZADO') {
+            return {
+                claveAcceso: autorizacion.numeroAutorizacion,
+                estado: 'AUTORIZADO'
+            };
         } else {
-            console.log('Factura no autorizada:', autorizacion);
+            return {
+                claveAcceso: autorizacion.numeroAutorizacion,
+                estado: 'NO AUTORIZADO'
+            };
         }
-
     } catch (error) {
-        console.error('Error al consultar la autorización:', error);
+        console.error('Error al consultar la autorización:', error.message);
+        return null;
     }
 }
 
-// Ejemplo de uso
-const claveAcceso = '0210202401010406546100110011010000000600000006010';
-consultarAutorizacion(claveAcceso);
+const xmlFilePath = '0910202401010406546100110011010000000760000007611';
+const ambiente = 'pruebas';  // Cambia a 'produccion' cuando sea necesario
+
+consultarAutorizacion(xmlFilePath, ambiente)
+    .then(result => {
+        console.log('Resultado del envío:', result);
+    })
+    .catch(error => {
+        console.error('Error inesperado:', error);
+    });
+
+//module.exports = consultarAutorizacion;
