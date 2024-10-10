@@ -61,7 +61,6 @@ exports.crearYEnviarFactura = async (req, res) => {
             fechaEmision: fechaEmisionFormateada,
             claveAcceso
         });
-        await factura.save();
         console.log('Factura guardada en la base de datos:', factura._id);
 
         // Generar XML
@@ -85,17 +84,20 @@ exports.crearYEnviarFactura = async (req, res) => {
         }
 
         // Llamada al servicio de firmador
-        const response = await axios.post(`http://firmador:8081/firmar`, {
+        const firmarResponse = await axios.post('http://172.22.0.1:8081/firmar', {
             xmlFilePath: filePath,
-            ruc_empresa: req.body.ruc_empresa
+            ruc_empresa: req.body.emisor.ruc
         });
-
-        if (response.data.success) {
+        
+        console.log('Respuesta del firmador:', firmarResponse.data);
+        
+        if (firmarResponse.data.success) {
             const xmlFirmado = response.data.xmlFirmado;
             // Ahora enviar el XML firmado al SRI
             const enviado = await enviarFactura(xmlFirmado, process.env.AMBIENTE);
             if (enviado) {
                 res.status(201).send(factura);
+                await factura.save();
             } else {
                 res.status(500).send({ message: 'Error al enviar la factura al SRI.' });
             }
