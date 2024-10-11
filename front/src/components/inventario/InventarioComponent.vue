@@ -25,7 +25,11 @@ export default {
         descripcion: '',
         precioUnitario: 0,
         precioTotalSinImpuesto: 0,
-        impuestos: []
+        impuestos: [
+          {codigo: '1', codigoPorcentaje: '1', tarifa: 0, baseImponible: 0, valor: 0},
+          {codigo: '2', codigoPorcentaje: '2', tarifa: 5, baseImponible: 0, valor: 0},
+          {codigo: '3', codigoPorcentaje: '3', tarifa: 15, baseImponible: 0, valor: 0}
+        ]
       },
       editMode: false,
       searchQuery: "",
@@ -38,6 +42,12 @@ export default {
 
     };
   },
+  watch: {
+    'productoActual.precioTotalSinImpuesto'(newValue) {
+      this.calculateImpuestos(newValue);
+    }
+  },
+
   computed: {
     filteredProducts() {
       if (this.searchQuery) {
@@ -70,8 +80,16 @@ export default {
 
   },
   methods: {
+
+    calculateImpuestos(precioTotalSinImpuesto) {
+      this.productoActual.impuestos.forEach(impuesto => {
+        impuesto.baseImponible = precioTotalSinImpuesto;
+        impuesto.valor = (impuesto.baseImponible * impuesto.tarifa) / 100;
+      });
+    },
+
     addImpuesto() {
-      this.productoActual.impuestos.push({ codigo: '', codigoPorcentaje: '', tarifa: 0, baseImponible: 0, valor: 0 });
+      this.productoActual.impuestos.push({codigo: '', codigoPorcentaje: '', tarifa: 0, baseImponible: 0, valor: 0});
     },
     removeImpuesto(index) {
       this.productoActual.impuestos.splice(index, 1);
@@ -206,7 +224,9 @@ export default {
         precioUnitario: 0,
         precioTotalSinImpuesto: 0,
         impuestos: [
-          { codigo: '', codigoPorcentaje: '', tarifa: 0, baseImponible: 0, valor: 0 }
+          {codigo: '1', codigoPorcentaje: '1', tarifa: 0, baseImponible: 0, valor: 0},
+          {codigo: '2', codigoPorcentaje: '2', tarifa: 5, baseImponible: 0, valor: 0},
+          {codigo: '3', codigoPorcentaje: '3', tarifa: 15, baseImponible: 0, valor: 0}
         ]
       };
     },
@@ -296,7 +316,8 @@ export default {
         class="mt-3"
     ></b-pagination>
 
-    <b-modal ref="my-modal" :title="editMode ? 'Editar Producto' : 'Nuevo Producto'" size="xl" centered hide-header-close>
+    <b-modal ref="my-modal" :title="editMode ? 'Editar Producto' : 'Nuevo Producto'" size="xl" centered
+             hide-header-close>
       <b-form @submit.stop.prevent="saveProduct">
         <div class="row mb-3">
           <b-form-group label="Código Principal" label-for="codigoPrincipal" class="col-12">
@@ -312,10 +333,12 @@ export default {
 
         <div class="row mb-3">
           <b-form-group label="Precio Unitario" label-for="precioUnitario" class="col-12 col-md-6">
-            <b-form-input type="number" v-model="productoActual.precioUnitario" id="precioUnitario" required></b-form-input>
+            <b-form-input type="number" v-model="productoActual.precioUnitario" id="precioUnitario"
+                          required></b-form-input>
           </b-form-group>
           <b-form-group label="Precio Total Sin Impuesto" label-for="precioTotalSinImpuesto" class="col-12 col-md-6">
-            <b-form-input type="number" v-model="productoActual.precioTotalSinImpuesto" id="precioTotalSinImpuesto" required></b-form-input>
+            <b-form-input type="number" v-model="productoActual.precioTotalSinImpuesto" id="precioTotalSinImpuesto"
+                          required></b-form-input>
           </b-form-group>
         </div>
 
@@ -323,37 +346,41 @@ export default {
         <div class="row mb-3">
           <div class="col-12">
             <h5>Impuestos</h5>
-            <b-button size="sm" variant="success" @click="addImpuesto">Agregar Impuesto</b-button>
+<!--            <b-button size="sm" variant="success" @click="addImpuesto">Agregar Impuesto</b-button>-->
           </div>
           <div v-for="(impuesto, index) in productoActual.impuestos" :key="index" class="col-12 mb-2">
             <div class="row">
               <b-form-group label="Código" class="col-12 col-md-2">
-                <b-form-input v-model="impuesto.codigo" required></b-form-input>
+                <b-form-input v-model="impuesto.codigo" disabled required></b-form-input>
               </b-form-group>
               <b-form-group label="Código Porcentaje" class="col-12 col-md-2">
-                <b-form-input v-model="impuesto.codigoPorcentaje" required></b-form-input>
+                <b-form-input v-model="impuesto.codigoPorcentaje" disabled required></b-form-input>
               </b-form-group>
               <b-form-group label="Tarifa" class="col-12 col-md-2">
-                <b-form-input type="number" v-model="impuesto.tarifa" required></b-form-input>
+                <b-form-input type="number" v-model="impuesto.tarifa" required disabled></b-form-input>
               </b-form-group>
               <b-form-group label="Base Imponible" class="col-12 col-md-3">
-                <b-form-input type="number" v-model="impuesto.baseImponible" required></b-form-input>
+                <b-form-input type="number" v-model="impuesto.baseImponible" disabled required></b-form-input>
               </b-form-group>
               <b-form-group label="Valor" class="col-12 col-md-2">
-                <b-form-input type="number" v-model="impuesto.valor" required></b-form-input>
+                <b-form-input type="number" v-model="impuesto.valor" disabled required></b-form-input>
               </b-form-group>
               <div class="col-12 col-md-1 d-flex align-items-center">
                 <b-button variant="danger" size="sm" @click="removeImpuesto(index)">Eliminar</b-button>
               </div>
             </div>
           </div>
+
         </div>
       </b-form>
 
       <template #modal-footer>
         <b-button class="mt-2" variant="outline-secondary" block @click="hideModal">Cancelar</b-button>
-        <b-button class="mt-2" v-if="!editMode" variant="outline-success" block @click="saveProduct">Guardar producto</b-button>
-        <b-button class="mt-2" v-if="editMode" variant="outline-success" block @click="saveProduct">Actualizar producto</b-button>
+        <b-button class="mt-2" v-if="!editMode" variant="outline-success" block @click="saveProduct">Guardar producto
+        </b-button>
+        <b-button class="mt-2" v-if="editMode" variant="outline-success" block @click="saveProduct">Actualizar
+          producto
+        </b-button>
       </template>
     </b-modal>
   </b-container>
