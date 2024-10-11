@@ -1,0 +1,31 @@
+{
+  "name": "retentions",
+  "version": "1.0.0",
+  "description": "retenciones",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "William",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@peculiar/webcrypto": "^1.5.0",
+    "@xmldom/xmldom": "^0.9.3",
+    "axios": "^1.7.2",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.4.4",
+    "node-cron": "^3.0.3",
+    "node-forge": "^1.3.1",
+    "pkijs": "^3.2.4",
+    "pretty": "^2.0.0",
+    "pvtsutils": "^1.3.5",
+    "webcrypto-core": "^1.8.0",
+    "xadesjs": "^2.4.4",
+    "xml-crypto": "^6.0.0",
+    "xml-formatter": "^3.6.3",
+    "xml2js": "^0.6.2",
+    "xmlbuilder2": "^3.1.1"
+  }
+}
