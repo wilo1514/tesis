@@ -36,6 +36,7 @@
            <SupplierComponent></SupplierComponent>
           </div>
           <div v-show="activeNavItem === 'Registros contables'">
+            PRUEBA REGISTROS
             <!--<b-card class="mt-3">
            <TaskList :tasks="tasks" @edit-task="handleEditTask" @edit-task-hidden="handleEditTaskHidden"
               :menu="activeNavItem" :selectedTask="selectedTask" :refresh="refresh" />
