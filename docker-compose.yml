@@ -76,11 +76,11 @@ services:
       - '3001:3001'
     environment:
       - MONGO_URI=mongodb://mongo:27017/facturacionDB
-      - P12_PASSWORD=HJWvWIzJXs71
+      - P12_PASSWORD=Enri2023
       - AMBIENTE=pruebas
       - EMISION=1
       - ESTAB=001
-      - PTOEMI=101
+      - PTOEMI=107
       - FIRMADOR_HOST=firmador
     volumes:
       - ./xmls:/app/xmls # Compartir la carpeta de XMLs entre billing y firmador
@@ -97,7 +97,6 @@ services:
     container_name: firmador
     volumes:
       - ./xmls:/app/xmls # Compartir la carpeta de XMLs entre billing y firmador
-      - C:/Users/willi/OneDrive/Escritorio/account-system/firmador/firma:/app/firmador/firma/ # Ruta para certificado y clave
     ports:
       - '8081:8081'
     environment:

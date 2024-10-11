@@ -76,6 +76,59 @@ Cada servicio tiene sus propias variables de entorno configuradas en el archivo 
    docker system prune -a --volumes
 
    ```
+Aquí tienes un archivo `.md` que contiene los comandos para limpiar tu entorno Docker:
+
+```markdown
+# Docker Clean-up Guide
+
+Este documento describe los comandos para realizar una limpieza completa de Docker, eliminando contenedores, volúmenes, imágenes y redes no utilizados.
+
+## Eliminar todos los contenedores parados
+
+```bash
+docker container prune
+```
+
+Este comando eliminará todos los contenedores que se encuentren parados.
+
+## Eliminar todas las imágenes no usadas
+
+```bash
+docker image prune -a
+```
+
+Este comando elimina todas las imágenes que no están siendo usadas por al menos un contenedor.
+
+## Eliminar todos los volúmenes no utilizados
+
+```bash
+docker volume prune
+```
+
+Este comando elimina todos los volúmenes de Docker que no están siendo utilizados.
+
+## Eliminar todas las redes no utilizadas
+
+```bash
+docker network prune
+```
+
+Este comando elimina todas las redes que no están siendo utilizadas por ningún contenedor.
+
+## Eliminar todo: contenedores, imágenes, volúmenes y redes no utilizados
+
+```bash
+docker system prune -a --volumes
+```
+
+Este comando realiza una limpieza completa de Docker, eliminando todos los contenedores parados, imágenes no utilizadas, redes no conectadas y volúmenes no utilizados.
+
+---
+
+Recuerda siempre usar estos comandos con precaución, ya que eliminarán recursos que no estén en uso, lo que podría resultar en pérdida de datos no persistidos.
+```
+
+Este archivo te ofrece los comandos básicos para limpiar Docker. Solo tienes que copiar y pegar estos comandos en tu terminal para limpiar todo el entorno Docker.
 
 ## Configuración de Carpetas Compartidas
 
