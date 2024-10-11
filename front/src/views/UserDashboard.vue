@@ -33,10 +33,7 @@
 
           </div>
           <div v-show="activeNavItem === 'Proveedores'">
-            <!--   <b-card class="mt-3">
-            <TaskList :tasks="tasks" @edit-task="handleEditTask" @edit-task-hidden="handleEditTaskHidden"
-             :menu="activeNavItem" :selectedTask="selectedTask" :refresh="refresh" />
-            </b-card> -->
+           <SupplierComponent></SupplierComponent>
           </div>
           <div v-show="activeNavItem === 'Registros contables'">
             <!--<b-card class="mt-3">
@@ -70,6 +67,7 @@ import ClientComponent from '@/components/clientes/ClientComponent.vue';
 import PrincipalComponent from '@/components/principal/principalComponent.vue';
 import InventarioComponent from '@/components/inventario/InventarioComponent.vue';
 import FacturacionComponent from '@/components/clientes/FacturacionComponent.vue';
+import SupplierComponent from '@/components/proveedores/proveedorComponent.vue';
 
 export default {
   components: {
@@ -82,7 +80,8 @@ export default {
     ClientComponent,
     PrincipalComponent,
     InventarioComponent,
-    FacturacionComponent
+    FacturacionComponent,
+    SupplierComponent
   },
   data() {
     return {

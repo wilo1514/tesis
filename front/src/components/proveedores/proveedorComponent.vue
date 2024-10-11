@@ -1,239 +1,339 @@
-<script>
-import {
-  getClients,
-  createClient,
-  updateClient,
-  deleteClient,
-  getClientByIdentificacion,
-  getClientByRazonSocial
-} from "@/services/clientService";
-
-export default {
-  data() {
-    return {
-      clients: [],
-      fields: [
-        {key: "identificacion", label: "Identificacion"},
-        {key: "razonSocial", label: "Razón Social", sortable: true},
-        {key: "email", label: "Email", sortable: true},
-        {key: "telefono", label: "Teléfono"},
-        {key: "actions", label: "Acciones"},
-      ],
-      items: [
-        {text: 'Admin', href: '#'},
-        {text: 'Manage', href: '#'},
-        {text: 'Library', active: true}
-      ],
-      clienteActual: {
-        razonSocial: '',
-        email: '',
-        telefono: '',
-        identificacion: '',
-        direccion: '',
-        tipoIdentificacion: '01',
-        contribuyenteRimpe: '',
-        obligadoContabilidad: 'NO'
-      },
-      contribuyenteRimpeOptions: [
-        {value: '0', text: 'Ninguna'},
-        {value: '1', text: 'Contribuyente Régimen RIMPE'},
-        {value: '2', text: 'Contribuyente Negocio Popular - Régimen RIMPE'}
-      ],
-      tipoIdentificacionOptions: [
-        {value: '01', text: 'Cédula de ciudadanía'},
-        {value: '02', text: 'Cédula de identidad'},
-        {value: '03', text: 'Pasaporte'},
-        {value: '04', text: 'RUC (Registro Único de Contribuyentes)'},
-        {value: '05', text: 'Identificación de extranjeros'},
-        {value: '06', text: 'Otros (especificar según normativa)'}
-      ],
-      obligadoContabilidadOptions: [
-        {value: 'SI', text: 'Sí'},
-        {value: 'NO', text: 'No'}
-      ],
-      editMode: false,
-      searchQuery: "",
-      perPage: 10,
-      currentPage: 1,
-    };
-  },
-  computed: {
-    paginatedClients() {
-      const start = (this.currentPage - 1) * this.perPage;
-      const end = start + this.perPage;
-      return this.clients.slice(start, end);
-    },
-  },
-  methods: {
-    resetSearch() {
-      this.searchQuery = "";
-      this.fetchClients();
-    },
-    async fetchClients() {
-      try {
-        if (this.searchQuery) {
-          if (!isNaN(this.searchQuery)) {
-            // Si la búsqueda es un número, buscar por identificación
-            this.clients = [await getClientByIdentificacion(this.searchQuery)];
-          } else {
-            // Si es texto, buscar por razón social
-            this.clients = await getClientByRazonSocial(this.searchQuery);
-          }
-        } else {
-          // Si no hay búsqueda, obtener todos los clientes
-          this.clients = await getClients();
-        }
-        this.currentPage = 1; // Reiniciar la página al hacer una búsqueda
-      } catch (error) {
-        console.error("Error al obtener la lista de clientes:", error);
-      }
-    },
-    openModal(mode, client = null) {
-      if (mode === 'crear') {
-        this.modalTitle = 'Nuevo Cliente';
-        this.editMode = false;
-        this.clienteActual = {
-          razonSocial: '',
-          email: '',
-          telefono: '',
-          identificacion: '',
-          direccion: '',
-          tipoIdentificacion: '01',
-          contribuyenteRimpe: '',
-          obligadoContabilidad: 'NO'
-        };
-      } else if (mode === 'editar') {
-        this.modalTitle = 'Editar Cliente';
-        this.editMode = true;
-        this.clienteActual = {...client}; // Cargar los datos del cliente
-      }
-      this.$bvModal.show('modal-nuevo-cliente');
-    },
-    async saveClient() {
-      try {
-        if (this.editMode) {
-          await updateClient(this.clienteActual._id, this.clienteActual); // Actualizar cliente existente
-        } else {
-          await createClient(this.clienteActual); // Crear nuevo cliente
-        }
-        this.$bvModal.hide('modal-nuevo-cliente');
-        this.fetchClients(); // Recargar la lista de clientes
-      } catch (error) {
-        console.error("Error al guardar el cliente:", error);
-      }
-    },
-    async deleteClient(clientId) {
-      try {
-        await deleteClient(clientId);
-        this.fetchClients();
-      } catch (error) {
-        console.error("Error al eliminar el cliente:", error);
-      }
-    },
-  },
-  created () {
-    this.fetchClients();
-  },
-};
-</script>
-
 <template>
   <b-container fluid>
-    <div class="d-flex justify-content-end  mr-4 mt-4">
+    <div class="d-flex justify-content-end mr-4 mt-4">
       <b-breadcrumb :items="items"></b-breadcrumb>
     </div>
 
     <div class="d-flex justify-content-between align-items-center p-3">
       <div>
-        <h2 class="mb-0 text-primary">Lista de Productos</h2>
+        <h2 class="mb-0 text-primary">Lista de Proveedores</h2>
       </div>
-      <b-button variant="primary" class="align-self-center" @click="openModal('crear')">Nuevo cliente</b-button>
+      <div>
+        <b-button variant="primary" class="align-self-center m-2" @click="showModalNew">Nuevo proveedor</b-button>
+      </div>
     </div>
-
 
     <div class="d-flex justify-content-center w-100">
-      <div class="row w-100 d-flex justify-content-center align-items-center">
-        <div class="col-6">
-          <!-- Se cambia el evento @input para que busque en tiempo real -->
-          <b-form-input v-model="searchQuery" @input="fetchClients"
-                        placeholder="Buscar por razón social o identificación"
-                        class="m-1"></b-form-input>
-        </div>
-        <div class="col-1">
-          <!-- Botón de reset de búsqueda -->
+      <b-row class="w-100 d-flex justify-content-center align-items-center">
+        <b-col lg="6">
+          <b-form-input
+              v-model="searchQuery"
+              placeholder="Buscar por nombre, RUC o email"
+              class="m-1"
+          ></b-form-input>
+        </b-col>
+        <b-col lg="1">
           <b-icon icon="x-lg" @click="resetSearch"></b-icon>
-        </div>
-      </div>
+        </b-col>
+        <b-col class="text-end">
+          <b-button variant="outline-secondary" class="m-1" size="sm" @click="showModalImport">
+            Importar
+            <b-icon icon="file-excel" variant="success"></b-icon>
+          </b-button>
+
+          <b-button variant="outline-secondary" size="sm" @click="exportToExcel">
+            Exportar
+            <b-icon icon="file-excel" variant="success"></b-icon>
+          </b-button>
+        </b-col>
+      </b-row>
     </div>
 
-    <b-table class="mt-3" :items="paginatedClients" :fields="fields" responsive="sm" striped hover>
+    <b-table class="mt-3" :items="paginatedSuppliers" :fields="fields" responsive="sm" striped hover>
+      <template #cell(index)="data">
+        {{ (currentPage - 1) * perPage + data.index + 1 }}
+      </template>
+
       <template #cell(actions)="data">
-        <b-button variant="primary" size="sm" @click="openModal('editar', data.item)">Editar</b-button>
-        <b-button variant="danger" size="sm" @click="deleteClient(data.item._id)">Eliminar</b-button>
+        <b-button variant="primary" size="sm" @click="showModalEdit(data.item)">Editar</b-button>
+        <b-button variant="danger" size="sm" @click="deleteSupplier(data.item._id)">Eliminar</b-button>
       </template>
     </b-table>
 
     <b-pagination
         v-model="currentPage"
-        :total-rows="clients.length"
+        :total-rows="filteredSuppliers.length"
         :per-page="perPage"
         align="center"
         class="mt-3"
     ></b-pagination>
-    <pre>{{ clients }}</pre>
 
-    <b-modal id="modal-nuevo-cliente" title="Nuevo Cliente" centered size="xl">
-      <b-form @submit.stop.prevent="saveNewClient">
+    <b-modal ref="my-modal" :title="editMode ? 'Editar Proveedor' : 'Nuevo Proveedor'" size="xl" centered hide-header-close>
+      <b-form @submit.stop.prevent="saveSupplier">
         <div class="row mb-3">
-          <b-form-group label="Razón Social" label-for="razonSocial" class="col-12">
-            <b-form-input v-model="clienteActual.razonSocial" id="razonSocial" required></b-form-input>
+          <b-form-group label="Nombre" label-for="name" class="col-12">
+            <b-form-input v-model="proveedorActual.name" id="name" required></b-form-input>
           </b-form-group>
         </div>
 
         <div class="row mb-3">
           <b-form-group label="Email" label-for="email" class="col-12 col-md-6">
-            <b-form-input type="email" v-model="clienteActual.email" id="email" required></b-form-input>
+            <b-form-input type="email" v-model="proveedorActual.email" id="email" required></b-form-input>
           </b-form-group>
-          <b-form-group label="Teléfono" label-for="telefono" class="col-12 col-md-6">
-            <b-form-input v-model="clienteActual.telefono" id="telefono" required></b-form-input>
-          </b-form-group>
-        </div>
-
-        <div class="row mb-3">
-          <b-form-group label="Identificación" label-for="identificacion" class="col-12 col-md-6">
-            <b-form-input v-model="clienteActual.identificacion" id="identificacion" required></b-form-input>
-          </b-form-group>
-          <b-form-group label="Dirección" label-for="direccion" class="col-12 col-md-6">
-            <b-form-input v-model="clienteActual.direccion" id="direccion" required></b-form-input>
+          <b-form-group label="Teléfono" label-for="phone" class="col-12 col-md-6">
+            <b-form-input v-model="proveedorActual.phone" id="phone"></b-form-input>
           </b-form-group>
         </div>
 
         <div class="row mb-3">
-          <b-form-group label="Tipo de Identificación" label-for="tipoIdentificacion" class="col-12 col-md-6">
-            <b-form-select class="form-select" v-model="clienteActual.tipoIdentificacion" id="tipoIdentificacion"
-                           :options="tipoIdentificacionOptions" required></b-form-select>
-          </b-form-group>
-          <b-form-group label="Contribuyente RIMPE" label-for="contribuyenteRimpe" class="col-12 col-md-6">
-            <b-form-select v-model="clienteActual.contribuyenteRimpe" id="contribuyenteRimpe" class="form-select w-100"
-                           :options="contribuyenteRimpeOptions" required>
-              <option value="" disabled>Seleccione el tipo de contribuyente</option>
-            </b-form-select>
-          </b-form-group>
-        </div>
-
-        <div class="row mb-3">
-          <b-form-group label="Obligado a llevar Contabilidad" label-for="obligadoContabilidad" class="col-12 col-md-6">
-            <b-form-select class="form-select" v-model="clienteActual.obligadoContabilidad" id="obligadoContabilidad"
-                           :options="obligadoContabilidadOptions" required></b-form-select>
+          <b-form-group label="RUC" label-for="ruc" class="col-12">
+            <b-form-input v-model="proveedorActual.ruc" id="ruc" required></b-form-input>
           </b-form-group>
         </div>
       </b-form>
 
       <template #modal-footer>
-        <b-button variant="secondary" @click="$bvModal.hide('modal-nuevo-cliente')">Cancelar</b-button>
-        <b-button variant="primary" @click="saveClient">Guardar</b-button>
+        <b-button class="mt-2" variant="outline-secondary" block @click="hideModal">Cancelar</b-button>
+        <b-button class="mt-2" v-if="!editMode" variant="outline-success" block @click="saveSupplier">Guardar proveedor</b-button>
+        <b-button class="mt-2" v-if="editMode" variant="outline-success" block @click="saveSupplier">Actualizar proveedor</b-button>
+      </template>
+    </b-modal>
+
+    <b-modal ref="my-modal-import" title="Importar proveedores" centered hide-header-close>
+      <div class="d-block text-center">
+        <div class="mb-3">
+          <input class="form-control" type="file" id="formFile" @change="fileInputChange">
+          <span v-if="importMessage" class="text-danger" v-html="importMessage"></span>
+          <div v-if="failedSuppliersData.length > 0" class="mt-1">
+            <b-button variant="danger" size="sm" @click="downloadFailedSuppliers">
+              Descargar proveedores fallidos
+              <b-icon icon="download" variant="danger"></b-icon>
+            </b-button>
+          </div>
+          <hr>
+          <b-button variant="light" size="sm" @click="downloadFormatoImportar"> Descargar plantilla
+            <b-icon icon="download" variant="success"></b-icon>
+          </b-button>
+        </div>
+      </div>
+
+      <template #modal-footer>
+        <b-button class="mt-2" variant="outline-secondary" block @click="hideModalImport">Cancelar</b-button>
+        <b-button class="mt-2" variant="outline-success" block @click="importFromExcel">Cargar proveedores</b-button>
       </template>
     </b-modal>
   </b-container>
 </template>
 
+<script>
+import {
+  getSuppliers,
+  createSupplier,
+  updateSupplier,
+  deleteSupplier
+} from "@/services/supplierService";
+import * as XLSX from "xlsx";
+
+export default {
+  data() {
+    return {
+      suppliers: [],
+      fields: [
+        { key: "index", label: "N" },
+        { key: "ruc", label: "RUC" },
+        { key: "name", label: "Nombre", sortable: true },
+        { key: "email", label: "Email", sortable: true },
+        { key: "phone", label: "Teléfono" },
+        { key: "actions", label: "Acciones" }
+      ],
+      items: [
+        { text: 'Proveedores', href: '#' },
+        { text: 'Lista de proveedores', active: true }
+      ],
+      proveedorActual: {
+        name: '',
+        email: '',
+        phone: '',
+        ruc: ''
+      },
+      editMode: false,
+      searchQuery: "",
+      perPage: 10,
+      currentPage: 1,
+      modalTitle: '',
+      file: null,
+      importMessage: '',
+      failedSuppliersData: []
+    };
+  },
+  computed: {
+    filteredSuppliers() {
+      if (this.searchQuery) {
+        return this.suppliers.filter((supplier) => {
+          return (
+              supplier.ruc.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              supplier.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              supplier.email.toLowerCase().includes(this.searchQuery.toLowerCase())
+          );
+        });
+      }
+      return this.suppliers;
+    },
+    paginatedSuppliers() {
+      const start = (this.currentPage - 1) * this.perPage;
+      const end = start + this.perPage;
+      return this.filteredSuppliers.slice(start, end);
+    }
+  },
+  methods: {
+    exportToExcel() {
+      const data = this.suppliers.map(supplier => ({
+        Nombre: supplier.name,
+        Email: supplier.email,
+        Teléfono: supplier.phone,
+        RUC: supplier.ruc
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(data); // Convierte los datos a una hoja de Excel
+      const wb = XLSX.utils.book_new(); // Crea un nuevo libro de Excel
+      XLSX.utils.book_append_sheet(wb, ws, "Proveedores"); // Agrega la hoja al libro
+
+      // Descargar el archivo Excel con el nombre 'proveedores.xlsx'
+      XLSX.writeFile(wb, "proveedores.xlsx");
+    },
+    downloadFailedSuppliers() {
+      if (this.failedSuppliersData.length === 0) {
+        this.importMessage = "No hay proveedores fallidos para descargar.";
+        return;
+      }
+      this.importMessage = "";
+      const ws = XLSX.utils.json_to_sheet(this.failedSuppliersData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Proveedores Fallidos");
+      XLSX.writeFile(wb, "proveedores_fallidos.xlsx");
+    },
+    resetSearch() {
+      this.searchQuery = "";
+      this.fetchSuppliers();
+    },
+    fileInputChange(event) {
+      this.file = event.target.files[0];
+      this.importMessage = '';
+    },
+    showModalImport() {
+      this.$refs['my-modal-import'].show();
+    },
+    hideModalImport() {
+      this.importMessage = "";
+      this.$refs['my-modal-import'].hide();
+    },
+    downloadFormatoImportar() {
+      const data = [
+        { name: 'Proveedor A', email: 'proveedorA@example.com', phone: '0991234567', ruc: '0123456789' },
+        { name: 'Proveedor B', email: 'proveedorB@example.com', phone: '0997654321', ruc: '0123456790' },
+        { name: 'Proveedor C', email: 'proveedorC@example.com', phone: '0992345678', ruc: '0123456791' }
+      ];
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Formato Proveedores");
+      XLSX.writeFile(wb, "formato_importar_proveedores.xlsx");
+    },
+    async importFromExcel() {
+      if (!this.file) {
+        this.importMessage = "Por favor selecciona un archivo primero";
+        return;
+      }
+
+      try {
+        const file = this.file;
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+        let successfullyAdded = 0;
+        let failedSuppliers = 0;
+        this.failedSuppliersData = [];
+
+        for (const supplierData of jsonData) {
+          const newSupplier = {
+            name: supplierData.name || '',
+            email: supplierData.email || '',
+            phone: supplierData.phone || '',
+            ruc: supplierData.ruc || ''
+          };
+
+          if (!newSupplier.name || !newSupplier.email || !newSupplier.ruc) {
+            console.warn("Faltan datos obligatorios para el proveedor:", newSupplier);
+            failedSuppliers++;
+            this.failedSuppliersData.push(newSupplier);
+            continue;
+          }
+
+          try {
+            await createSupplier(newSupplier);
+            successfullyAdded++;
+          } catch (error) {
+            console.error("Error al crear el proveedor:", error.response ? error.response.data.message : error);
+            failedSuppliers++;
+            this.failedSuppliersData.push(newSupplier);
+          }
+        }
+
+        if (successfullyAdded > 0) {
+          this.importMessage = `Se cargaron ${successfullyAdded} proveedores exitosamente. <br> No se cargaron ${failedSuppliers} proveedores.`;
+        } else {
+          this.importMessage = `No se cargó ninguno. Los ${failedSuppliers} proveedores ya existen o tienen errores.`;
+        }
+
+        this.fetchSuppliers();
+      } catch (error) {
+        this.importMessage = "Error al importar proveedores desde Excel. Verifica el archivo y vuelve a intentarlo.";
+        console.error("Error al importar proveedores desde Excel:", error);
+      }
+    },
+    async fetchSuppliers() {
+      try {
+        this.suppliers = await getSuppliers();
+        this.currentPage = 1;
+      } catch (error) {
+        console.error("Error al obtener la lista de proveedores:", error);
+      }
+    },
+    resetSupplier() {
+      this.proveedorActual = { name: '', email: '', phone: '', ruc: '' };
+    },
+    async saveSupplier() {
+      try {
+        if (this.editMode) {
+          await updateSupplier(this.proveedorActual._id, this.proveedorActual);
+        } else {
+          await createSupplier(this.proveedorActual);
+        }
+        this.resetSupplier();
+        this.hideModal();
+        this.fetchSuppliers();
+      } catch (error) {
+        console.error("Error al guardar el proveedor:", error);
+      }
+    },
+    async deleteSupplier(supplierId) {
+      try {
+        await deleteSupplier(supplierId);
+        this.fetchSuppliers();
+      } catch (error) {
+        console.error("Error al eliminar el proveedor:", error);
+      }
+    },
+    showModalNew() {
+      this.editMode = false;
+      this.resetSupplier();
+      this.$refs['my-modal'].show();
+    },
+    showModalEdit(data) {
+      this.editMode = true;
+      this.proveedorActual = {...data};
+      this.$refs['my-modal'].show();
+    },
+    hideModal() {
+      this.editMode = false;
+      this.resetSupplier();
+      this.$refs['my-modal'].hide();
+    }
+  },
+  created() {
+    this.fetchSuppliers();
+  }
+};
+</script>
