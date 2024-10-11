@@ -16,6 +16,8 @@
           <div v-show="activeNavItem === 'Lista de Clientes'">
             <ClientComponent></ClientComponent>
           </div>
+
+
           <div v-show="activeNavItem === 'Facturación'">
             <FacturacionComponent></FacturacionComponent>
           </div>
@@ -33,7 +35,7 @@
 
           </div>
           <div v-show="activeNavItem === 'Proveedores'">
-           <SupplierComponent></SupplierComponent>
+            <SupplierComponent></SupplierComponent>
           </div>
           <div v-show="activeNavItem === 'Registros contables'">
             PRUEBA REGISTROS
@@ -41,6 +43,10 @@
            <TaskList :tasks="tasks" @edit-task="handleEditTask" @edit-task-hidden="handleEditTaskHidden"
               :menu="activeNavItem" :selectedTask="selectedTask" :refresh="refresh" />
             </b-card>-->
+          </div>
+
+          <div v-show="activeNavItem === 'Usuarios'">
+            <AdminUsuariosComponent></AdminUsuariosComponent>
           </div>
         </div>
         <div class="col-lg-3">
@@ -69,6 +75,7 @@ import PrincipalComponent from '@/components/principal/principalComponent.vue';
 import InventarioComponent from '@/components/inventario/InventarioComponent.vue';
 import FacturacionComponent from '@/components/clientes/FacturacionComponent.vue';
 import SupplierComponent from '@/components/proveedores/proveedorComponent.vue';
+import AdminUsuariosComponent from '@/components/administrador/usuarios/AdminUsuariosComponent.vue';
 
 export default {
   components: {
@@ -82,7 +89,8 @@ export default {
     PrincipalComponent,
     InventarioComponent,
     FacturacionComponent,
-    SupplierComponent
+    SupplierComponent,
+    AdminUsuariosComponent
   },
   data() {
     return {
