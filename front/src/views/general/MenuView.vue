@@ -13,16 +13,17 @@
         <div v-else>
           <b-nav-item :style="{ 'background-color': selectedMenuItem === item.name ? 'whitesmoke' : '' }">
             <b-icon :icon="item.icon" :variant="item.color" class="mr-2"/>
-            <span class="mr-3 text-small">{{ item.name }}</span>
-            <b-button v-b-toggle="'subitems-' + item.id" variant="link" class="p-0 ml-auto">
+            <b-button v-b-toggle="'subitems-' + item.id"  variant="transparent" class="p-0 ml-auto"   :class="`text-${item.color}`">
+              <span class="mr-3 text-small ">{{ item.name }}</span>
               <b-icon :icon="openItem === item.id ? 'chevron-compact-up' : 'chevron-compact-down'"/>
             </b-button>
           </b-nav-item>
 
           <!-- Subitems (toggleable) debajo del item principal -->
-          <b-collapse :id="'subitems-' + item.id" >
+          <b-collapse :id="'subitems-' + item.id" @show="openItem = item.id" @hide="openItem = null" >
             <b-nav class="ml-4">
-              <b-nav-item v-for="subitem in item.subitems" :key="subitem.id" @click="handleSubitemClick(subitem.name)"   class="d-block w-100"
+              <b-nav-item v-for="subitem in item.subitems" :key="subitem.id" @click="handleSubitemClick(subitem.name)"
+                          class="d-block w-100"
                           :style="{ 'background-color': selectedSubitem === subitem.name ? 'whitesmoke' : '' }">
                 <span class="mr-2 text-small">{{ subitem.name }}</span>
                 <br>
