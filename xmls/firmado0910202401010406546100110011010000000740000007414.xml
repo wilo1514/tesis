@@ -5,11 +5,11 @@
     <razonSocial>LITUMA MOSCOSO FAUSTO ADRIAN</razonSocial>
     <nombreComercial>LITUMA MOSCOSO FAUSTO ADRIAN</nombreComercial>
     <ruc>0104065461001</ruc>
-    <claveAcceso>0910202401010406546100110011010000000730000007311</claveAcceso>
+    <claveAcceso>0910202401010406546100110011010000000740000007414</claveAcceso>
     <codDoc>01</codDoc>
     <estab>001</estab>
     <ptoEmi>101</ptoEmi>
-    <secuencial>000000073</secuencial>
+    <secuencial>000000074</secuencial>
     <dirMatriz>REMIGIO TAMARIZ 004 Y EL BATAN</dirMatriz>
   </infoTributaria>
   <infoFactura>
@@ -77,34 +77,34 @@
       </impuestos>
     </detalle>
   </detalles>
-<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:etsi="http://uri.etsi.org/01903/v1.3.2#" Id="Signature927883">
-<ds:SignedInfo Id="Signature-SignedInfo757397">
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:etsi="http://uri.etsi.org/01903/v1.3.2#" Id="Signature599832">
+<ds:SignedInfo Id="Signature-SignedInfo114941">
 <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
 <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
-<ds:Reference Id="SignedPropertiesID234488" Type="http://uri.etsi.org/01903#SignedProperties" URI="#Signature927883-SignedProperties305847">
+<ds:Reference Id="SignedPropertiesID64637" Type="http://uri.etsi.org/01903#SignedProperties" URI="#Signature599832-SignedProperties225590">
 <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
-<ds:DigestValue>imIpD6a/DSXmWwxe0NVR+59lZ/4=</ds:DigestValue>
+<ds:DigestValue>l1FPynCSrrMtxUxhwRKnBSzsdp0=</ds:DigestValue>
 </ds:Reference>
-<ds:Reference URI="#Certificate1753763">
+<ds:Reference URI="#Certificate1714670">
 <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
-<ds:DigestValue>VD8w8NBE5/iV/AEdjbA1bqELZvg=</ds:DigestValue>
+<ds:DigestValue>Vfvj2f4veWGBL9tZpsCsoSfy+40=</ds:DigestValue>
 </ds:Reference>
-<ds:Reference Id="Reference-ID-754235" URI="#comprobante">
+<ds:Reference Id="Reference-ID-100078" URI="#comprobante">
 <ds:Transforms>
 <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
 </ds:Transforms>
 <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
-<ds:DigestValue>ZY8ijKHT9hCuU5prJXLpb03gZtA=</ds:DigestValue>
+<ds:DigestValue>mzPpltF18y/b6ZbojUoHhrRtC+E=</ds:DigestValue>
 </ds:Reference>
 </ds:SignedInfo>
-<ds:SignatureValue Id="SignatureValue9953">
-VqJjtdyeizJxa72dQt0RI00+mB2e1TQG4IIWDVuhu19vRS6OzVleMmVtsQHE5FPavcLG+alrjg9t
-kWSctMIVGpm0RmMRQX3u5h8+O08KKMml6S0Dd+z7neqNBVrL50/rcZOnGnIoQSxDxYe8Po9GTV0P
-791IA4IOT8z17Ab2P+uK7SMmnqg/zPF4Atv9uVQz51gPspoYN+VkGyqrvjBsxP4ynGMH5dE1am61
-hCnk4zAfxzOklFvXKBEf/byu20aooYJthwelMK5U1WPHoMJLA+FelchzwqNBgFPXr05kLcGmbws2
-sQyK0WOVoW2xXEKr23x4ZJUf/u+DA/8q7kkgYA==
+<ds:SignatureValue Id="SignatureValue364577">
+H2wGQY/0wEqGjsjsLes2iKaLgL5rtTlaKlKSIrU59IX/L4W0FKTDcAH6AVIv0CnapKSGyNDnYYI5
+iWfg6NDWEVrX2HBLi/OhuBGqseKlTVSSl37SdJLKZiWzVJt69sWJIFenlo14gt7Lsejrzr0HdU2u
+zpE/hHkoBemoN+jljRUtA2xo7M03t8wByeWUBTuhZ2iFe8CmXkwI1YsaVSgR+Fo/lB5wYrHjOVRd
+bbSJNbn3ombOlQyzxlDWj9crBTxRqFD6B4N66vl2iIQL3F5O9UgAFRoFl9IQhN4NsaHL1Av6kD6/
+pk48cQXpRWgnQQOxroJzm7rrG8gOUPXFWPi41g==
 </ds:SignatureValue>
-<ds:KeyInfo Id="Certificate1753763">
+<ds:KeyInfo Id="Certificate1714670">
 <ds:X509Data>
 <ds:X509Certificate>
 MIIJSDCCBzCgAwIBAgIIJxXcOh5tI6cwDQYJKoZIhvcNAQELBQAwgbgxCzAJBgNVBAYTAkVTMUQw
@@ -164,4 +164,4 @@ fxT4R7ayCQUqQiuoK0dZHZFCqGutfbshri5tNw==
 </ds:RSAKeyValue>
 </ds:KeyValue>
 </ds:KeyInfo>
-<ds:Object Id="Signature927883-Object560868"><etsi:QualifyingProperties Target="#Signature927883"><etsi:SignedProperties Id="Signature927883-SignedProperties305847"><etsi:SignedSignatureProperties><etsi:SigningTime>2024-10-10T01:34:32+00:00</etsi:SigningTime><etsi:SigningCertificate><etsi:Cert><etsi:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>INJ20QxEXE3pSiqDyriV5UhB9Bs=</ds:DigestValue></etsi:CertDigest><etsi:IssuerSerial><ds:X509IssuerName>2.5.4.97=#0c0f56415445532d413636373231343939,CN=UANATACA CA2 2016,OU=TSP-UANATACA,O=UANATACA S.A.,L=Barcelona (see current address at www.uanataca.com/address),C=ES</ds:X509IssuerName><ds:X509SerialNumber>2816399284166796199</ds:X509SerialNumber></etsi:IssuerSerial></etsi:Cert></etsi:SigningCertificate></etsi:SignedSignatureProperties><etsi:SignedDataObjectProperties><etsi:DataObjectFormat ObjectReference="#Reference-ID-754235"><etsi:Description>contenido comprobante</etsi:Description><etsi:MimeType>text/xml</etsi:MimeType></etsi:DataObjectFormat></etsi:SignedDataObjectProperties></etsi:SignedProperties></etsi:QualifyingProperties></ds:Object></ds:Signature></factura>
+<ds:Object Id="Signature599832-Object369611"><etsi:QualifyingProperties Target="#Signature599832"><etsi:SignedProperties Id="Signature599832-SignedProperties225590"><etsi:SignedSignatureProperties><etsi:SigningTime>2024-10-10T01:55:41+00:00</etsi:SigningTime><etsi:SigningCertificate><etsi:Cert><etsi:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>INJ20QxEXE3pSiqDyriV5UhB9Bs=</ds:DigestValue></etsi:CertDigest><etsi:IssuerSerial><ds:X509IssuerName>2.5.4.97=#0c0f56415445532d413636373231343939,CN=UANATACA CA2 2016,OU=TSP-UANATACA,O=UANATACA S.A.,L=Barcelona (see current address at www.uanataca.com/address),C=ES</ds:X509IssuerName><ds:X509SerialNumber>2816399284166796199</ds:X509SerialNumber></etsi:IssuerSerial></etsi:Cert></etsi:SigningCertificate></etsi:SignedSignatureProperties><etsi:SignedDataObjectProperties><etsi:DataObjectFormat ObjectReference="#Reference-ID-100078"><etsi:Description>contenido comprobante</etsi:Description><etsi:MimeType>text/xml</etsi:MimeType></etsi:DataObjectFormat></etsi:SignedDataObjectProperties></etsi:SignedProperties></etsi:QualifyingProperties></ds:Object></ds:Signature></factura>

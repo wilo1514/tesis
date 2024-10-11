@@ -6,6 +6,7 @@ const generarXMLFactura = require('../utils/xmlGenerator');
 const firmarxml = require('../utils/firmador'); // Aquí asegúrate de que "firmador.js" sea la función correcta.
 const reintentarEnvio = require('../utils/reintentarEnvio');
 const enviarFactura = require('../utils/sriClient');
+const consultarfactura = require('../utils/consultasSRI');
 const path = require('path');
 const generarClaveAcceso = require('../utils/generarClave'); // Importar la función de generar clave de acceso
 
@@ -92,7 +93,7 @@ exports.crearYEnviarFactura = async (req, res) => {
         console.log('Respuesta del firmador:', firmarResponse.data);
         
         if (firmarResponse.data.success) {
-            const xmlFirmado = response.data.xmlFirmado;
+            const xmlFirmado = firmarResponse.data.xmlFirmado;
             // Ahora enviar el XML firmado al SRI
             const enviado = await enviarFactura(xmlFirmado, process.env.AMBIENTE);
             if (enviado) {
@@ -103,7 +104,13 @@ exports.crearYEnviarFactura = async (req, res) => {
             }
         } else {
             res.status(500).send({ message: 'Error al firmar la factura.' });
-        }
+        };
+        const autorizacion = consultarfactura(
+            claveAcceso,
+            process.env.AMBIENTE
+        );
+        console.log('La factura fue ', autorizacion);
+
     } catch (error) {
         console.error('Error al crear y enviar la factura:', error);
         res.status(500).send({
