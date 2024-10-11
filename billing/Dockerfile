@@ -16,7 +16,7 @@ RUN npm install
 COPY . .
 
 # Exponer el puerto 3002
-EXPOSE 3002
+EXPOSE 3001
 
 # Comando para iniciar la aplicación
 CMD ["node", "src/app.js"]

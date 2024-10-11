@@ -12,7 +12,7 @@ const generarClaveAcceso = require('../utils/generarClave'); // Importar la func
 
 async function obtenerDatosReceptor(clienteId) {
     try {
-        const url = `http://172.22.0.1:3005/api/clients/${clienteId}`;
+        const url = `http://172.18.0.1:3005/api/clients/${clienteId}`;
         const response = await axios.get(url);
         return response.data;
     } catch (error) {
@@ -20,6 +20,15 @@ async function obtenerDatosReceptor(clienteId) {
         throw new Error('No se pudo obtener datos del cliente');
     }
 }
+
+exports.getInvoices = async (req, res) => {
+    try {
+        const factura = await Factura.find();
+        res.status(200).json(factura);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 exports.crearYEnviarFactura = async (req, res) => {
     try {
@@ -85,7 +94,7 @@ exports.crearYEnviarFactura = async (req, res) => {
         }
 
         // Llamada al servicio de firmador
-        const firmarResponse = await axios.post('http://172.22.0.1:8081/firmar', {
+        const firmarResponse = await axios.post('http://172.18.0.1:8081/firmar', {
             xmlFilePath: filePath,
             ruc_empresa: req.body.emisor.ruc
         });
@@ -147,5 +156,13 @@ exports.reenviarFacturasPendientes = async (req, res) => {
     } catch (error) {
         console.error('Error al reenviar facturas pendientes:', error);
         res.status(500).send({ message: 'Error al reenviar facturas pendientes', error: error.message, stack: error.stack });
+    }
+};
+exports.getInvoices = async (req, res) => {
+    try {
+        const invoices = await Invoice.find();
+        res.status(200).json(invoices);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
