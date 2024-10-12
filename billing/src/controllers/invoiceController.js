@@ -12,7 +12,7 @@ const generarClaveAcceso = require('../utils/generarClave'); // Importar la func
 
 async function obtenerDatosReceptor(clienteId) {
     try {
-        const url = `http://172.18.0.1:3005/api/clients/${clienteId}`;
+        const url = `http://172.21.0.1:3005/api/clients/${clienteId}`;
         const response = await axios.get(url);
         return response.data;
     } catch (error) {
@@ -21,14 +21,7 @@ async function obtenerDatosReceptor(clienteId) {
     }
 }
 
-exports.getInvoices = async (req, res) => {
-    try {
-        const factura = await Factura.find();
-        res.status(200).json(factura);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+
 
 exports.crearYEnviarFactura = async (req, res) => {
     try {
@@ -94,13 +87,13 @@ exports.crearYEnviarFactura = async (req, res) => {
         }
 
         // Llamada al servicio de firmador
-        const firmarResponse = await axios.post('http://172.18.0.1:8081/firmar', {
+        const firmarResponse = await axios.post('http://172.21.0.1:8081/firmar', {
             xmlFilePath: filePath,
             ruc_empresa: req.body.emisor.ruc
         });
-        
+
         console.log('Respuesta del firmador:', firmarResponse.data);
-        
+
         if (firmarResponse.data.success) {
             const xmlFirmado = firmarResponse.data.xmlFirmado;
             // Ahora enviar el XML firmado al SRI
@@ -160,7 +153,7 @@ exports.reenviarFacturasPendientes = async (req, res) => {
 };
 exports.getInvoices = async (req, res) => {
     try {
-        const invoices = await Invoice.find();
+        const invoices = await Factura.find();
         res.status(200).json(invoices);
     } catch (error) {
         res.status(500).json({ error: error.message });

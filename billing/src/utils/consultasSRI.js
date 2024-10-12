@@ -50,15 +50,15 @@ async function consultarAutorizacion(claveAcceso, ambiente) {
     }
 }
 
-const xmlFilePath = '0910202401010406546100110011010000000760000007611';
-const ambiente = 'pruebas';  // Cambia a 'produccion' cuando sea necesario
+// const xmlFilePath = '0910202401010406546100110011010000000760000007611';
+// const ambiente = 'pruebas';  // Cambia a 'produccion' cuando sea necesario
 
-consultarAutorizacion(xmlFilePath, ambiente)
-    .then(result => {
-        console.log('Resultado del envío:', result);
-    })
-    .catch(error => {
-        console.error('Error inesperado:', error);
-    });
+// consultarAutorizacion(xmlFilePath, ambiente)
+//     .then(result => {
+//         console.log('Resultado del envío:', result);
+//     })
+//     .catch(error => {
+//         console.error('Error inesperado:', error);
+//     });
 
-//module.exports = consultarAutorizacion;
+module.exports = consultarAutorizacion;
