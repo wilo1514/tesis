@@ -405,7 +405,7 @@ export default {
         <b-col lg="6">
           <b-form-input
               v-model="searchQuery"
-              placeholder="Buscar por razón social, identificación, email o teléfono"
+              placeholder="Buscar"
               class="m-1"
           ></b-form-input>
         </b-col>

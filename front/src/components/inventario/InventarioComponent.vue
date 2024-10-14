@@ -5,7 +5,7 @@ import {
 import * as XLSX from "xlsx";
 
 export default {
-  props:{ flagInvoice: Boolean},
+  props: {flagInvoice: Boolean},
   data() {
     return {
       products: [],
@@ -15,7 +15,6 @@ export default {
         {key: "descripcion", label: "Descripción", sortable: true},
         {key: "precioUnitario", label: "Precio Unitario", sortable: true},
         {key: "precioTotalSinImpuesto", label: "Precio Total Sin Impuesto"},
-        {key: "actions", label: "Acciones"},
       ],
       items: [
         {text: 'Productos', href: '#'},
@@ -77,6 +76,14 @@ export default {
       set(file) {
         this.file = file; // Actualiza el archivo seleccionado
       }
+    },
+    computedFields() {
+      // Si flagInvoice es false, agregar la columna 'actions'
+      if (!this.flagInvoice) {
+        return [...this.fields, { key: "actions", label: "Acciones" }];
+      }
+      // Si flagInvoice es true, no agregar la columna 'actions'
+      return this.fields;
     }
 
   },
@@ -289,7 +296,7 @@ export default {
       <b-breadcrumb :items="items"></b-breadcrumb>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center p-3">
+    <div class="d-flex justify-content-between align-items-center p-3" v-if="!flagInvoice">
       <div>
         <h2 class="mb-0 text-primary">Lista de Productos</h2>
       </div>
@@ -298,12 +305,29 @@ export default {
       </div>
     </div>
 
-    <b-table class="mt-3" :items="paginatedProducts" :fields="fields" responsive="sm" striped hover>
+    <div class="d-flex justify-content-center w-100">
+      <b-row class="w-100 d-flex justify-content-center align-items-center">
+        <b-col lg="6">
+          <b-form-input
+              v-model="searchQuery"
+              placeholder="Buscar"
+              class="m-1"
+          ></b-form-input>
+        </b-col>
+        <b-col lg="1">
+          <b-icon icon="x-lg" @click="resetSearch"></b-icon>
+
+        </b-col>
+      </b-row>
+    </div>
+
+
+    <b-table class="mt-3" :items="paginatedProducts" :fields="computedFields" responsive="sm" striped hover>
       <template #cell(index)="data">
         {{ (currentPage - 1) * perPage + data.index + 1 }}
       </template>
 
-      <template #cell(actions)="data">
+      <template #cell(actions)="data" v-if="!flagInvoice">
         <b-button variant="primary" size="sm" @click="showModalEdit(data.item)">Editar</b-button>
         <b-button variant="danger" size="sm" @click="deleteProduct(data.item._id)">Eliminar</b-button>
       </template>
@@ -347,7 +371,7 @@ export default {
         <div class="row mb-3">
           <div class="col-12">
             <h5>Impuestos</h5>
-<!--            <b-button size="sm" variant="success" @click="addImpuesto">Agregar Impuesto</b-button>-->
+            <!--            <b-button size="sm" variant="success" @click="addImpuesto">Agregar Impuesto</b-button>-->
           </div>
           <div v-for="(impuesto, index) in productoActual.impuestos" :key="index" class="col-12 mb-2">
             <div class="row">
@@ -375,7 +399,7 @@ export default {
         </div>
       </b-form>
 
-      <template #modal-footer>
+      <template #modal-footer >
         <b-button class="mt-2" variant="outline-secondary" block @click="hideModal">Cancelar</b-button>
         <b-button class="mt-2" v-if="!editMode" variant="outline-success" block @click="saveProduct">Guardar producto
         </b-button>

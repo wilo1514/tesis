@@ -13,7 +13,7 @@
               <b-form-input id="clienteId" v-model="razonSocial" required disabled></b-form-input>
             </b-col>
             <b-col>
-              <b-button class="w-100" variant="warning" @click="showModalClient">Clients</b-button>
+              <b-button class="w-100" variant="primary" @click="showModalClient">Clientes</b-button>
             </b-col>
           </b-row>
         </b-form-group>
