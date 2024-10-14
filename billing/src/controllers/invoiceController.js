@@ -21,8 +21,6 @@ async function obtenerDatosReceptor(clienteId) {
     }
 }
 
-
-
 exports.crearYEnviarFactura = async (req, res) => {
     try {
         const ambiente = process.env.AMBIENTE;
@@ -64,7 +62,6 @@ exports.crearYEnviarFactura = async (req, res) => {
             fechaEmision: fechaEmisionFormateada,
             claveAcceso
         });
-        console.log('Factura guardada en la base de datos:', factura._id);
 
         // Generar XML
         const xml = generarXMLFactura(factura);
@@ -93,25 +90,37 @@ exports.crearYEnviarFactura = async (req, res) => {
         });
 
         console.log('Respuesta del firmador:', firmarResponse.data);
-
         if (firmarResponse.data.success) {
             const xmlFirmado = firmarResponse.data.xmlFirmado;
-            // Ahora enviar el XML firmado al SRI
+
+            // Enviar el XML firmado al SRI
             const enviado = await enviarFactura(xmlFirmado, process.env.AMBIENTE);
+
             if (enviado) {
-                res.status(201).send(factura);
-                await factura.save();
+                // Retrasar la consulta de autorización por 4 segundos
+                setTimeout(async () => {
+                    // Realizar la consulta de autorización al SRI
+                    console.log(claveAcceso, process.env.AMBIENTE);
+                    const autorizacion = await consultarfactura(claveAcceso, process.env.AMBIENTE);
+                    console.log(autorizacion);
+                    // Verificar si la factura fue autorizada
+                    if (autorizacion && autorizacion.estado === 'AUTORIZADO') {
+                        // Si la factura fue autorizada, guardarla en la base de datos
+                        factura.xmlFirmado = xmlFirmado;
+                        await factura.save();
+                        console.log('Factura guardada en la base de datos:', factura._id);
+                        res.status(201).send(factura);
+                    } else {
+                        res.status(500).send({ message: 'La factura no fue autorizada.' });
+                        console.log('Error: La factura no fue autorizada.');
+                    }
+                }, 6000); // 4 segundos de espera antes de la consulta
             } else {
                 res.status(500).send({ message: 'Error al enviar la factura al SRI.' });
             }
         } else {
             res.status(500).send({ message: 'Error al firmar la factura.' });
-        };
-        const autorizacion = consultarfactura(
-            claveAcceso,
-            process.env.AMBIENTE
-        );
-        console.log('La factura fue ', autorizacion);
+        }
 
     } catch (error) {
         console.error('Error al crear y enviar la factura:', error);
@@ -151,6 +160,7 @@ exports.reenviarFacturasPendientes = async (req, res) => {
         res.status(500).send({ message: 'Error al reenviar facturas pendientes', error: error.message, stack: error.stack });
     }
 };
+
 exports.getInvoices = async (req, res) => {
     try {
         const invoices = await Factura.find();

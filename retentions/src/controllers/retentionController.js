@@ -1,43 +1,36 @@
 const axios = require('axios');
 const fs = require('fs');
-const Factura = require('../models/retention');
-const FacturaPendiente = require('../models/pendingRetention');
-const generarXMLFactura = require('../utils/xmlGenerator');
+const Retencion = require('../models/retention');
+const RetencionPendiente = require('../models/pendingRetention');
+const generarXMLRetencion = require('../utils/xmlGenerator');
 const reintentarEnvio = require('../utils/reintentarEnvio');
-const enviarFactura = require('../utils/sriClient');
-const consultarfactura = require('../utils/consultasSRI');
+const enviarRetencion = require('../utils/sriClient');
+const consultarRetencion = require('../utils/consultasSRI');
 const path = require('path');
-const generarClaveAcceso = require('../utils/generarClave'); // Importar la función de generar clave de acceso
+const generarClaveAcceso = require('../utils/generarClave');
+const calcularRetencion = require('../utils/calcularRetencion'); // Nueva utilidad
 
-async function obtenerDatosReceptor(clienteId) {
+async function obtenerDatosReceptor(supplierId) {
     try {
         const url = `http://172.21.0.1:3003/api/suppliers/${supplierId}`;
         const response = await axios.get(url);
         return response.data;
     } catch (error) {
-        console.error('Error al obtener los datos del receptor:', error.response?.status, error.response?.data || error.message);
-        throw new Error('No se pudo obtener datos del retention');
+        console.error('Error al obtener los datos del proveedor:', error.response?.status, error.response?.data || error.message);
+        throw new Error('No se pudo obtener datos del proveedor');
     }
 }
 
-exports.getRetention = async (req, res) => {
-    try {
-        const factura = await Factura.find();
-        res.status(200).json(factura);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-exports.crearYEnviarFactura = async (req, res) => {
+exports.crearYEnviarRetencion = async (req, res) => {
     try {
         const ambiente = process.env.AMBIENTE;
         const tipoEmision = process.env.EMISION;
         const estab = process.env.ESTAB;
         const ptoEmi = process.env.PTOEMI;
-        const clienteId = req.body.clienteId;
-        console.log(`Intentando obtener datos del cliente con ID: ${clienteId}`);
-        const receptor = await obtenerDatosReceptor(clienteId);
+        const supplierId = req.body.supplierId;
+        const emisor = req.body.emisor; // Emisor es ahora parte del cuerpo de la solicitud
+        console.log(`Intentando obtener datos del proveedor con ID: ${supplierId}`);
+        const proveedor = await obtenerDatosReceptor(supplierId);
 
         // Generar la fecha de emisión en formato DD/MM/AAAA
         const fechaEmision = new Date();
@@ -48,32 +41,36 @@ exports.crearYEnviarFactura = async (req, res) => {
         const claveAcceso = generarClaveAcceso(
             fechaEmisionFormateada,
             '07',
-            req.body.emisor.ruc,
+            emisor.ruc,
             amb,
             estab,
             ptoEmi,
-            req.body.emisor.fac,
+            emisor.ret,
             tipoEmision
         );
         console.log('Clave de Acceso Generada:', claveAcceso);
 
-        // Crear la factura con la clave de acceso y la fecha de emisión
-        const secuencial = req.body.emisor.fac;
-        const factura = new Factura({
+        // Calcular las retenciones basadas en el régimen del proveedor y tipo de contribuyente del emisor
+        const impuestosRetenidos = calcularRetencion(req.body.detalles, proveedor.Regimen, emisor.tipoContribuyente);
+
+        // Crear la retención con la clave de acceso y la fecha de emisión
+        const secuencial = emisor.ret;
+        const retencion = new Retencion({
             ...req.body,
-            amb: amb, // Corregido para asegurar que sea '1' o '2'
-            tipoEmision: tipoEmision, // Asegurando que se pase '1' como tipo de emisión
+            amb: amb,
+            tipoEmision: tipoEmision,
             estab: estab,
             ptoEmi: ptoEmi,
             secuencial: secuencial,
-            receptor,
+            receptor: proveedor, // Datos del proveedor como receptor
             fechaEmision: fechaEmisionFormateada,
-            claveAcceso
+            claveAcceso,
+            impuestosRetenidos
         });
-        console.log('Factura guardada en la base de datos:', factura._id);
+        console.log('Retención guardada en la base de datos:', retencion._id);
 
         // Generar XML
-        const xml = generarXMLFactura(factura);
+        const xml = generarXMLRetencion(retencion);
 
         const dirPath = path.join('/app/xmls');
 
@@ -95,7 +92,7 @@ exports.crearYEnviarFactura = async (req, res) => {
         // Llamada al servicio de firmador
         const firmarResponse = await axios.post('http://172.21.0.1:8081/firmar', {
             xmlFilePath: filePath,
-            ruc_empresa: req.body.emisor.ruc
+            ruc_empresa: emisor.ruc
         });
 
         console.log('Respuesta del firmador:', firmarResponse.data);
@@ -103,65 +100,28 @@ exports.crearYEnviarFactura = async (req, res) => {
         if (firmarResponse.data.success) {
             const xmlFirmado = firmarResponse.data.xmlFirmado;
             // Ahora enviar el XML firmado al SRI
-            const enviado = await enviarFactura(xmlFirmado, process.env.AMBIENTE);
+            const enviado = await enviarRetencion(xmlFirmado, process.env.AMBIENTE);
             if (enviado) {
-                res.status(201).send(factura);
-                await factura.save();
+                res.status(201).send(retencion);
+                await retencion.save();
             } else {
-                res.status(500).send({ message: 'Error al enviar la factura al SRI.' });
+                res.status(500).send({ message: 'Error al enviar la retención al SRI.' });
             }
         } else {
-            res.status(500).send({ message: 'Error al firmar la factura.' });
+            res.status(500).send({ message: 'Error al firmar la retención.' });
         };
-        const autorizacion = consultarfactura(
+        const autorizacion = consultarRetencion(
             claveAcceso,
             process.env.AMBIENTE
         );
-        console.log('La factura fue ', autorizacion);
+        console.log('La retención fue ', autorizacion);
 
     } catch (error) {
-        console.error('Error al crear y enviar la factura:', error);
+        console.error('Error al crear y enviar la retención:', error);
         res.status(500).send({
-            message: 'Error al crear y enviar la factura',
+            message: 'Error al crear y enviar la retención',
             error: error.message,
             stack: error.stack
         });
-    }
-};
-
-// Función para reenviar facturas pendientes manualmente
-exports.reenviarFacturasPendientes = async (req, res) => {
-    try {
-        const facturasPendientes = await FacturaPendiente.find();
-        console.log(`Facturas pendientes encontradas: ${facturasPendientes.length}`);
-
-        for (const facturaPendiente of facturasPendientes) {
-            const factura = await Factura.findById(facturaPendiente.facturaId);
-            if (!factura) {
-                console.warn(`Factura no encontrada: ${facturaPendiente.facturaId}`);
-                continue;
-            }
-            const reenviado = await reintentarEnvio(factura, facturaPendiente.xmlFirmado, process.env.AMBIENTE);
-
-            if (reenviado) {
-                await FacturaPendiente.findByIdAndDelete(facturaPendiente._id);
-                console.log(`Factura reenviada y eliminada de pendientes: ${facturaPendiente.facturaId}`);
-            } else {
-                console.warn(`Factura no pudo ser reenviada: ${facturaPendiente.facturaId}`);
-            }
-        }
-
-        res.status(200).send({ message: 'Proceso de reenvío completado.' });
-    } catch (error) {
-        console.error('Error al reenviar facturas pendientes:', error);
-        res.status(500).send({ message: 'Error al reenviar facturas pendientes', error: error.message, stack: error.stack });
-    }
-};
-exports.getInvoices = async (req, res) => {
-    try {
-        const invoices = await Invoice.find();
-        res.status(200).json(invoices);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
     }
 };
