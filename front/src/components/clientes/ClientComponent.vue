@@ -10,6 +10,7 @@ import {
 import * as XLSX from "xlsx";
 
 export default {
+  props:{ flagInvoice: Boolean},
   data() {
     return {
       clients: [],
@@ -19,8 +20,7 @@ export default {
         {key: "razonSocial", label: "Razón Social", sortable: true},
         {key: "email", label: "Email", sortable: true},
         {key: "telefono", label: "Teléfono"},
-        {key: "obligadoContabilidad", label: "Obligado Contabilidad", sortable: true},
-        {key: "actions", label: "Acciones"},
+        {key: "obligadoContabilidad", label: "Obligado Contabilidad", sortable: true}
       ],
       items: [
         {text: 'Clientes', href: '#'},
@@ -96,6 +96,14 @@ export default {
       set(file) {
         this.file = file; // Actualiza el archivo seleccionado
       }
+    },
+    computedFields() {
+      // Si flagInvoice es false, agregar la columna 'actions'
+      if (!this.flagInvoice) {
+        return [...this.fields, { key: "actions", label: "Acciones" }];
+      }
+      // Si flagInvoice es true, no agregar la columna 'actions'
+      return this.fields;
     }
 
   },
@@ -357,11 +365,12 @@ export default {
       this.$refs['my-modal'].hide()
       console.log("ocultar modal", this.clienteActual)
     },
-    toggleModal() {
-      // We pass the ID of the button that we want to return focus to
-      // when the modal has hidden
-      this.$refs['my-modal'].toggle('#toggle-btn')
-    }
+
+    rowClicked(client) {
+      // Aquí puedes emitir un evento o manejar la acción con la data
+      console.log("Fila seleccionada:", client);
+      this.$emit('clientSelected', client); // Emitir el cliente seleccionado
+    },
 
   },
 
@@ -375,17 +384,18 @@ export default {
 
 <template>
   <b-container fluid>
-    <div class="d-flex justify-content-end  mr-4 mt-4">
+    <div class="d-flex justify-content-end  mr-4 mt-4" v-if="!flagInvoice">
       <b-breadcrumb :items="items"></b-breadcrumb>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center p-3">
+    <div class="d-flex justify-content-between align-items-center p-3 " v-if="!flagInvoice">
       <div>
         <h2 class="mb-0 text-primary">Lista de Clientes</h2>
       </div>
       <div>
-
-        <b-button variant="primary" class="align-self-center m-2" @click="showModalNew">Nuevo cliente</b-button>
+{{flagInvoice}}
+        <b-button variant="primary" class="align-self-center m-2" @click="showModalNew">
+          Nuevo cliente</b-button>
 
       </div>
     </div>
@@ -403,7 +413,7 @@ export default {
           <b-icon icon="x-lg" @click="resetSearch"></b-icon>
 
         </b-col>
-        <b-col class="text-end">
+        <b-col class="text-end" v-if="!flagInvoice">
 
 
           <b-button variant="outline-secondary" class="m-1" size="sm" @click="showModalImport"> Importar
@@ -420,20 +430,21 @@ export default {
       </b-row>
     </div>
 
-    <b-table class="mt-3" :items="paginatedClients" :fields="fields" responsive="sm" striped hover>
+    <b-table class="mt-3" :items="paginatedClients" :fields="computedFields" responsive="sm" striped hover     @row-clicked="rowClicked" >
 
       <template #cell(index)="data">
         {{ (currentPage - 1) * perPage + data.index + 1 }}
       </template>
       <template #cell(obligadoContabilidad)="data">
-        <div class="d-flex justify-content-center align-items-center">
+        <div class="d-flex justify-content-center align-items-center w-100" >
 
           <b-icon icon="circle-fill" variant="success" v-if="data.item.obligadoContabilidad === 'SI'"></b-icon>
           <b-icon v-else icon="circle-fill" variant="danger"></b-icon>
         </div>
       </template>
 
-      <template #cell(actions)="data">
+
+      <template #cell(actions)="data" v-if="!flagInvoice">
         <b-button variant="primary" size="sm" @click="showModalEdit(data.item)">Editar</b-button>
         <b-button variant="danger" size="sm" @click="deleteClient(data.item._id)">Eliminar</b-button>
       </template>
@@ -535,3 +546,14 @@ export default {
     </b-modal>
   </b-container>
 </template>
+
+<style scoped>
+/* Estilos para hacer la fila clicable */
+.rowClass{
+  cursor: pointer;
+}
+
+.rowClass:hover {
+  background-color: #f5f5f5;
+}
+</style>

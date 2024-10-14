@@ -5,6 +5,7 @@ import {
 import * as XLSX from "xlsx";
 
 export default {
+  props:{ flagInvoice: Boolean},
   data() {
     return {
       products: [],
@@ -284,7 +285,7 @@ export default {
 </script>
 <template>
   <b-container fluid>
-    <div class="d-flex justify-content-end  mr-4 mt-4">
+    <div class="d-flex justify-content-end  mr-4 mt-4" v-if="!flagInvoice">
       <b-breadcrumb :items="items"></b-breadcrumb>
     </div>
 
