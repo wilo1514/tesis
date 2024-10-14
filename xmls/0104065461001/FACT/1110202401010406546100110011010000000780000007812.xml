@@ -6,20 +6,20 @@
     <razonSocial>LITUMA MOSCOSO FAUSTO ADRIAN</razonSocial>
     <nombreComercial>LITUMA MOSCOSO FAUSTO ADRIAN</nombreComercial>
     <ruc>0104065461001</ruc>
-    <claveAcceso>0510202401010406546100110011010000000700000007015</claveAcceso>
+    <claveAcceso>1110202401010406546100110011010000000780000007812</claveAcceso>
     <codDoc>01</codDoc>
     <estab>001</estab>
     <ptoEmi>101</ptoEmi>
-    <secuencial>000000070</secuencial>
+    <secuencial>000000078</secuencial>
     <dirMatriz>REMIGIO TAMARIZ 004 Y EL BATAN</dirMatriz>
   </infoTributaria>
   <infoFactura>
-    <fechaEmision>05/10/2024</fechaEmision>
+    <fechaEmision>11/10/2024</fechaEmision>
     <dirEstablecimiento>REMIGIO TAMARIZ 004 Y EL BATAN</dirEstablecimiento>
     <obligadoContabilidad>NO</obligadoContabilidad>
-    <tipoIdentificacionComprador>04</tipoIdentificacionComprador>
-    <razonSocialComprador>Empresa Ejemplo S.A.</razonSocialComprador>
-    <identificacionComprador>0102030405001</identificacionComprador>
+    <tipoIdentificacionComprador>01</tipoIdentificacionComprador>
+    <razonSocialComprador>Fernando C</razonSocialComprador>
+    <identificacionComprador>0105246318</identificacionComprador>
     <totalSinImpuestos>52.5</totalSinImpuestos>
     <totalDescuento>0</totalDescuento>
     <totalConImpuestos>
