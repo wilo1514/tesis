@@ -12,7 +12,7 @@ const generarClaveAcceso = require('../utils/generarClave'); // Importar la func
 
 async function obtenerDatosReceptor(clienteId) {
     try {
-        const url = `http://172.21.0.1:3005/api/clients/${clienteId}`;
+        const url = `http://172.18.0.5:3005/api/clients/${clienteId}`;
         const response = await axios.get(url);
         return response.data;
     } catch (error) {
