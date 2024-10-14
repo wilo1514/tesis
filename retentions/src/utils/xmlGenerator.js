@@ -1,92 +1,70 @@
 const { create } = require('xmlbuilder2');
 
-function generarXMLFactura(factura) {
-    // Agrupar y sumar los impuestos por código y códigoPorcentaje
-    const totalImpuestos = factura.detalles.reduce((acum, detalle) => {
-        detalle.impuestos.forEach((impuesto) => {
-            const key = `${impuesto.codigo}-${impuesto.codigoPorcentaje}`;
-            if (!acum[key]) {
-                acum[key] = {
-                    codigo: impuesto.codigo,
-                    codigoPorcentaje: impuesto.codigoPorcentaje,
-                    baseImponible: 0,
-                    valor: 0,
-                };
-            }
-            acum[key].baseImponible += impuesto.baseImponible;
-            acum[key].valor += impuesto.valor;
-        });
+function generarXMLRetencion(retencion) {
+    // Agrupar y sumar los impuestos retenidos por código y códigoPorcentaje
+    const totalImpuestos = retencion.impuestosRetenidos.reduce((acum, impuesto) => {
+        const key = `${impuesto.codigo}-${impuesto.codigoPorcentaje}`;
+        if (!acum[key]) {
+            acum[key] = {
+                codigo: impuesto.codigo,
+                codigoPorcentaje: impuesto.codigoPorcentaje,
+                baseImponible: 0,
+                valorRetenido: 0,
+                codDocSustento: impuesto.codDocSustento,
+                numDocSustento: impuesto.numDocSustento,
+                fechaEmisionDocSustento: impuesto.fechaEmisionDocSustento,
+            };
+        }
+        acum[key].baseImponible += impuesto.baseImponible;
+        acum[key].valorRetenido += impuesto.valorRetenido;
         return acum;
     }, {});
 
-    // Convertir el objeto de impuestos a un array
-    const totalConImpuestos = Object.values(totalImpuestos);
+    // Convertir el objeto de impuestos retenidos a un array
+    const totalImpuestosRetenidos = Object.values(totalImpuestos);
 
     const obj = {
-        factura: {
+        comprobanteRetencion: {
             '@id': 'comprobante',
-            '@version': '1.1.0',
+            '@version': '1.0.0',
             infoTributaria: {
-                ambiente: factura.amb,
-                tipoEmision: factura.tipoEmision,
-                razonSocial: factura.emisor.razonSocial,
-                nombreComercial: factura.emisor.nombreComercial,
-                ruc: factura.emisor.ruc,
-                claveAcceso: factura.claveAcceso,
-                codDoc: '01',
-                estab: factura.estab,
-                ptoEmi: factura.ptoEmi,
-                secuencial: factura.secuencial,
-                dirMatriz: factura.emisor.direccionMatriz,
-                contribuyenteRimpe: factura.emisor.contribuyenteRimpe
+                ambiente: retencion.ambiente,
+                tipoEmision: retencion.tipoEmision,
+                razonSocial: retencion.emisor.razonSocial,
+                nombreComercial: retencion.emisor.nombreComercial,
+                ruc: retencion.emisor.ruc,
+                claveAcceso: retencion.claveAcceso,
+                codDoc: '07',  // Código de retención es '07'
+                estab: retencion.establecimiento,
+                ptoEmi: retencion.puntoEmision,
+                secuencial: retencion.secuencial,
+                dirMatriz: retencion.emisor.direccionMatriz
             },
-            infoFactura: {
-                fechaEmision: factura.fechaEmision,
-                dirEstablecimiento: factura.emisor.direccionEstablecimiento,
-                obligadoContabilidad: factura.emisor.obligadoContabilidad,
-                tipoIdentificacionComprador: factura.receptor.tipoIdentificacion,
-                razonSocialComprador: factura.receptor.razonSocial,
-                identificacionComprador: factura.receptor.identificacion,
-                totalSinImpuestos: factura.totalSinImpuestos,
-                totalDescuento: factura.totalDescuento,
-                totalConImpuestos: {
-                    totalImpuesto: totalConImpuestos.map(impuesto => ({
-                        codigo: impuesto.codigo,
-                        codigoPorcentaje: impuesto.codigoPorcentaje,
-                        baseImponible: impuesto.baseImponible,
-                        valor: impuesto.valor
-                    }))
-                },
-                propina: factura.propina,
-                importeTotal: factura.importeTotal,
-                moneda: factura.moneda,
-                pagos: {
-                    pago: factura.pagos.map(pago => ({
-                        formaPago: pago.formaPago,
-                        total: pago.total,
-                        plazo: pago.plazo,
-                        unidadTiempo: pago.unidadTiempo
-                    }))
-                }
+            infoCompRetencion: {
+                fechaEmision: retencion.fechaEmision,
+                dirEstablecimiento: retencion.emisor.direccionEstablecimiento,
+                obligadoContabilidad: retencion.emisor.obligadoContabilidad,
+                tipoIdentificacionSujetoRetenido: retencion.receptor.tipoIdentificacion,
+                razonSocialSujetoRetenido: retencion.receptor.razonSocial,
+                identificacionSujetoRetenido: retencion.receptor.identificacion,
+                periodoFiscal: retencion.periodoFiscal
             },
-            detalles: {
-                detalle: factura.detalles.map(detalle => ({
-                    codigoPrincipal: detalle.codigoPrincipal,
-                    codigoAuxiliar: detalle.codigoAuxiliar,
-                    descripcion: detalle.descripcion,
-                    cantidad: detalle.cantidad,
-                    precioUnitario: detalle.precioUnitario,
-                    descuento: detalle.descuento,
-                    precioTotalSinImpuesto: detalle.precioTotalSinImpuesto,
-                    impuestos: {
-                        impuesto: detalle.impuestos.map(impuesto => ({
-                            codigo: impuesto.codigo,
-                            codigoPorcentaje: impuesto.codigoPorcentaje,
-                            tarifa: impuesto.tarifa,
-                            baseImponible: impuesto.baseImponible,
-                            valor: impuesto.valor
-                        }))
-                    }
+            impuestos: {
+                impuesto: totalImpuestosRetenidos.map(impuesto => ({
+                    codigo: impuesto.codigo,
+                    codigoRetencion: impuesto.codigoPorcentaje,
+                    baseImponible: impuesto.baseImponible,
+                    porcentajeRetener: impuesto.porcentajeRetener,
+                    valorRetenido: impuesto.valorRetenido,
+                    codDocSustento: impuesto.codDocSustento,
+                    numDocSustento: impuesto.numDocSustento,
+                    fechaEmisionDocSustento: impuesto.fechaEmisionDocSustento
+                }))
+            },
+            infoAdicional: {
+                campoAdicional: retencion.informacionAdicional.map(info => ({
+                    '@nombre': info.nombre,
+                    '#text': info.valor
                 }))
             }
         }
@@ -97,4 +75,4 @@ function generarXMLFactura(factura) {
     return xml;
 }
 
-module.exports = generarXMLFactura;
+module.exports = generarXMLRetencion;

@@ -47,7 +47,7 @@ async function enviarFacturaManual(filePath, ambiente) {
 }
 
 // Ejecutar la función manualmente
-const xmlFilePath = path.join('C:', 'Users', 'willi', 'OneDrive', 'Escritorio', 'firmado0910202401010406546100110011010000000740000007414.xml');
+const xmlFilePath = path.join('C:', 'Users', 'willi', 'OneDrive', 'Escritorio', 'account-system','xmls', 'firmado1110202401010406546100110011010000000770000007711.xml');
 const ambiente = 'pruebas';  // Cambia a 'produccion' cuando sea necesario
 
 enviarFacturaManual(xmlFilePath, ambiente)

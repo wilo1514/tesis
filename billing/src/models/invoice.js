@@ -32,6 +32,7 @@ const InformacionAdicionalSchema = new mongoose.Schema({
 
 const FacturaSchema = new mongoose.Schema({
     claveAcceso: { type: String, required: true, unique: true },
+    xmlFirmado: { type: String },
     amb: String,
     tipoEmision: String,
     estab: String,
