@@ -26,50 +26,138 @@
         <!-- Información del emisor -->
         <b-card-title>Información del Emisor</b-card-title>
 
-       <div class="d-flex justify-content-between">
+        <div class="d-flex justify-content-between">
 
 
+          <b-form-group label="RUC del Emisor" label-for="emisorRuc" class="w-30 m-1">
+            <b-form-input id="emisorRuc" v-model="newInvoice.emisor.ruc" required></b-form-input>
+          </b-form-group>
 
-        <b-form-group label="RUC del Emisor" label-for="emisorRuc" class="w-30 m-1">
-          <b-form-input id="emisorRuc" v-model="newInvoice.emisor.ruc" required></b-form-input>
-        </b-form-group>
+          <b-form-group label="Razón Social" label-for="razonSocial" class="w-100 m-1">
+            <b-form-input id="razonSocial" v-model="newInvoice.emisor.razonSocial" required></b-form-input>
+          </b-form-group>
+          <b-form-group label="Número de Factura" label-for="fac">
+            <b-form-input id="fac" v-model="newInvoice.emisor.fac" required></b-form-input>
+          </b-form-group>
 
-        <b-form-group label="Razón Social" label-for="razonSocial" class="w-100 m-1">
-          <b-form-input id="razonSocial" v-model="newInvoice.emisor.razonSocial" required></b-form-input>
-        </b-form-group>
-         <b-form-group label="Número de Factura" label-for="fac">
-           <b-form-input id="fac" v-model="newInvoice.emisor.fac" required></b-form-input>
-         </b-form-group>
-
-       </div>
+        </div>
 
 
         <!-- Detalles de la factura -->
         <b-card-title>Detalles de la Factura</b-card-title>
 
-        <b-form-group label="Cliente" label-for="clienteId">
-          <b-row>
-            <b-col lg="10">
-              <b-form-input id="clienteId" v-model="razonSocial" required disabled></b-form-input>
-            </b-col>
-            <b-col>
-              <b-button class="w-100" variant="warning" @click="showModalProducts">Productos / Servicios</b-button>
-            </b-col>
-          </b-row>
-        </b-form-group>
-        <b-form-group label="Descripción del Producto" label-for="descripcionProducto">
-          <b-form-input id="descripcionProducto" v-model="newInvoice.detalles[0].descripcion" required></b-form-input>
-        </b-form-group>
+      <!--  <b-row>
+          <b-col>Producto</b-col>
+          <b-col>Descripción</b-col>
+          <b-col>Cantidad</b-col>
+          <b-col>Precio</b-col>
+          <b-col>Impuesto</b-col>
+          <b-col>Subtotal</b-col>
 
-        <b-form-group label="Cantidad" label-for="cantidadProducto">
-          <b-form-input id="cantidadProducto" v-model="newInvoice.detalles[0].cantidad" type="number"
-                        required></b-form-input>
-        </b-form-group>
+        </b-row>
 
-        <b-form-group label="Precio Unitario" label-for="precioUnitarioProducto">
-          <b-form-input id="precioUnitarioProducto" v-model="newInvoice.detalles[0].precioUnitario" type="number"
-                        required></b-form-input>
-        </b-form-group>
+        <b-row>
+          <b-col>
+
+            <div>
+              <Select2 v-model="myValue" :options="myOptions" :settings="{ settingOption: value, settingOption: value }"
+                       @change="myChangeEvent($event)" @select="mySelectEvent($event)"/>
+
+            </div>
+          </b-col>
+          <b-col><span> {{ myValue }}</span></b-col>
+          <b-col>
+
+            <b-form-input></b-form-input>
+          </b-col>
+          <b-col>
+            <b-form-input></b-form-input>
+
+          </b-col>
+          <b-col>
+            <b-form-select  v-model="selected" :options="options" size="sm" class="form-control"></b-form-select>
+            <div class="mt-3">Selected: <strong>{{ selected }}</strong></div>
+
+          </b-col>
+          <b-col>
+
+            <b-form-input></b-form-input>
+          </b-col>
+
+        </b-row>
+-->
+
+        <b-row>
+          <b-col>Producto</b-col>
+          <b-col>Descripción</b-col>
+          <b-col>Cantidad</b-col>
+          <b-col>Precio</b-col>
+          <b-col>Impuesto</b-col>
+          <b-col>Subtotal</b-col>
+        </b-row>
+        <!-- Filas dinámicas para los productos -->
+        <b-row v-for="(detalle, index) in newInvoice.detalles" :key="index">
+          <b-col>
+
+
+            <Select2
+                v-model="detalle.codigoPrincipal"
+                :options="products.map(p => ({ id: p.codigoPrincipal, text: `${p.codigoPrincipal} - ${p.descripcion}` }))"
+                @change="updateProductDetails(detalle, index)"
+            />
+          </b-col>
+          <b-col><b-form-input v-model="detalle.descripcion" required></b-form-input></b-col>
+          <b-col><b-form-input v-model="detalle.cantidad" type="number" min="1" @input="calculateSubtotal(detalle)" required></b-form-input></b-col>
+          <b-col><b-form-input v-model="detalle.precioUnitario" type="number" @input="calculateSubtotal(detalle)" required></b-form-input></b-col>
+          <b-col>
+            <b-form-select class="form-control" v-model="detalle.impuestos[0].codigoPorcentaje" :options="taxOptions" @change="calculateTax(detalle)" required></b-form-select>
+          </b-col>
+          <b-col><b-form-input v-model="detalle.precioTotalSinImpuesto" disabled></b-form-input></b-col>
+        </b-row>
+
+        <!-- Botón para agregar más productos -->
+        <b-button variant="success" @click="addNewProductRow">Agregar Producto</b-button>
+
+
+
+
+
+
+
+
+        <!--
+                <b-form-group label="Cliente" label-for="clienteId">
+                  <b-row>
+                    <b-col lg="10">
+                      <b-form-input id="clienteId" v-model="razonSocial" required disabled></b-form-input>
+                    </b-col>
+                    <b-col>
+                      <b-button class="w-100" variant="warning" @click="showModalProducts">Productos / Servicios</b-button>
+                    </b-col>
+                  </b-row>
+                </b-form-group>
+                <b-form-group label="Descripción del Producto" label-for="descripcionProducto">
+                  <b-form-input id="descripcionProducto" v-model="newInvoice.detalles[0].descripcion" required></b-form-input>
+                </b-form-group>
+
+                <b-form-group label="Cantidad" label-for="cantidadProducto">
+                  <b-form-input id="cantidadProducto" v-model="newInvoice.detalles[0].cantidad" type="number"
+                                required></b-form-input>
+                </b-form-group>
+
+                <b-form-group label="Precio Unitario" label-for="precioUnitarioProducto">
+                  <b-form-input id="precioUnitarioProducto" v-model="newInvoice.detalles[0].precioUnitario" type="number"
+                                required></b-form-input>
+                </b-form-group>
+
+                -->
+
+
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
 
         <!-- Información del pago -->
         <b-card-title>Información del Pago</b-card-title>
@@ -99,8 +187,9 @@
       <InventarioComponent :flagInvoice="flagInvoice" @clientSelected="clientSelected"></InventarioComponent>
 
     </b-modal>
+<!--    <pre>{{products}}</pre>-->
 
-    <pre>{{ newInvoice }}</pre>
+<!--    <pre>{{ newInvoice }}</pre>-->
   </b-container>
 </template>
 
@@ -108,10 +197,28 @@
 import {createAndSendInvoice} from "@/services/invoiceServices";
 import ClientComponent from "@/components/clientes/ClientComponent.vue";
 import InventarioComponent from "@/components/inventario/InventarioComponent.vue";
+import Select2 from 'v-select2-component';
+import { getProducts } from "@/services/productsService";
+
 export default {
-  components: {ClientComponent, InventarioComponent},
+  components: {ClientComponent, InventarioComponent, Select2},
   data() {
     return {
+      products: [],
+      taxOptions: [
+        { value: '0', text: '0%' },
+        { value: '15', text: '15%' }
+      ],
+      selected: null,
+      options: [
+        { value: null, text: 'Please select an option' },
+        { value: 'a', text: 'This is First option' },
+        { value: 'b', text: 'Selected Option' },
+        { value: { C: '3PO' }, text: 'This is an option with object value' },
+        { value: 'd', text: 'This one is disabled', disabled: true }
+      ],
+      myValue: '',
+      myOptions: ['op1', 'op2', 'op3'],
       flagInvoice: true,
       razonSocial: '',
       newInvoice: {
@@ -171,6 +278,55 @@ export default {
     };
   },
   methods: {
+
+    addNewProductRow() {
+      this.newInvoice.detalles.push({
+        codigoPrincipal: "",
+        descripcion: "",
+        cantidad: 1,
+        precioUnitario: 0,
+        descuento: 0,
+        precioTotalSinImpuesto: 0,
+        impuestos: [
+          {
+            codigo: "2",
+            codigoPorcentaje: "0",
+            tarifa: 0,
+            baseImponible: 0,
+            valor: 0
+          }
+        ]
+      });
+    },
+    calculateSubtotal(detalle) {
+      detalle.precioTotalSinImpuesto = detalle.cantidad * detalle.precioUnitario;
+      this.calculateTax(detalle);
+    },
+
+    calculateTax(detalle) {
+      const tarifa = parseFloat(detalle.impuestos[0].codigoPorcentaje);
+      const baseImponible = detalle.cantidad * detalle.precioUnitario;
+
+      // Actualizamos los valores de impuestos
+      detalle.impuestos[0].tarifa = tarifa;
+      detalle.impuestos[0].baseImponible = baseImponible;
+      detalle.impuestos[0].valor = baseImponible * (tarifa / 100);
+    },
+    updateProductDetails(detalle, index) {
+      const product = this.products.find(p => p.codigoPrincipal === detalle.codigoPrincipal);
+      if (product) {
+        detalle.descripcion = product.descripcion;
+        detalle.precioUnitario = product.precioUnitario;
+        this.calculateSubtotal(detalle);
+      }
+    },
+
+    myChangeEvent(val) {
+      console.log(val);
+    },
+    mySelectEvent({id, text}) {
+      console.log({id, text})
+    },
     clientSelected(data) {
       this.newInvoice.clienteId = data._id;
       this.razonSocial = data.razonSocial;
@@ -252,7 +408,17 @@ export default {
         ],
         firma: "AquiVaLaFirmaElectronica"
       };
-    }
+    },
+    async fetchProducts() {
+      try {
+        this.products = await getProducts();
+      } catch (error) {
+        console.error("Error al obtener productos:", error);
+      }
+    },
+  },
+  mounted() {
+    this.fetchProducts();
   }
 };
 </script>
