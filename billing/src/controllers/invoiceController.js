@@ -12,7 +12,7 @@ const generarClaveAcceso = require('../utils/generarClave'); // Importar la func
 
 async function obtenerDatosReceptor(clienteId) {
     try {
-        const url = `http://172.18.0.5:3005/api/clients/${clienteId}`;
+        const url = `http://172.18.0.4:3005/api/clients/${clienteId}`;
         const response = await axios.get(url);
         return response.data;
     } catch (error) {
@@ -84,7 +84,7 @@ exports.crearYEnviarFactura = async (req, res) => {
         }
 
         // Llamada al servicio de firmador
-        const firmarResponse = await axios.post('http://172.21.0.1:8081/firmar', {
+        const firmarResponse = await axios.post('http://172.18.0.1:8081/firmar', {
             xmlFilePath: filePath,
             ruc_empresa: req.body.emisor.ruc
         });
