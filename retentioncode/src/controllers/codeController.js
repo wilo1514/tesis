@@ -67,3 +67,16 @@ exports.getCodeByType = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// Buscar Code por codigo
+exports.getCodeByCodigo = async (req, res) => {
+    try {
+        const codes = await Code.findOne({ codigo: req.params.codigo });
+        if (!codes) {
+            return res.status(404).json({ error: 'Code not found with the provided type' });
+        }
+        res.status(200).json(codes);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

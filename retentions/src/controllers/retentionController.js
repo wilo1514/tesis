@@ -12,7 +12,7 @@ const calcularRetencion = require('../utils/calcularRetencion'); // Nueva utilid
 
 async function obtenerDatosReceptor(supplierId) {
     try {
-        const url = `http://172.21.0.1:3003/api/suppliers/${supplierId}`;
+        const url = `http://172.18.0.1:3003/api/suppliers/${supplierId}`;
         const response = await axios.get(url);
         return response.data;
     } catch (error) {
@@ -20,7 +20,6 @@ async function obtenerDatosReceptor(supplierId) {
         throw new Error('No se pudo obtener datos del proveedor');
     }
 }
-
 exports.crearYEnviarRetencion = async (req, res) => {
     try {
         const ambiente = process.env.AMBIENTE;
@@ -28,7 +27,8 @@ exports.crearYEnviarRetencion = async (req, res) => {
         const estab = process.env.ESTAB;
         const ptoEmi = process.env.PTOEMI;
         const supplierId = req.body.supplierId;
-        const emisor = req.body.emisor; // Emisor es ahora parte del cuerpo de la solicitud
+        const emisor = req.body.emisor;
+
         console.log(`Intentando obtener datos del proveedor con ID: ${supplierId}`);
         const proveedor = await obtenerDatosReceptor(supplierId);
 
@@ -50,8 +50,16 @@ exports.crearYEnviarRetencion = async (req, res) => {
         );
         console.log('Clave de Acceso Generada:', claveAcceso);
 
-        // Calcular las retenciones basadas en el régimen del proveedor y tipo de contribuyente del emisor
-        const impuestosRetenidos = calcularRetencion(req.body.detalles, proveedor.Regimen, emisor.tipoContribuyente);
+        // Calcular las retenciones
+        const impuestosRetenidos = await calcularRetencion(req.body.detalles);
+
+        // Validar si hay impuestos retenidos
+        if (!impuestosRetenidos || impuestosRetenidos.length === 0) {
+            return res.status(400).json({ message: 'No se calcularon impuestos retenidos' });
+        }
+
+        // Calcular el total retenido basado en el valor retenido total
+        const totalRetenido = impuestosRetenidos.reduce((total, impuesto) => total + impuesto.valorRetenido, 0);
 
         // Crear la retención con la clave de acceso y la fecha de emisión
         const secuencial = emisor.ret;
@@ -65,8 +73,10 @@ exports.crearYEnviarRetencion = async (req, res) => {
             receptor: proveedor, // Datos del proveedor como receptor
             fechaEmision: fechaEmisionFormateada,
             claveAcceso,
-            impuestosRetenidos
+            impuestosRetenidos,
+            totalRetenido // Agregamos el total retenido
         });
+
         console.log('Retención guardada en la base de datos:', retencion._id);
 
         // Generar XML
@@ -90,7 +100,7 @@ exports.crearYEnviarRetencion = async (req, res) => {
         }
 
         // Llamada al servicio de firmador
-        const firmarResponse = await axios.post('http://172.21.0.1:8081/firmar', {
+        const firmarResponse = await axios.post('http://172.18.0.1:8081/firmar', {
             xmlFilePath: filePath,
             ruc_empresa: emisor.ruc
         });
@@ -99,22 +109,22 @@ exports.crearYEnviarRetencion = async (req, res) => {
 
         if (firmarResponse.data.success) {
             const xmlFirmado = firmarResponse.data.xmlFirmado;
+
             // Ahora enviar el XML firmado al SRI
             const enviado = await enviarRetencion(xmlFirmado, process.env.AMBIENTE);
             if (enviado) {
-                res.status(201).send(retencion);
                 await retencion.save();
+                res.status(201).send(retencion); // Responder al cliente con la retención
             } else {
                 res.status(500).send({ message: 'Error al enviar la retención al SRI.' });
             }
         } else {
             res.status(500).send({ message: 'Error al firmar la retención.' });
-        };
-        const autorizacion = consultarRetencion(
-            claveAcceso,
-            process.env.AMBIENTE
-        );
-        console.log('La retención fue ', autorizacion);
+        }
+
+        // Consultar la autorización en el SRI
+        const autorizacion = await consultarRetencion(claveAcceso, process.env.AMBIENTE);
+        console.log('Resultado de la autorización:', autorizacion);
 
     } catch (error) {
         console.error('Error al crear y enviar la retención:', error);

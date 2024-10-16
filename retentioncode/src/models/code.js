@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const codeSchema = new Schema({
     type: String,
     descripcion: String,
-    codigo: Number,
+    codigo: { type: String, required: true, unique: true },
     porcentaje: Number
 });
 

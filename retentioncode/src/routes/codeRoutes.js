@@ -4,6 +4,7 @@ const codeController = require('../controllers/codeController');
 
 router.get('/', codeController.getCodes);
 router.get('/type/:type', codeController.getCodeByType);
+router.get('/codigo/:codigo', codeController.getCodeByCodigo);
 router.get('/:id', codeController.getCodeById);
 router.post('/', codeController.createCode);
 router.put('/:id', codeController.updateCode);
