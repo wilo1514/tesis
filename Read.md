@@ -74,6 +74,7 @@ Cada servicio tiene sus propias variables de entorno configuradas en el archivo 
    ```bash
    docker-compose down
    docker system prune -a --volumes
+   docker-compose up --build 
 
    ```
 Aquí tienes un archivo `.md` que contiene los comandos para limpiar tu entorno Docker:

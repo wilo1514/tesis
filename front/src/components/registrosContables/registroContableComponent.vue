@@ -40,12 +40,12 @@ export default {
         {value: '2', text: 'Contribuyente Negocio Popular - Régimen RIMPE'}
       ],
       tipoIdentificacionOptions: [
-        {value: '01', text: 'Cédula de ciudadanía'},
-        {value: '02', text: 'Cédula de identidad'},
-        {value: '03', text: 'Pasaporte'},
+        {value: '05', text: 'Cédula de ciudadanía'},
+        {value: '05', text: 'Cédula de identidad'},
+        {value: '06', text: 'Pasaporte'},
         {value: '04', text: 'RUC (Registro Único de Contribuyentes)'},
-        {value: '05', text: 'Identificación de extranjeros'},
-        {value: '06', text: 'Otros (especificar según normativa)'}
+        {value: '08', text: 'Identificación de extranjeros'},
+        {value: '00', text: 'Otros (especificar según normativa)'}
       ],
       obligadoContabilidadOptions: [
         {value: 'SI', text: 'Sí'},

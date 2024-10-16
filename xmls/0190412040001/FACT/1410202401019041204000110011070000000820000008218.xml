@@ -18,8 +18,13 @@
     <dirEstablecimiento>REMIGIO TAMARIZ 004 Y EL BATAN</dirEstablecimiento>
     <obligadoContabilidad>NO</obligadoContabilidad>
     <tipoIdentificacionComprador>05</tipoIdentificacionComprador>
+<<<<<<< HEAD
     <razonSocialComprador>Adrian Moscoso</razonSocialComprador>
     <identificacionComprador>0105260434</identificacionComprador>
+=======
+    <razonSocialComprador>Bryam C</razonSocialComprador>
+    <identificacionComprador>0105246318</identificacionComprador>
+>>>>>>> 67a96f829e07be899d7c32a2abfcb9c38791b0d7
     <totalSinImpuestos>52.5</totalSinImpuestos>
     <totalDescuento>0</totalDescuento>
     <totalConImpuestos>

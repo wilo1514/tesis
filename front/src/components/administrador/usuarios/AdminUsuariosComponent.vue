@@ -8,7 +8,7 @@
         <b-form-group label="Nombre:" label-for="nameInput">
           <b-form-input
               id="nameInput"
-              v-model="newUser.name"
+              v-model="newUser.username"
               placeholder="Ingresa el nombre"
               required
           ></b-form-input>
@@ -42,7 +42,7 @@
       <h3 class="mt-4">Lista de Usuarios</h3>
       <b-list-group v-if="usuarios.length">
         <b-list-group-item v-for="usuario in usuarios" :key="usuario.id">
-          {{ usuario.name }} - {{ usuario.email }}
+          {{ usuario.username }} - {{ usuario.email }}
         </b-list-group-item>
       </b-list-group>
       <b-alert v-else variant="info">No hay usuarios registrados.</b-alert>
@@ -59,7 +59,7 @@ export default {
     return {
       usuarios: [],
       newUser: {
-        name: "",
+        username: "",
         email: "",
         password: "",
       },
@@ -81,7 +81,7 @@ export default {
       try {
         const response = await registerUser(this.newUser);
         console.log("Usuario registrado:", response);
-        this.newUser = {name: "", email: "", password: ""}; // Resetea el formulario
+        this.newUser = {username: "", email: "", password: ""}; // Resetea el formulario
         this.fetchUsers(); // Refresca la lista de usuarios
       } catch (error) {
         console.error("Error al registrar el usuario:", error);

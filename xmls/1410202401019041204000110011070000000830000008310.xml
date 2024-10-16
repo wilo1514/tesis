@@ -6,11 +6,11 @@
     <razonSocial>ACCESSCONT CIA LTDA</razonSocial>
     <nombreComercial>ACCESSCONT CIA LTDA</nombreComercial>
     <ruc>0190412040001</ruc>
-    <claveAcceso>1410202401019041204000110011070000000820000008218</claveAcceso>
+    <claveAcceso>1410202401019041204000110011070000000830000008310</claveAcceso>
     <codDoc>01</codDoc>
     <estab>001</estab>
     <ptoEmi>107</ptoEmi>
-    <secuencial>000000082</secuencial>
+    <secuencial>000000083</secuencial>
     <dirMatriz>REMIGIO TAMARIZ 004 Y EL BATAN</dirMatriz>
   </infoTributaria>
   <infoFactura>
@@ -18,13 +18,8 @@
     <dirEstablecimiento>REMIGIO TAMARIZ 004 Y EL BATAN</dirEstablecimiento>
     <obligadoContabilidad>NO</obligadoContabilidad>
     <tipoIdentificacionComprador>05</tipoIdentificacionComprador>
-<<<<<<< HEAD
-    <razonSocialComprador>Adrian Moscoso</razonSocialComprador>
-    <identificacionComprador>0105260434</identificacionComprador>
-=======
     <razonSocialComprador>Bryam C</razonSocialComprador>
     <identificacionComprador>0105246318</identificacionComprador>
->>>>>>> 67a96f829e07be899d7c32a2abfcb9c38791b0d7
     <totalSinImpuestos>52.5</totalSinImpuestos>
     <totalDescuento>0</totalDescuento>
     <totalConImpuestos>
