@@ -3,20 +3,20 @@
   <infoTributaria>
     <ambiente>1</ambiente>
     <tipoEmision>1</tipoEmision>
-    <razonSocial>AUDITORES CONTABLES &amp; CONSULTORES ENRIQUETA SARMIENTO ACCESCONT CIA. LTDA.</razonSocial>
-    <nombreComercial>ACCESCONT CIA. LTDA.</nombreComercial>
+    <razonSocial>ACCESSCONT CIA LTDA</razonSocial>
+    <nombreComercial>ACCESSCONT CIA LTDA</nombreComercial>
     <ruc>0190412040001</ruc>
-    <claveAcceso>1410202401019041204000110011070000000760000007618</claveAcceso>
+    <claveAcceso>1410202401019041204000110011070000000830000008310</claveAcceso>
     <codDoc>01</codDoc>
     <estab>001</estab>
     <ptoEmi>107</ptoEmi>
-    <secuencial>000000076</secuencial>
-    <dirMatriz>TOMÁS ORDOÑEZ 14-31 Y PIO BRAVO</dirMatriz>
+    <secuencial>000000083</secuencial>
+    <dirMatriz>REMIGIO TAMARIZ 004 Y EL BATAN</dirMatriz>
   </infoTributaria>
   <infoFactura>
     <fechaEmision>14/10/2024</fechaEmision>
-    <dirEstablecimiento>DE LA MISTELA Y RAFAEL CARPIO ABAD</dirEstablecimiento>
-    <obligadoContabilidad>SI</obligadoContabilidad>
+    <dirEstablecimiento>REMIGIO TAMARIZ 004 Y EL BATAN</dirEstablecimiento>
+    <obligadoContabilidad>NO</obligadoContabilidad>
     <tipoIdentificacionComprador>05</tipoIdentificacionComprador>
     <razonSocialComprador>Bryam C</razonSocialComprador>
     <identificacionComprador>0105246318</identificacionComprador>
@@ -26,17 +26,23 @@
       <totalImpuesto>
         <codigo>2</codigo>
         <codigoPorcentaje>0</codigoPorcentaje>
-        <baseImponible>52.5</baseImponible>
+        <baseImponible>0.5</baseImponible>
         <valor>0</valor>
+      </totalImpuesto>
+      <totalImpuesto>
+        <codigo>2</codigo>
+        <codigoPorcentaje>4</codigoPorcentaje>
+        <baseImponible>52</baseImponible>
+        <valor>7.8</valor>
       </totalImpuesto>
     </totalConImpuestos>
     <propina>0</propina>
-    <importeTotal>52.5</importeTotal>
+    <importeTotal>60.3</importeTotal>
     <moneda>USD</moneda>
     <pagos>
       <pago>
         <formaPago>20</formaPago>
-        <total>52.5</total>
+        <total>60.3</total>
         <plazo>0</plazo>
         <unidadTiempo>dias</unidadTiempo>
       </pago>
@@ -70,10 +76,10 @@
       <impuestos>
         <impuesto>
           <codigo>2</codigo>
-          <codigoPorcentaje>0</codigoPorcentaje>
-          <tarifa>0</tarifa>
+          <codigoPorcentaje>4</codigoPorcentaje>
+          <tarifa>15</tarifa>
           <baseImponible>52</baseImponible>
-          <valor>0</valor>
+          <valor>7.8</valor>
         </impuesto>
       </impuestos>
     </detalle>
