@@ -57,10 +57,10 @@ exports.crearYEnviarRetencion = async (req, res) => {
         const secuencial = emisor.ret;
         const retencion = new Retencion({
             ...req.body,
-            amb: amb,
+            ambiente: amb,
             tipoEmision: tipoEmision,
-            estab: estab,
-            ptoEmi: ptoEmi,
+            establecimiento: estab,
+            puntoEmision: ptoEmi,
             secuencial: secuencial,
             receptor: proveedor, // Datos del proveedor como receptor
             fechaEmision: fechaEmisionFormateada,

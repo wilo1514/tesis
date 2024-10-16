@@ -6,6 +6,7 @@ const ImpuestoRetenidoSchema = new Schema({
     codigo: String, // Código del impuesto (1 para IVA, por ejemplo)
     codigoPorcentaje: String, // Código del porcentaje retenido
     baseImponible: Number, // Base imponible del impuesto retenido
+    porcentajeRetener: Number, // Porcentaje de retención aplicado
     valorRetenido: Number, // Valor del impuesto retenido
     codDocSustento: String, // Código del documento sustento
     numDocSustento: String, // Número del documento sustento

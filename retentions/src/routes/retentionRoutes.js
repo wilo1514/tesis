@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const invoiceController = require('../controllers/retentionController');
+const retentionController = require('../controllers/retentionController');
 
-router.post('/', invoiceController.crearYEnviarFactura);
-router.post('/reenviar-pendientes', invoiceController.reenviarFacturasPendientes);
+router.post('/', retentionController.crearYEnviarRetencion);
 
 module.exports = router;

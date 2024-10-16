@@ -8,6 +8,7 @@ services:
       - suppliers
       - billing
       - products
+      - retentioncode
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
@@ -56,6 +57,20 @@ services:
     networks:
       - app-network
 
+  retentioncode:
+    build: ./retentioncode
+    ports:
+      - '3009:3009'
+    environment:
+      - DB_URI=mongodb://mongo:27017/retentioncodeDB
+    depends_on:
+      - mongo
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    networks:
+      - app-network
+
   suppliers:
     build: ./suppliers
     ports:
@@ -76,6 +91,28 @@ services:
       - '3001:3001'
     environment:
       - MONGO_URI=mongodb://mongo:27017/facturacionDB
+      - P12_PASSWORD=Enri2023
+      - AMBIENTE=pruebas
+      - EMISION=1
+      - ESTAB=001
+      - PTOEMI=107
+      - FIRMADOR_HOST=firmador
+    volumes:
+      - ./xmls:/app/xmls # Compartir la carpeta de XMLs entre billing y firmador
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    depends_on:
+      - mongo
+      - firmador
+    networks:
+      - app-network
+
+  retentions:
+    build: ./retentions
+    ports:
+      - '3008:3008'
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/retencionDB
       - P12_PASSWORD=Enri2023
       - AMBIENTE=pruebas
       - EMISION=1

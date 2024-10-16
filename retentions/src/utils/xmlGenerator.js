@@ -8,8 +8,9 @@ function generarXMLRetencion(retencion) {
             acum[key] = {
                 codigo: impuesto.codigo,
                 codigoPorcentaje: impuesto.codigoPorcentaje,
-                baseImponible: 0,
-                valorRetenido: 0,
+                baseImponible: isNaN(impuesto.baseImponible) ? 0 : impuesto.baseImponible,
+                valorRetenido: isNaN(impuesto.valorRetenido) ? 0 : impuesto.valorRetenido,
+                porcentajeRetener: isNaN(impuesto.porcentajeRetener) ? 0 : impuesto.porcentajeRetener, // Validar porcentajeRetener
                 codDocSustento: impuesto.codDocSustento,
                 numDocSustento: impuesto.numDocSustento,
                 fechaEmisionDocSustento: impuesto.fechaEmisionDocSustento,
@@ -28,7 +29,7 @@ function generarXMLRetencion(retencion) {
             '@id': 'comprobante',
             '@version': '1.0.0',
             infoTributaria: {
-                ambiente: retencion.ambiente,
+                ambiente: retencion.ambiente,  // Asegúrate de incluir el ambiente
                 tipoEmision: retencion.tipoEmision,
                 razonSocial: retencion.emisor.razonSocial,
                 nombreComercial: retencion.emisor.nombreComercial,
@@ -53,9 +54,9 @@ function generarXMLRetencion(retencion) {
                 impuesto: totalImpuestosRetenidos.map(impuesto => ({
                     codigo: impuesto.codigo,
                     codigoRetencion: impuesto.codigoPorcentaje,
-                    baseImponible: impuesto.baseImponible,
-                    porcentajeRetener: impuesto.porcentajeRetener,
-                    valorRetenido: impuesto.valorRetenido,
+                    baseImponible: isNaN(impuesto.baseImponible) ? 0 : impuesto.baseImponible, // Validación adicional
+                    porcentajeRetener: isNaN(impuesto.porcentajeRetener) ? 0 : impuesto.porcentajeRetener, // Validar que no sea NaN
+                    valorRetenido: isNaN(impuesto.valorRetenido) ? 0 : impuesto.valorRetenido, // Validar que no sea NaN
                     codDocSustento: impuesto.codDocSustento,
                     numDocSustento: impuesto.numDocSustento,
                     fechaEmisionDocSustento: impuesto.fechaEmisionDocSustento

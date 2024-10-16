@@ -3,62 +3,64 @@ function calcularRetencion(detalles, regimenProveedor, tipoContribuyenteEmisor) 
         const baseImponible = detalle.precioTotalSinImpuesto;
 
         // Definir variables para IVA y Renta retenida
-        let porcentajeRetencionIVA;
-        let porcentajeRetencionRenta;
+        let porcentajeRetencionIVA = 0;
+        let porcentajeRetencionRenta = 0;
 
-        // Calcular Retención de IVA
-        switch (tipoContribuyenteEmisor) {
-            case 'Persona Natural':
-                if (regimenProveedor === 'No obligado a llevar contabilidad') {
-                    porcentajeRetencionIVA = 0.30; // 30% del IVA
+        // ** Ajuste en la retención del IVA según los códigos y parámetros del SRI
+        switch (detalle.impuestos[0].codigoPorcentaje) {
+            case '2': // Código del porcentaje para IVA
+                if (tipoContribuyenteEmisor === 'Persona Natural') {
+                    // Si es una persona natural, usamos el 30% del IVA
+                    porcentajeRetencionIVA = 30;
+                } else if (tipoContribuyenteEmisor === 'Persona Jurídica' || tipoContribuyenteEmisor === 'Contribuyente Especial') {
+                    // Para personas jurídicas o contribuyentes especiales, retenemos el 100% del IVA
+                    porcentajeRetencionIVA = 100;
                 } else {
-                    porcentajeRetencionIVA = 1.00; // 100% del IVA
+                    porcentajeRetencionIVA = 0; // Otros casos no retienen IVA
                 }
                 break;
-            case 'Persona Jurídica':
-            case 'Contribuyente Especial':
-                porcentajeRetencionIVA = 1.00; // 100% del IVA para personas jurídicas y contribuyentes especiales
-                break;
             default:
-                porcentajeRetencionIVA = 0.00; // No se retiene IVA
+                porcentajeRetencionIVA = 0; // No se retiene en casos no especificados
         }
 
-        // Calcular Retención de Impuesto a la Renta (IR)
+        // ** Ajuste en la retención de Impuesto a la Renta (IR) basado en el régimen del proveedor
         switch (regimenProveedor) {
             case 'Persona Natural':
-                porcentajeRetencionRenta = 0.01; // 1% para personas naturales no obligadas a llevar contabilidad
+                porcentajeRetencionRenta = 1; // 1% para personas naturales no obligadas a llevar contabilidad
                 break;
             case 'Persona Jurídica':
-                porcentajeRetencionRenta = 0.02; // 2% para compras de bienes a personas jurídicas
+                porcentajeRetencionRenta = 2; // 2% para personas jurídicas
                 break;
             case 'Servicios Profesionales':
-                porcentajeRetencionRenta = 0.10; // 10% para servicios profesionales
+                porcentajeRetencionRenta = 10; // 10% para servicios profesionales
                 break;
             case 'Pagos al Exterior':
-                porcentajeRetencionRenta = 0.25; // 25% para servicios de no residentes
+                porcentajeRetencionRenta = 25; // 25% para pagos al exterior
                 break;
             case 'RIMPE':
-                porcentajeRetencionRenta = 0.01; // 1% para contribuyentes bajo régimen RIMPE
+                porcentajeRetencionRenta = 1; // 1% para régimen RIMPE
                 break;
             default:
-                porcentajeRetencionRenta = 0.00; // No se retiene Impuesto a la Renta
+                porcentajeRetencionRenta = 0; // No se retiene si no está especificado
         }
 
         // Cálculo del IVA retenido
-        const valorIVA = detalle.impuestos.find(i => i.codigo === '2').valor; // Se asume que el código '2' es IVA
-        const valorRetenidoIVA = valorIVA * porcentajeRetencionIVA;
+        const valorIVA = detalle.impuestos.find(i => i.codigo === '2')?.valor || 0;
+        const valorRetenidoIVA = (valorIVA * porcentajeRetencionIVA) / 100;
 
         // Cálculo del Impuesto a la Renta retenido
-        const valorRetenidoRenta = baseImponible * porcentajeRetencionRenta;
+        const valorRetenidoRenta = (baseImponible * porcentajeRetencionRenta) / 100;
 
         // Devolver los valores de retención calculados
         return {
-            codigo: detalle.impuestos[0].codigo, // Usamos el código del primer impuesto relacionado
-            codigoPorcentaje: detalle.impuestos[0].codigoPorcentaje, // Usamos el código porcentaje
+            codigo: detalle.impuestos[0].codigo, // Código del impuesto
+            codigoPorcentaje: detalle.impuestos[0].codigoPorcentaje, // Código del porcentaje
             baseImponible: baseImponible,
-            valorRetenidoIVA: valorRetenidoIVA,
-            valorRetenidoRenta: valorRetenidoRenta,
-            codDocSustento: '01',  // Se asume que es una factura (cod 01)
+            porcentajeRetener: porcentajeRetencionIVA, // Porcentaje de retención del IVA
+            valorRetenidoIVA: valorRetenidoIVA, // Valor retenido del IVA
+            porcentajeRetencionRenta: porcentajeRetencionRenta, // Porcentaje de retención de Renta
+            valorRetenidoRenta: valorRetenidoRenta, // Valor retenido de Renta
+            codDocSustento: '01',  // Código del documento sustento (factura)
             numDocSustento: detalle.numeroComprobante,
             fechaEmisionDocSustento: detalle.fechaEmisionComprobante
         };
