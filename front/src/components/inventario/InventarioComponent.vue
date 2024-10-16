@@ -3,18 +3,37 @@ import {
   getProducts, createProduct, getProductById, updateProduct, deleteProduct
 } from "@/services/productsService";
 import * as XLSX from "xlsx";
+import Select2 from 'v-select2-component';
 
 export default {
   props: {flagInvoice: Boolean},
+  components: {Select2},
   data() {
     return {
+      listImpuestos: [
+        {name: "IVA", value: "2"},
+        {name: "ICE", value: "3"},
+        {name: "IRBPNR", value: "5"},
+      ],
+      listTarifas: [
+        {name: "0%", tarifa: "0", codigo: "0"},
+        {name: "12%", tarifa: "12", codigo: "2"},
+        {name: "13%", tarifa: "13", codigo: "10"},
+        {name: "14%", tarifa: "14", codigo: "3"},
+        {name: "15%", tarifa: "15", codigo: "4"},
+        {name: "5%", tarifa: "5", codigo: "5"},
+        {name: "No objeto de Impuesto", tarifa: "0", codigo: "6"},
+        {name: "Excento de IVA", tarifa: "0", codigo: "7"},
+        {name: "IVA diferenciado", tarifa: "0", codigo: "8"},
+      ],
       products: [],
       fields: [
-        {key: "index", label: "N"},
+        {key: "index", label: "N", tdClass: "text-center"},
         {key: "codigoPrincipal", label: "Código Principal"},
-        {key: "descripcion", label: "Descripción", sortable: true},
-        {key: "precioUnitario", label: "Precio Unitario", sortable: true},
-        {key: "precioTotalSinImpuesto", label: "Precio Total Sin Impuesto"},
+        {key: "descripcion", label: "Producto / Servicio"},
+        {key: 'tarifa', label: 'Tarifa de Impuesto', tdClass: "text-center", sortable: true},
+        {key: "precioUnitario", label: "Precio Unitario", tdClass: "text-center"},
+        {key: 'iva', label: 'Iva', tdClass: "text-center" },
       ],
       items: [
         {text: 'Productos', href: '#'},
@@ -26,9 +45,7 @@ export default {
         precioUnitario: 0,
         precioTotalSinImpuesto: 0,
         impuestos: [
-          {codigo: '1', codigoPorcentaje: '1', tarifa: 0, baseImponible: 0, valor: 0},
-          {codigo: '2', codigoPorcentaje: '2', tarifa: 5, baseImponible: 0, valor: 0},
-          {codigo: '3', codigoPorcentaje: '3', tarifa: 15, baseImponible: 0, valor: 0}
+          {codigo: '2', codigoPorcentaje: '1', tarifa: 0, baseImponible: 0, valor: 0},
         ]
       },
       editMode: false,
@@ -45,7 +62,8 @@ export default {
   watch: {
     'productoActual.precioTotalSinImpuesto'(newValue) {
       this.calculateImpuestos(newValue);
-    }
+    },
+
   },
 
   computed: {
@@ -80,7 +98,7 @@ export default {
     computedFields() {
       // Si flagInvoice es false, agregar la columna 'actions'
       if (!this.flagInvoice) {
-        return [...this.fields, { key: "actions", label: "Acciones" }];
+        return [...this.fields, {key: "actions", label: "Acciones"}];
       }
       // Si flagInvoice es true, no agregar la columna 'actions'
       return this.fields;
@@ -89,6 +107,32 @@ export default {
   },
   methods: {
 
+    updateProductDetails(detalle, index) {
+      console.log(detalle, index);
+      // const product = this.products.find(p => p.codigoPrincipal === detalle.codigoPrincipal);
+      // if (product) {
+      //   detalle.descripcion = product.descripcion;
+      //   detalle.precioUnitario = product.precioUnitario;
+      //   this.calculateSubtotal(detalle);
+      // }
+    },
+    updateImpuestosDetails(impuesto, index) {
+      // Encuentra la tarifa seleccionada en listTarifas y asigna su valor a impuesto.tarifa
+      const selectedTarifa = this.listTarifas.find(tarifa => tarifa.codigo === impuesto.codigoPorcentaje);
+      if (selectedTarifa) {
+        impuesto.tarifa = selectedTarifa.tarifa; // Actualiza impuesto.tarifa con el valor de la tarifa seleccionada
+      }
+      this.calculateImpuestos(this.productoActual.precioTotalSinImpuesto);
+    },
+    updatePrecioYBase(nuevoPrecio) {
+      this.productoActual.precioTotalSinImpuesto = nuevoPrecio;
+
+      if (this.productoActual.impuestos && this.productoActual.impuestos.length > 0) {
+        this.productoActual.impuestos.forEach(impuesto => {
+          impuesto.baseImponible = nuevoPrecio;
+        });
+      }
+    },
     calculateImpuestos(precioTotalSinImpuesto) {
       this.productoActual.impuestos.forEach(impuesto => {
         impuesto.baseImponible = precioTotalSinImpuesto;
@@ -96,120 +140,10 @@ export default {
       });
     },
 
-    addImpuesto() {
-      this.productoActual.impuestos.push({codigo: '', codigoPorcentaje: '', tarifa: 0, baseImponible: 0, valor: 0});
-    },
-    removeImpuesto(index) {
-      this.productoActual.impuestos.splice(index, 1);
-    },
-    downloadFailedProducts() {
-      if (this.failedProductsData.length === 0) {
-        this.importMessage = "No hay productos fallidos para descargar.";
-        return;
-      }
-      this.importMessage = "";
-      // Crear el archivo Excel con los productos fallidos
-      const ws = XLSX.utils.json_to_sheet(this.failedProductsData); // Convierte los datos de productos fallidos en una hoja de Excel
-      const wb = XLSX.utils.book_new(); // Crea un nuevo libro de Excel
-      XLSX.utils.book_append_sheet(wb, ws, "Productos Fallidos"); // Agregar la hoja con el nombre "Productos Fallidos"
 
-      // Descargar el archivo Excel con el nombre 'productos_fallidos.xlsx'
-      XLSX.writeFile(wb, "productos_fallidos.xlsx");
-    },
     resetSearch() {
       this.searchQuery = "";
       this.fetchProducts();
-    },
-
-    fileInputChange(event) {
-      this.file = event.target.files[0]; // Guardar el archivo seleccionado
-      this.importMessage = ''; // Resetear el mensaje cuando se selecciona un archivo
-    },
-    showModalImport() {
-      this.$refs['my-modal-import'].show()
-    },
-    hideModalImport() {
-      this.importMessage = "";
-      this.$refs['my-modal-import'].hide()
-    },
-
-    exportToExcel() {
-      const data = this.filteredProducts.map(product => ({
-        "Código Principal": product.codigoPrincipal,
-        Descripción: product.descripcion,
-        "Precio Unitario": product.precioUnitario,
-        "Precio Total Sin Impuesto": product.precioTotalSinImpuesto,
-      }));
-
-      const ws = XLSX.utils.json_to_sheet(data); // Convierte los datos a una hoja de Excel
-      const wb = XLSX.utils.book_new(); // Crea un nuevo libro de Excel
-      XLSX.utils.book_append_sheet(wb, ws, "Productos"); // Agrega la hoja al libro
-
-      XLSX.writeFile(wb, "productos.xlsx"); // Genera y descarga el archivo Excel
-    },
-
-    async importFromExcel() {
-      if (!this.file) {
-        this.importMessage = "Por favor selecciona un archivo primero";
-        return;
-      }
-
-      try {
-        const file = this.file;
-        const data = await file.arrayBuffer(); // Leer el archivo
-        const workbook = XLSX.read(data); // Leer el archivo Excel
-        const sheet = workbook.Sheets[workbook.SheetNames[0]]; // Obtener la primera hoja
-        const jsonData = XLSX.utils.sheet_to_json(sheet); // Convertir a JSON
-
-        let successfullyAdded = 0;
-        let failedProducts = 0; // Contador de productos fallidos (errores)
-        this.failedProductsData = []; // Array para almacenar los datos de productos fallidos
-
-        // Procesar los datos y crear los productos
-        for (const productData of jsonData) {
-          const newProduct = {
-            codigoPrincipal: productData.codigoPrincipal || '',
-            descripcion: productData.descripcion || '',
-            precioUnitario: productData.precioUnitario || 0,
-            precioTotalSinImpuesto: productData.precioTotalSinImpuesto || 0,
-            impuestos: productData.impuestos || []
-          };
-
-          // Validar si los campos requeridos están presentes
-          if (!newProduct.codigoPrincipal || !newProduct.descripcion) {
-            console.warn("Faltan datos obligatorios para el producto:", newProduct);
-            failedProducts++; // Contar los fallidos debido a datos incompletos
-            this.failedProductsData.push(newProduct); // Agregar producto fallido a la lista
-            continue; // Saltar este producto si faltan datos
-          }
-
-          try {
-            // Intentar crear un nuevo producto
-            await createProduct(newProduct);
-            successfullyAdded++; // Incrementar el contador de productos agregados exitosamente
-          } catch (error) {
-            console.error("Error al crear el producto:", error.response ? error.response.data.message : error);
-            failedProducts++; // Contar los errores
-            this.failedProductsData.push(newProduct); // Agregar producto fallido a la lista
-          }
-        }
-
-        // Actualizar el mensaje de éxito o error basado en los resultados de la importación
-        if (successfullyAdded > 0) {
-          // Mostrar cuántos productos fueron cargados y cuántos fallaron
-          this.importMessage = `Se cargaron ${successfullyAdded} productos exitosamente. <br> No se cargaron ${failedProducts} productos.`;
-        } else {
-          // Si no se cargó ninguno, mostrar mensaje de error
-          this.importMessage = `No se cargó ninguno. Los ${failedProducts} productos ya existen o tienen errores.`;
-        }
-
-        // Refrescar la lista de productos después de la importación
-        this.fetchProducts();
-
-      } catch (error) {
-        this.importMessage = "Error al importar productos desde Excel. Verifica el archivo y vuelve a intentarlo.";
-        console.error("Error al importar productos desde Excel:", error);
-      }
     },
 
     async fetchProducts() {
@@ -232,9 +166,7 @@ export default {
         precioUnitario: 0,
         precioTotalSinImpuesto: 0,
         impuestos: [
-          {codigo: '1', codigoPorcentaje: '1', tarifa: 0, baseImponible: 0, valor: 0},
-          {codigo: '2', codigoPorcentaje: '2', tarifa: 5, baseImponible: 0, valor: 0},
-          {codigo: '3', codigoPorcentaje: '3', tarifa: 15, baseImponible: 0, valor: 0}
+          {codigo: '2', codigoPorcentaje: '1', tarifa: 0, baseImponible: 0, valor: 0},
         ]
       };
     },
@@ -266,20 +198,20 @@ export default {
     showModalNew() {
       this.editMode = false;
       this.resetProduct();
-      this.$refs['my-modal'].show();
+      this.$refs['modal-producto'].show();
     },
     showModalEdit(data) {
       this.editMode = true;
       this.productoActual = {...data};
-      this.$refs['my-modal'].show();
+      this.$refs['modal-producto'].show();
     },
     hideModal() {
       this.editMode = false;
       this.resetProduct();
-      this.$refs['my-modal'].hide();
+      this.$refs['modal-producto'].hide();
     },
     toggleModal() {
-      this.$refs['my-modal'].toggle('#toggle-btn');
+      this.$refs['modal-producto'].toggle('#toggle-btn');
     }
 
   },
@@ -321,10 +253,21 @@ export default {
       </b-row>
     </div>
 
-
     <b-table class="mt-3" :items="paginatedProducts" :fields="computedFields" responsive="sm" striped hover>
       <template #cell(index)="data">
         {{ (currentPage - 1) * perPage + data.index + 1 }}
+      </template>
+
+      <template #cell(tarifa)="data">
+        <span v-if="data.item.impuestos && data.item.impuestos.length > 0">
+          {{ data.item.impuestos[0].tarifa }} %
+        </span>
+
+      </template>
+      <template #cell(iva)="data">
+        <span v-if="data.item.impuestos && data.item.impuestos.length > 0">
+          {{ data.item.impuestos[0].valor }}
+        </span>
       </template>
 
       <template #cell(actions)="data" v-if="!flagInvoice">
@@ -341,65 +284,78 @@ export default {
         class="mt-3"
     ></b-pagination>
 
-    <b-modal ref="my-modal" :title="editMode ? 'Editar Producto' : 'Nuevo Producto'" size="xl" centered
+    <b-modal ref="modal-producto" :title="editMode ? 'Editar Producto' : 'Nuevo Producto'" size="lg" centered
              hide-header-close>
       <b-form @submit.stop.prevent="saveProduct">
-        <div class="row mb-3">
-          <b-form-group label="Código Principal" label-for="codigoPrincipal" class="col-12">
-            <b-form-input v-model="productoActual.codigoPrincipal" id="codigoPrincipal" required></b-form-input>
-          </b-form-group>
-        </div>
+        <b-row>
+          <b-col lg="3">
+            <b-form-group label="Código Principal" label-for="codigoPrincipal" class="col-12">
+              <b-form-input v-model="productoActual.codigoPrincipal" id="codigoPrincipal" required></b-form-input>
+            </b-form-group>
 
-        <div class="row mb-3">
-          <b-form-group label="Descripción" label-for="descripcion" class="col-12">
-            <b-form-input v-model="productoActual.descripcion" id="descripcion" required></b-form-input>
-          </b-form-group>
-        </div>
+          </b-col>
+          <b-col>
+            <b-form-group label="Nombre del producto o servicio" label-for="descripcion" class="col-12">
+              <b-form-input v-model="productoActual.descripcion" id="descripcion" required></b-form-input>
+            </b-form-group>
 
-        <div class="row mb-3">
-          <b-form-group label="Precio Unitario" label-for="precioUnitario" class="col-12 col-md-6">
-            <b-form-input type="number" v-model="productoActual.precioUnitario" id="precioUnitario"
-                          required></b-form-input>
-          </b-form-group>
-          <b-form-group label="Precio Total Sin Impuesto" label-for="precioTotalSinImpuesto" class="col-12 col-md-6">
-            <b-form-input type="number" v-model="productoActual.precioTotalSinImpuesto" id="precioTotalSinImpuesto"
-                          required></b-form-input>
-          </b-form-group>
-        </div>
+          </b-col>
+          <b-col lg="2">
+            <b-form-group label="Precio Unitario" label-for="precioUnitario">
+              <b-form-input type="number" v-model="productoActual.precioUnitario" id="precioUnitario"
+                            @input="updatePrecioYBase(productoActual.precioUnitario)" required></b-form-input>
+            </b-form-group>
+          </b-col>
 
-        <!-- Sección de Impuestos -->
-        <div class="row mb-3">
-          <div class="col-12">
-            <h5>Impuestos</h5>
-            <!--            <b-button size="sm" variant="success" @click="addImpuesto">Agregar Impuesto</b-button>-->
-          </div>
-          <div v-for="(impuesto, index) in productoActual.impuestos" :key="index" class="col-12 mb-2">
-            <div class="row">
-              <b-form-group label="Código" class="col-12 col-md-2">
-                <b-form-input v-model="impuesto.codigo" disabled required></b-form-input>
-              </b-form-group>
-              <b-form-group label="Código Porcentaje" class="col-12 col-md-2">
-                <b-form-input v-model="impuesto.codigoPorcentaje" disabled required></b-form-input>
-              </b-form-group>
-              <b-form-group label="Tarifa" class="col-12 col-md-2">
-                <b-form-input type="number" v-model="impuesto.tarifa" required disabled></b-form-input>
-              </b-form-group>
-              <b-form-group label="Base Imponible" class="col-12 col-md-3">
-                <b-form-input type="number" v-model="impuesto.baseImponible" disabled required></b-form-input>
-              </b-form-group>
-              <b-form-group label="Valor" class="col-12 col-md-2">
-                <b-form-input type="number" v-model="impuesto.valor" disabled required></b-form-input>
-              </b-form-group>
-              <div class="col-12 col-md-1 d-flex align-items-center">
-                <b-button variant="danger" size="sm" @click="removeImpuesto(index)">Eliminar</b-button>
+        </b-row>
+
+        <b-row>
+          <b-col lg="12">
+            <div class="mt-3 mb-3 text-center">
+              <h5>Impuesto</h5>
+              <hr>
+            </div>
+          </b-col>
+          <b-col>
+
+            <div v-for="(impuesto, index) in productoActual.impuestos" :key="index" class="col-12 mb-2">
+              <div class="d-flex justify-content-around align-items-center">
+                <b-form-group label="Tipo" class="row">
+
+                  <b-form-select
+                      class="form-control"
+                      v-model="impuesto.codigo"
+                      :options="listImpuestos.map(p => ({ value: p.value, text: p.name }))"
+                      @change="updateProductDetails(impuesto, index)"
+                      required
+                  />
+                </b-form-group>
+                <b-form-group label="Tarifa" class="row">
+                  <b-form-select
+                      class="form-control"
+                      v-model="impuesto.codigoPorcentaje"
+                      :options="listTarifas.map(p => ({ value: p.codigo, text: p.name }))"
+                      @change="updateImpuestosDetails(impuesto, index)"
+                      required
+                  />
+
+                </b-form-group>
+
+                <b-form-group label="Valor" class="">
+                  <b-form-input type="number" v-model="impuesto.valor" disabled required></b-form-input>
+                </b-form-group>
+
               </div>
             </div>
-          </div>
 
-        </div>
+
+          </b-col>
+        </b-row>
+
+
       </b-form>
 
-      <template #modal-footer >
+      <template #modal-footer>
         <b-button class="mt-2" variant="outline-secondary" block @click="hideModal">Cancelar</b-button>
         <b-button class="mt-2" v-if="!editMode" variant="outline-success" block @click="saveProduct">Guardar producto
         </b-button>
@@ -407,6 +363,9 @@ export default {
           producto
         </b-button>
       </template>
+
+
     </b-modal>
   </b-container>
 </template>
+
