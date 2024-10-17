@@ -135,11 +135,10 @@ export default {
     },
     calculateImpuestos(precioTotalSinImpuesto) {
       this.productoActual.impuestos.forEach(impuesto => {
-        impuesto.baseImponible = precioTotalSinImpuesto;
-        impuesto.valor = (impuesto.baseImponible * impuesto.tarifa) / 100;
+        impuesto.baseImponible = parseFloat(precioTotalSinImpuesto).toFixed(2);
+        impuesto.valor = (parseFloat(impuesto.baseImponible) * parseFloat(impuesto.tarifa) / 100).toFixed(2);
       });
     },
-
 
     resetSearch() {
       this.searchQuery = "";
