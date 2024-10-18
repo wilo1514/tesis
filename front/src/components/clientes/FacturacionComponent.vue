@@ -4,88 +4,66 @@
 
     <!-- Formulario para crear y enviar una nueva factura -->
     <b-card class="mb-4">
+
+
+      <div class="mb-3 d-flex justify-content-between align-items-end">
+        <b-form-group  label="Número de Factura" label-for="fac">
+          <b-form-input disabled id="fac" v-model="newInvoice.emisor.fac" required></b-form-input>
+        </b-form-group>
+        <b-button v-b-toggle.my-collapse>Configurar emisor
+          <b-icon icon="wrench" scale="0.8"></b-icon>
+        </b-button>
+      </div>
+
+      <b-collapse id="my-collapse">
+        <b-card title="Configurar emisor">
+
+          <b-form-group label="RUC Empresa" label-for="rucEmpresa">
+            <b-form-input id="rucEmpresa" v-model="newInvoice.ruc_empresa" required></b-form-input>
+          </b-form-group>
+
+          <!-- Información del emisor -->
+          <b-card-title>Información del Emisor</b-card-title>
+
+          <div class="d-flex justify-content-between">
+
+
+            <b-form-group label="RUC del Emisor" label-for="emisorRuc" class="w-30 m-1">
+              <b-form-input id="emisorRuc" v-model="newInvoice.emisor.ruc" required></b-form-input>
+            </b-form-group>
+
+            <b-form-group label="Razón Social" label-for="razonSocial" class="w-100 m-1">
+              <b-form-input id="razonSocial" v-model="newInvoice.emisor.razonSocial" required></b-form-input>
+            </b-form-group>
+
+
+          </div>
+        </b-card>
+      </b-collapse>
+
+
       <b-card-title>Crear y Enviar Factura</b-card-title>
       <b-form @submit.prevent="createInvoice">
         <!-- Cliente ID -->
-        <b-form-group label="Cliente" label-for="clienteId">
-          <b-row>
-            <b-col lg="10">
+        <b-row >
+          <b-col>
+            <b-button class="w-100 mt-4" variant="primary" @click="showModalClient">Seleccionar cliente</b-button>
+          </b-col>
+          <b-col lg="6">
+            <b-form-group label="Cliente" label-for="clienteId">
               <b-form-input id="clienteId" v-model="razonSocial" required disabled></b-form-input>
-            </b-col>
-            <b-col>
-              <b-button class="w-100" variant="primary" @click="showModalClient">Clientes</b-button>
-            </b-col>
-          </b-row>
-        </b-form-group>
-
-        <!-- RUC Empresa -->
-        <b-form-group label="RUC Empresa" label-for="rucEmpresa">
-          <b-form-input id="rucEmpresa" v-model="newInvoice.ruc_empresa" required></b-form-input>
-        </b-form-group>
-
-        <!-- Información del emisor -->
-        <b-card-title>Información del Emisor</b-card-title>
-
-        <div class="d-flex justify-content-between">
-
-
-          <b-form-group label="RUC del Emisor" label-for="emisorRuc" class="w-30 m-1">
-            <b-form-input id="emisorRuc" v-model="newInvoice.emisor.ruc" required></b-form-input>
-          </b-form-group>
-
-          <b-form-group label="Razón Social" label-for="razonSocial" class="w-100 m-1">
-            <b-form-input id="razonSocial" v-model="newInvoice.emisor.razonSocial" required></b-form-input>
-          </b-form-group>
-          <b-form-group label="Número de Factura" label-for="fac">
-            <b-form-input id="fac" v-model="newInvoice.emisor.fac" required></b-form-input>
-          </b-form-group>
-
-        </div>
+            </b-form-group>
+          </b-col>
+          <b-col>
+            <b-form-group label="Fecha de emisión" label-for="rucEmpresa">
+              <b-input type="date" v-model="fechaFormateada" @input="updateFechaFormateada"></b-input>
+            </b-form-group>
+          </b-col>
+        </b-row>
 
 
         <!-- Detalles de la factura -->
-        <b-card-title>Detalles de la Factura</b-card-title>
-
-      <!--  <b-row>
-          <b-col>Producto</b-col>
-          <b-col>Descripción</b-col>
-          <b-col>Cantidad</b-col>
-          <b-col>Precio</b-col>
-          <b-col>Impuesto</b-col>
-          <b-col>Subtotal</b-col>
-
-        </b-row>
-
-        <b-row>
-          <b-col>
-
-            <div>
-              <Select2 v-model="myValue" :options="myOptions" :settings="{ settingOption: value, settingOption: value }"
-                       @change="myChangeEvent($event)" @select="mySelectEvent($event)"/>
-
-            </div>
-          </b-col>
-          <b-col><span> {{ myValue }}</span></b-col>
-          <b-col>
-
-            <b-form-input></b-form-input>
-          </b-col>
-          <b-col>
-            <b-form-input></b-form-input>
-
-          </b-col>
-          <b-col>
-            <b-form-select  v-model="selected" :options="options" size="sm" class="form-control"></b-form-select>
-            <div class="mt-3">Selected: <strong>{{ selected }}</strong></div>
-
-          </b-col>
-          <b-col>
-
-            <b-form-input></b-form-input>
-          </b-col>
-
-        </b-row>
--->
+        <b-card-title  class="mt-4">Detalles de la Factura</b-card-title>
 
         <b-row>
           <b-col>Producto</b-col>
@@ -106,23 +84,28 @@
                 @change="updateProductDetails(detalle, index)"
             />
           </b-col>
-          <b-col><b-form-input v-model="detalle.descripcion" required></b-form-input></b-col>
-          <b-col><b-form-input v-model="detalle.cantidad" type="number" min="1" @input="calculateSubtotal(detalle)" required></b-form-input></b-col>
-          <b-col><b-form-input v-model="detalle.precioUnitario" type="number" @input="calculateSubtotal(detalle)" required></b-form-input></b-col>
           <b-col>
-            <b-form-select class="form-control" v-model="detalle.impuestos[0].codigoPorcentaje" :options="taxOptions" @change="calculateTax(detalle)" required></b-form-select>
+            <b-form-input v-model="detalle.descripcion" required></b-form-input>
           </b-col>
-          <b-col><b-form-input v-model="detalle.precioTotalSinImpuesto" disabled></b-form-input></b-col>
+          <b-col>
+            <b-form-input v-model="detalle.cantidad" type="number" min="1" @input="calculateSubtotal(detalle)"
+                          required></b-form-input>
+          </b-col>
+          <b-col>
+            <b-form-input v-model="detalle.precioUnitario" type="number" @input="calculateSubtotal(detalle)"
+                          required></b-form-input>
+          </b-col>
+          <b-col>
+            <b-form-select class="form-control" v-model="detalle.impuestos[0].codigoPorcentaje" :options="taxOptions"
+                           @change="calculateTax(detalle)" required></b-form-select>
+          </b-col>
+          <b-col>
+            <b-form-input v-model="detalle.precioTotalSinImpuesto" disabled></b-form-input>
+          </b-col>
         </b-row>
 
         <!-- Botón para agregar más productos -->
         <b-button variant="success" @click="addNewProductRow">Agregar Producto</b-button>
-
-
-
-
-
-
 
 
         <!--
@@ -179,6 +162,8 @@
       </b-form>
     </b-card>
 
+    <pre>{{newInvoice}}</pre>
+
     <b-modal ref="modal-client" title="Agregar cliente" size="xl" centered hide-header-close>
       <ClientComponent :flagInvoice="flagInvoice" @clientSelected="clientSelected"></ClientComponent>
 
@@ -187,9 +172,9 @@
       <InventarioComponent :flagInvoice="flagInvoice" @clientSelected="clientSelected"></InventarioComponent>
 
     </b-modal>
-<!--    <pre>{{products}}</pre>-->
+    <!--    <pre>{{products}}</pre>-->
 
-<!--    <pre>{{ newInvoice }}</pre>-->
+    <!--    <pre>{{ newInvoice }}</pre>-->
   </b-container>
 </template>
 
@@ -198,24 +183,26 @@ import {createAndSendInvoice} from "@/services/invoiceServices";
 import ClientComponent from "@/components/clientes/ClientComponent.vue";
 import InventarioComponent from "@/components/inventario/InventarioComponent.vue";
 import Select2 from 'v-select2-component';
-import { getProducts } from "@/services/productsService";
+import {getProducts} from "@/services/productsService";
+import moment from 'moment';
 
 export default {
   components: {ClientComponent, InventarioComponent, Select2},
   data() {
     return {
+      fechaFormateada: '',
       products: [],
       taxOptions: [
-        { value: '0', text: '0%' },
-        { value: '15', text: '15%' }
+        {value: '0', text: '0%'},
+        {value: '15', text: '15%'}
       ],
       selected: null,
       options: [
-        { value: null, text: 'Please select an option' },
-        { value: 'a', text: 'This is First option' },
-        { value: 'b', text: 'Selected Option' },
-        { value: { C: '3PO' }, text: 'This is an option with object value' },
-        { value: 'd', text: 'This one is disabled', disabled: true }
+        {value: null, text: 'Please select an option'},
+        {value: 'a', text: 'This is First option'},
+        {value: 'b', text: 'Selected Option'},
+        {value: {C: '3PO'}, text: 'This is an option with object value'},
+        {value: 'd', text: 'This one is disabled', disabled: true}
       ],
       myValue: '',
       myOptions: ['op1', 'op2', 'op3'],
@@ -223,6 +210,7 @@ export default {
       razonSocial: '',
       newInvoice: {
         clienteId: "",
+        fechaEmision: "",
         ruc_empresa: "0190412040001",
         emisor: {
           ruc: "0190412040001",
@@ -277,8 +265,16 @@ export default {
 
     };
   },
+  computed: {
+    fechaEnDDMMYYYY() {
+      return this.fechaFormateada ? moment(this.fechaFormateada, 'YYYY-MM-DD').format('DD/MM/YYYY') : '';
+    }
+  },
   methods: {
-
+    updateFechaFormateada() {
+      // Convertir la fecha ingresada en el input al formato DD/MM/YYYY
+      this.newInvoice.fechaEmision = moment(this.fechaFormateada, 'YYYY-MM-DD').format('DD/MM/YYYY');
+    },
     addNewProductRow() {
       this.newInvoice.detalles.push({
         codigoPrincipal: "",
@@ -419,6 +415,10 @@ export default {
   },
   mounted() {
     this.fetchProducts();
+    this.fechaFormateada = moment().format('YYYY-MM-DD');
+    // Establecer la fecha interna en el formato DD/MM/YYYY
+    this.newInvoice.fechaEmision = moment(this.fechaFormateada, 'YYYY-MM-DD').format('DD/MM/YYYY');
+
   }
 };
 </script>
