@@ -119,7 +119,13 @@ exports.crearYEnviarFactura = async (req, res) => {
             }
         } else {
             res.status(500).send({ message: 'Error al firmar la factura.' });
-        }
+        };
+
+        const autorizacion = consultarfactura(
+            claveAcceso,
+            process.env.AMBIENTE
+        );
+        console.log('La factura fue ', autorizacion);
 
     } catch (error) {
         console.error('Error al crear y enviar la factura:', error);
