@@ -129,6 +129,22 @@ services:
     networks:
       - app-network
 
+  savebilling:
+    build: ./savebilling
+    ports:
+      - '3011:3011'
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/savebillingDB
+      - AMBIENTE=produccion
+    volumes:
+      - ./xmls:/app/xmls # Compartir la carpeta de XMLs entre billing y firmador
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
   firmador:
     build: ./firmador
     container_name: firmador
