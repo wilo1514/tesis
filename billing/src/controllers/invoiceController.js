@@ -11,7 +11,7 @@ const generarClaveAcceso = require('../utils/generarClave'); // Importar la func
 
 async function obtenerDatosReceptor(clienteId) {
     try {
-        const url = `http://172.18.0.7:3005/api/clients/${clienteId}`;
+        const url = `http://172.18.0.5:3005/api/clients/${clienteId}`;
         const response = await axios.get(url);
         return response.data;
     } catch (error) {
@@ -179,3 +179,31 @@ exports.getInvoices = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
+exports.getInvoicesPorPuntoEmision = async (req, res) => {
+    try {
+        const { ptoEmi } = req.query;  // Obtener el punto de emisión de los parámetros de consulta
+
+        // Verificamos que el parámetro 'ptoEmi' haya sido proporcionado
+        if (!ptoEmi) {
+            return res.status(400).json({ error: 'El parámetro punto de emisión (ptoEmi) es requerido.' });
+        }
+
+        // Filtrar las facturas que coincidan con el punto de emisión
+        const facturas = await Factura.find({ 'emisor.ptoEmi': ptoEmi });
+
+        // Si no hay facturas, devolvemos un mensaje adecuado
+        if (facturas.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron facturas para el punto de emisión proporcionado.' });
+        }
+
+        // Devolver las facturas filtradas
+        res.status(200).json(facturas);
+    } catch (error) {
+        console.error('Error al obtener facturas por punto de emisión:', error);
+        res.status(500).json({ error: 'Error al obtener facturas por punto de emisión.' });
+    }
+};
+
+

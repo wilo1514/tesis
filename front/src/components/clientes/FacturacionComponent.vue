@@ -3,7 +3,12 @@
     <b-card class="mb-4">
       <div class="mb-3 d-flex justify-content-between align-items-end">
         <b-form-group label="Número de Factura" label-for="fac">
-          <b-form-input disabled id="fac" v-model="newInvoice.emisor.fac" required></b-form-input>
+          <b-form-input
+              disabled
+              id="fac"
+              v-model="newInvoice.emisor.fac"
+              required
+          ></b-form-input>
         </b-form-group>
         <b-button v-b-toggle.my-collapse>Configurar emisor
           <b-icon icon="wrench" scale="0.8"></b-icon>
@@ -33,11 +38,18 @@
             <b-form-group label="Tipo emision" label-for="tipoEmision" class="w-10 m-1">
               <b-form-input id="tipoEmision" v-model="newInvoice.emisor.tipoEmision" required></b-form-input>
             </b-form-group>
-            <b-form-group label="Establecimiento" label-for="estab" class="w-10 m-1">
-              <b-form-input id="estab" v-model="newInvoice.emisor.estab" required type="number"></b-form-input>
+            <b-form-group label="Establecimiento" label-for="estab">
+              <b-form-input
+                  id="estab"
+                  v-model="newInvoice.emisor.estab"
+                  required
+                  type="number"
+              ></b-form-input>
             </b-form-group>
             <b-form-group label="Punto emisión" label-for="ptoEmi" class="w-10 m-1">
-              <b-form-input id="ptoEmi" v-model="newInvoice.emisor.ptoEmi" required type="number"></b-form-input>
+              <b-form-input id="ptoEmi" v-model="newInvoice.emisor.ptoEmi"
+                            @input="checkAndSetInvoiceNumber"
+                            required type="number"></b-form-input>
             </b-form-group>
 
 
@@ -45,7 +57,6 @@
         </b-card>
       </b-collapse>
 
-      <pre>{{ newInvoice }}</pre>
       <!--      <b-card-title>Crear y Enviar Factura</b-card-title>-->
       <b-form @submit.prevent="createInvoice">
         <!-- Cliente ID -->
@@ -98,13 +109,13 @@
                             required></b-form-input>
             </td>
             <td>
-              <b-form-input v-model="detalle.precioUnitario"  @input="calculateSubtotal(detalle)"
+              <b-form-input v-model="detalle.precioUnitario" @input="calculateSubtotal(detalle)"
                             required></b-form-input>
             </td>
             <td class="d-flex justify-content-between align-items-center">
               <div>
 
-                <b-form-input v-model="detalle.porcentajeDescuento"  @input="calculateSubtotal(detalle)"
+                <b-form-input v-model="detalle.porcentajeDescuento" @input="calculateSubtotal(detalle)"
                               required></b-form-input>
               </div>
               <div>
@@ -220,6 +231,8 @@
 
         <b-button variant="primary" type="submit">Enviar Factura</b-button>
       </b-form>
+
+      <pre>{{newInvoice}}</pre>
     </b-card>
 
 
@@ -239,7 +252,7 @@
 </template>
 
 <script>
-import {createAndSendInvoice} from "@/services/invoiceServices";
+import {createAndSendInvoice, getInvoicesPorPuntoEmision} from "@/services/invoiceServices";
 import ClientComponent from "@/components/clientes/ClientComponent.vue";
 import InventarioComponent from "@/components/inventario/InventarioComponent.vue";
 import Select2 from 'v-select2-component';
@@ -320,7 +333,7 @@ export default {
           direccionEstablecimiento: "DE LA MISTELA Y RAFAEL CARPIO ABAD",
           contribuyenteEspecial: "NO",
           obligadoContabilidad: "SI",
-          fac: "000000076",
+          fac: "",
           ambiente: "pruebas",
           tipoEmision: "1",
           estab: "001",
@@ -453,6 +466,51 @@ export default {
     },
   },
   methods: {
+
+    async checkAndSetInvoiceNumber() {
+      try {
+        // Verificar que el punto de emisión esté correctamente configurado
+        if (!this.newInvoice.emisor.ptoEmi) {
+          console.error("Punto de emisión no especificado");
+          return;
+        }
+
+        // Obtener las facturas para el punto de emisión ingresado
+        const invoices = await getInvoicesPorPuntoEmision(this.newInvoice.emisor.ptoEmi);
+        console.log("Facturas encontradas para el punto de emisión:", invoices);
+
+        if (invoices.length > 0) {
+          // Filtrar facturas por punto de emisión específico y ordenarlas por secuencial de forma descendente
+          const facturasOrdenadas = invoices
+              .filter(invoice => invoice.emisor.ptoEmi === this.newInvoice.emisor.ptoEmi) // Filtrar por punto de emisión
+              .map((invoice) => ({
+                ...invoice,
+                secuencial: parseInt(invoice.secuencial, 10), // Asegurarse de que el secuencial sea un número
+              }))
+              .sort((a, b) => b.secuencial - a.secuencial); // Ordenar en orden descendente
+
+          // Verificar que las facturas filtradas y ordenadas no estén vacías
+          if (facturasOrdenadas.length > 0) {
+            // Obtener el secuencial más alto de las facturas del punto de emisión
+            const maxSecuencial = facturasOrdenadas[0].secuencial;
+
+            // Asignar el siguiente número de secuencial incrementado en 1
+            this.newInvoice.emisor.fac = (maxSecuencial + 1).toString().padStart(9, "0");
+          } else {
+            // Si no existen facturas después de filtrar, asignar el secuencial inicial
+            this.newInvoice.emisor.fac = "000000001";
+          }
+        } else {
+          // Si no existen facturas, asignar el secuencial inicial
+          this.newInvoice.emisor.fac = "000000001";
+        }
+      } catch (error) {
+        console.error("Error al obtener facturas:", error);
+      }
+    }
+
+    ,
+
 
     addNewInfoAdicionalRow() {
       this.newInvoice.informacionAdicional.push({
@@ -594,7 +652,7 @@ export default {
           detalle.precioUnitario = parseFloat(detalle.precioUnitario).toFixed(2);  // Convertir a float y asegurar dos decimales
           detalle.precioUnitario = parseFloat(detalle.precioUnitario); // Asegurarse de que se guarde como número
         });
-         const facturaCreada=  await createAndSendInvoice(this.newInvoice);
+        const facturaCreada = await createAndSendInvoice(this.newInvoice);
 
 
         this.resetInvoiceForm();
@@ -612,16 +670,21 @@ export default {
     resetInvoiceForm() {
       this.newInvoice = {
         clienteId: "",
-        ruc_empresa: "",
+        fechaEmision: "",
+        ruc_empresa: "0190412040001",
         emisor: {
-          ruc: "",
-          razonSocial: "",
-          nombreComercial: "",
-          direccionMatriz: "",
-          direccionEstablecimiento: "",
-          contribuyenteEspecial: "",
+          ruc: "0190412040001",
+          razonSocial: "AUDITORES CONTABLES & CONSULTORES ENRIQUETA SARMIENTO ACCESCONT CIA. LTDA.",
+          nombreComercial: "ACCESCONT CIA. LTDA.",
+          direccionMatriz: "TOMÁS ORDOÑEZ 14-31 Y PIO BRAVO",
+          direccionEstablecimiento: "DE LA MISTELA Y RAFAEL CARPIO ABAD",
+          contribuyenteEspecial: "NO",
           obligadoContabilidad: "SI",
-          fac: ""
+          fac: "",
+          ambiente: "pruebas",
+          tipoEmision: "1",
+          estab: "001",
+          ptoEmi: "108",
         },
         detalles: [
           {
@@ -662,7 +725,7 @@ export default {
           }
         ],
         firma: "AquiVaLaFirmaElectronica"
-      };
+      }
     },
     async fetchProducts() {
       try {
@@ -677,6 +740,8 @@ export default {
     this.fechaFormateada = moment().format('YYYY-MM-DD');
     // Establecer la fecha interna en el formato DD/MM/YYYY
     this.newInvoice.fechaEmision = moment(this.fechaFormateada, 'YYYY-MM-DD').format('DD/MM/YYYY');
+
+    this.checkAndSetInvoiceNumber();
 
   }
 };
