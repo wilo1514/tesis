@@ -42,19 +42,19 @@
       </b-collapse>
 
 
-      <b-card-title>Crear y Enviar Factura</b-card-title>
+      <!--      <b-card-title>Crear y Enviar Factura</b-card-title>-->
       <b-form @submit.prevent="createInvoice">
         <!-- Cliente ID -->
         <b-row>
-          <b-col>
+          <b-col lg="2">
             <b-button class="w-100 mt-4" variant="primary" @click="showModalClient">Seleccionar cliente</b-button>
           </b-col>
-          <b-col lg="6">
+          <b-col>
             <b-form-group label="Cliente" label-for="clienteId">
               <b-form-input id="clienteId" v-model="razonSocial" required disabled></b-form-input>
             </b-form-group>
           </b-col>
-          <b-col>
+          <b-col lg="2">
             <b-form-group label="Fecha de emisión" label-for="rucEmpresa">
               <b-input type="date" v-model="fechaFormateada" @input="updateFechaFormateada"></b-input>
             </b-form-group>
@@ -63,7 +63,7 @@
         <!--        <pre>{{ newInvoice.detalles }}</pre>-->
 
         <!-- Detalles de la factura -->
-        <b-card-title class="mt-4">Detalles de la Factura</b-card-title>
+        <h4 class="mt-4 d-flex justify-content-start">Detalles de la Factura</h4>
         <table class="table table-bordered">
           <thead>
           <tr>
@@ -104,16 +104,6 @@
             </td>
             <td>
 
-              <!--              <b-form-select-->
-              <!--                  class="form-control"-->
-              <!--                  v-model="impuesto.codigoPorcentaje"-->
-              <!--                  :options="listTarifas.map(p => ({ value: p.codigo, text: p.name }))"-->
-              <!--                  @change="updateImpuestosDetails(impuesto, index)"-->
-              <!--                  required-->
-              <!--              />-->
-              <!--              codigoPorcentaje: {{ detalle.impuestos[0].codigoPorcentaje }}-->
-
-              <!--              set:              {{ getTarifa(detalle.impuestos[0].codigoPorcentaje) }}-->
               <b-form-select
                   class="form-control"
                   v-model="detalle.impuestos[0].codigoPorcentaje"
@@ -122,9 +112,6 @@
                   required
               />
 
-
-              <!--              <b-form-select v-model="detalle.impuestos[0].codigoPorcentaje" :options="taxOptions"-->
-              <!--                             @change="calculateTax(detalle)" required></b-form-select>-->
             </td>
             <td>
               <b-form-input v-model="detalle.precioTotalSinImpuesto" disabled></b-form-input>
@@ -140,33 +127,33 @@
         <b-button variant="success" @click="addNewProductRow">Agregar Producto</b-button>
 
         <!-- Tabla para Resumen de la Factura -->
-        <b-card-title class="mt-4">Resumen de la Factura</b-card-title>
-        <table class="table table-bordered">
-          <tbody>
-          <tr>
-            <td>SUBTOTAL SIN IMPUESTO:</td>
-            <td>{{ totalSinImpuestos.toFixed(2) }}</td>
-          </tr>
-          <tr>
-            <td>DESCUENTO:</td>
-            <td>{{ totalDescuento.toFixed(2) }}</td>
-          </tr>
-          <tr>
-            <td>PROPINA:</td>
-            <td>
-              <b-form-input v-model="newInvoice.propina"></b-form-input>
-            </td>
-          </tr>
-          <tr>
-            <td>IMPUESTO 15%:</td>
-            <td>{{ totalSumaImpuestosValue }}</td>
-          </tr>
-          <tr>
-            <td>VALOR TOTAL:</td>
-            <td>{{ importeTotal.toFixed(2) }}</td>
-          </tr>
-          </tbody>
-        </table>
+        <h4 class="mt-4 d-flex justify-content-start">Resumen de la Factura</h4>
+
+        <b-table small :items="summaryInvoiceItems" :fields="fieldsSummaryInvoice">
+          <template #head(label)="data">
+            <th class="d-flex justify-content-end">{{ data.label }}</th>
+          </template>
+          <template #head(value)="data">
+            <th class="d-flex justify-content-end">{{ data.label }}</th>
+          </template>
+          <template #cell(value)="data">
+            <span v-if="data.item.label !== 'PROPINA:'">{{ data.item.value }}</span>
+
+            <div v-else class="d-flex justify-content-end w-100">
+              <b-form-input v-model="newInvoice.propina" class="text-end w-25" size="sm"></b-form-input>
+            </div>
+          </template>
+        </b-table>
+
+        <h4 class="mt-4 d-flex justify-content-start">Métodos de pago</h4>
+        <div>
+          <b-form-select
+              class="form-control"
+              v-model="newInvoice.pagos[0].formaPago"
+              :options="formasDePago.map(p => ({ value: p.codigo, text: `${p.codigo} - ${p.name}` }))"
+              required
+          />
+        </div>
 
         <b-button variant="primary" type="submit">Enviar Factura</b-button>
       </b-form>
@@ -201,6 +188,21 @@ export default {
   components: {ClientComponent, InventarioComponent, Select2},
   data() {
     return {
+      fieldsSummaryInvoice: [
+        {key: 'label', label: '', tdClass: 'col-md-10 text-end'},
+        {key: 'value', label: '', tdClass: 'text-end'}
+      ],
+
+      formasDePago: [
+        {name: "SIN UTILIZACION DEL SISTEMA FINANCIERO", codigo: "01"},
+        {name: "COMPENSACIÓN DE DEUDAS", codigo: "15"},
+        {name: "TARJETA DE DÉBITO", codigo: "16"},
+        {name: "DINERO ELECTRÓNICO", codigo: "17"},
+        {name: "TARJETA PREPAGO", codigo: "18"},
+        {name: "TARJETA DE CRÉDITO", codigo: "19"},
+        {name: "OTROS CON UTILIZACIÓN DEL SISTEMA FINANCIERO", codigo: "20"},
+        {name: "ENDOSO DE TÍTULOS", codigo: "21"}
+      ],
       listTarifas: [
         {name: "0%", tarifa: "0", codigo: "0"},
         {name: "12%", tarifa: "12", codigo: "2"},
@@ -303,10 +305,11 @@ export default {
     },
     importeTotal(newValue) {
       this.newInvoice.importeTotal = newValue + this.newInvoice.totalSinImpuestos;
+      this.newInvoice.pagos[0].total = newValue + this.newInvoice.totalSinImpuestos;
     },
     totalDescuento(newValue) {
       // Asignar el valor calculado a newInvoice.totalSinImpuestos
-      this.newInvoice.totalDescuento = newValue;
+      this.newInvoice.totalDescuento = newValue.toFixed(2);
     },
     totalSumaImpuestos(newValue) {
       // Asignar el valor calculado a newInvoice.totalSinImpuestos
@@ -317,6 +320,15 @@ export default {
   },
 
   computed: {
+    summaryInvoiceItems() {
+      return [
+        {label: 'SUBTOTAL SIN IMPUESTO:', value: this.totalSinImpuestos.toFixed(2)},
+        {label: 'DESCUENTO:', value: this.totalDescuento.toFixed(2)},
+        {label: 'PROPINA:', value: 'input'}, // La celda para PROPINA contendrá el input
+        {label: 'IMPUESTO 15%:', value: this.totalSumaImpuestosValue.toFixed(2)},
+        {label: 'VALOR TOTAL:', value: this.importeTotal.toFixed(2)}
+      ];
+    },
     fechaEnDDMMYYYY() {
       return this.fechaFormateada ? moment(this.fechaFormateada, 'YYYY-MM-DD').format('DD/MM/YYYY') : '';
     },
@@ -353,9 +365,9 @@ export default {
         detalle.descuento = parseFloat(detalle.descuento);
 
         total += detalle.descuento;
-
       });
-      return total;
+      // Aplicar toFixed(2) y devolverlo como número flotante
+      return parseFloat(total.toFixed(2));
     },
     propina() {
       return this.newInvoice.propina || 0;
@@ -412,7 +424,7 @@ export default {
       // Aplicar el descuento basado en el porcentaje ingresado
       detalle.descuento = (this.porcentajeDescuento / 100) * detalle.precioTotalSinImpuesto;
 
-
+      detalle.descuento = (detalle.descuento).toFixed(2);
       // Restar el descuento del precio total sin impuestos
       detalle.precioTotalSinImpuesto -= detalle.descuento;
 

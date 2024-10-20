@@ -10,6 +10,7 @@ export default {
   components: {Select2},
   data() {
     return {
+
       listImpuestos: [
         {name: "IVA", value: "2"},
         {name: "ICE", value: "3"},
