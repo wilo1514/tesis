@@ -22,10 +22,10 @@ async function obtenerDatosReceptor(supplierId) {
 }
 exports.crearYEnviarRetencion = async (req, res) => {
     try {
-        const ambiente = process.env.AMBIENTE;
-        const tipoEmision = process.env.EMISION;
-        const estab = process.env.ESTAB;
-        const ptoEmi = process.env.PTOEMI;
+        const ambiente = req.body.emisor.ambiente;
+        const tipoEmision = req.body.emisor.tipoEmision;
+        const estab = req.body.emisor.estab;
+        const ptoEmi = req.body.emisor.ptoEmi;
         const supplierId = req.body.supplierId;
         const emisor = req.body.emisor;
 
@@ -33,8 +33,7 @@ exports.crearYEnviarRetencion = async (req, res) => {
         const proveedor = await obtenerDatosReceptor(supplierId);
 
         // Generar la fecha de emisión en formato DD/MM/AAAA
-        const fechaEmision = new Date();
-        const fechaEmisionFormateada = fechaEmision.toLocaleDateString('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const fechaEmisionFormateada = req.body.fechaEmision;
 
         // Generar la clave de acceso
         const amb = ambiente === 'produccion' ? '2' : '1';
@@ -111,7 +110,7 @@ exports.crearYEnviarRetencion = async (req, res) => {
             const xmlFirmado = firmarResponse.data.xmlFirmado;
 
             // Ahora enviar el XML firmado al SRI
-            const enviado = await enviarRetencion(xmlFirmado, process.env.AMBIENTE);
+            const enviado = await enviarRetencion(xmlFirmado, ambiente);
             if (enviado) {
                 await retencion.save();
                 res.status(201).send(retencion); // Responder al cliente con la retención
@@ -123,7 +122,7 @@ exports.crearYEnviarRetencion = async (req, res) => {
         }
 
         // Consultar la autorización en el SRI
-        const autorizacion = await consultarRetencion(claveAcceso, process.env.AMBIENTE);
+        const autorizacion = await consultarRetencion(claveAcceso, ambiente);
         console.log('Resultado de la autorización:', autorizacion);
 
     } catch (error) {

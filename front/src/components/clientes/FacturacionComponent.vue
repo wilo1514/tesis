@@ -7,7 +7,7 @@
 
 
       <div class="mb-3 d-flex justify-content-between align-items-end">
-        <b-form-group  label="Número de Factura" label-for="fac">
+        <b-form-group label="Número de Factura" label-for="fac">
           <b-form-input disabled id="fac" v-model="newInvoice.emisor.fac" required></b-form-input>
         </b-form-group>
         <b-button v-b-toggle.my-collapse>Configurar emisor
@@ -45,7 +45,7 @@
       <b-card-title>Crear y Enviar Factura</b-card-title>
       <b-form @submit.prevent="createInvoice">
         <!-- Cliente ID -->
-        <b-row >
+        <b-row>
           <b-col>
             <b-button class="w-100 mt-4" variant="primary" @click="showModalClient">Seleccionar cliente</b-button>
           </b-col>
@@ -60,10 +60,10 @@
             </b-form-group>
           </b-col>
         </b-row>
-
+        <pre>{{ newInvoice.detalles }}</pre>
 
         <!-- Detalles de la factura -->
-        <b-card-title  class="mt-4">Detalles de la Factura</b-card-title>
+        <b-card-title class="mt-4">Detalles de la Factura</b-card-title>
 
         <b-row>
           <b-col>Producto</b-col>
@@ -72,12 +72,11 @@
           <b-col>Precio</b-col>
           <b-col>Impuesto</b-col>
           <b-col>Subtotal</b-col>
+          <b-col>Acción</b-col>
         </b-row>
         <!-- Filas dinámicas para los productos -->
         <b-row v-for="(detalle, index) in newInvoice.detalles" :key="index">
           <b-col>
-
-
             <Select2
                 v-model="detalle.codigoPrincipal"
                 :options="products.map(p => ({ id: p.codigoPrincipal, text: `${p.codigoPrincipal} - ${p.descripcion}` }))"
@@ -102,10 +101,21 @@
           <b-col>
             <b-form-input v-model="detalle.precioTotalSinImpuesto" disabled></b-form-input>
           </b-col>
+          <b-col>
+            <b-button variant="white" @click="removeProductRow(index)">
+              <b-icon icon="trash" variant="danger"></b-icon>
+            </b-button>
+          </b-col>
         </b-row>
 
         <!-- Botón para agregar más productos -->
         <b-button variant="success" @click="addNewProductRow">Agregar Producto</b-button>
+        <b-row>
+          <b-col>Total sin Impuestos: {{ totalSinImpuestos }}....{{ newInvoice.totalSinImpuestos }}</b-col>
+        </b-row>
+        <b-row>
+          <b-col>To: {{ importeTotal }} .......... {{ newInvoice.importeTotal }}</b-col>
+        </b-row>
 
 
         <!--
@@ -162,7 +172,7 @@
       </b-form>
     </b-card>
 
-    <pre>{{newInvoice}}</pre>
+    <pre>{{ newInvoice }}</pre>
 
     <b-modal ref="modal-client" title="Agregar cliente" size="xl" centered hide-header-close>
       <ClientComponent :flagInvoice="flagInvoice" @clientSelected="clientSelected"></ClientComponent>
@@ -190,6 +200,7 @@ export default {
   components: {ClientComponent, InventarioComponent, Select2},
   data() {
     return {
+      valorTotal: 0,
       fechaFormateada: '',
       products: [],
       taxOptions: [
@@ -265,9 +276,50 @@ export default {
 
     };
   },
+
+  watch: {
+    totalSinImpuestos(newValue) {
+      // Asignar el valor calculado a newInvoice.totalSinImpuestos
+      this.newInvoice.totalSinImpuestos = newValue;
+    },
+    importeTotal(newValue) {
+      this.newInvoice.importeTotal = newValue;
+    }
+
+  },
+
   computed: {
     fechaEnDDMMYYYY() {
       return this.fechaFormateada ? moment(this.fechaFormateada, 'YYYY-MM-DD').format('DD/MM/YYYY') : '';
+    },
+    totalSinImpuestos() {
+      // Inicializamos el total en 0
+      let total = 0;
+
+      // Recorremos todos los detalles
+      this.newInvoice.detalles.forEach(detalle => {
+        // Recorremos los impuestos de cada detalle y sumamos la base imponible
+        detalle.impuestos.forEach(impuesto => {
+          total += impuesto.baseImponible;
+        });
+      });
+
+      // Retornamos el total sin impuestos
+      return total;
+    },
+    importeTotal() {
+      let total = 0;
+
+      // Recorremos todos los detalles
+      this.newInvoice.detalles.forEach(detalle => {
+        // Recorremos los impuestos de cada detalle y sumamos la base imponible
+        detalle.impuestos.forEach(impuesto => {
+          total += impuesto.valor;
+        });
+      });
+
+      // Retornamos el total sin impuestos
+      return total;
     }
   },
   methods: {
@@ -294,8 +346,13 @@ export default {
         ]
       });
     },
+    removeProductRow(index) {
+      this.newInvoice.detalles.splice(index, 1);
+    },
+
     calculateSubtotal(detalle) {
       detalle.precioTotalSinImpuesto = detalle.cantidad * detalle.precioUnitario;
+
       this.calculateTax(detalle);
     },
 

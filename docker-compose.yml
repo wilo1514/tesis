@@ -95,7 +95,7 @@ services:
       - AMBIENTE=pruebas
       - EMISION=1
       - ESTAB=001
-      - PTOEMI=107
+      - PTOEMI=108
       - FIRMADOR_HOST=firmador
     volumes:
       - ./xmls:/app/xmls # Compartir la carpeta de XMLs entre billing y firmador

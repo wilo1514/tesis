@@ -72,7 +72,7 @@ async function consultarAutorizacion(claveAcceso, ambiente) {
 }
 
 // Para pruebas
-// const xmlFilePath = '1610202407019041204000110011070000000180000001815';
+// const xmlFilePath = '1610202401019041204000110011080000000050000000516';
 // const ambiente = 'pruebas';  // Cambia a 'produccion' cuando sea necesario
 
 // consultarAutorizacion(xmlFilePath, ambiente)
@@ -84,3 +84,5 @@ async function consultarAutorizacion(claveAcceso, ambiente) {
 //     });
 
 module.exports = consultarAutorizacion;
+
+

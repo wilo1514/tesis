@@ -3,7 +3,6 @@ const fs = require('fs');
 const Factura = require('../models/invoice');
 const FacturaPendiente = require('../models/pendingInvoice');
 const generarXMLFactura = require('../utils/xmlGenerator');
-const firmarxml = require('../utils/firmador'); // Aquí asegúrate de que "firmador.js" sea la función correcta.
 const reintentarEnvio = require('../utils/reintentarEnvio');
 const enviarFactura = require('../utils/sriClient');
 const consultarfactura = require('../utils/consultasSRI');
@@ -23,10 +22,10 @@ async function obtenerDatosReceptor(clienteId) {
 
 exports.crearYEnviarFactura = async (req, res) => {
     try {
-        const ambiente = process.env.AMBIENTE;
-        const tipoEmision = process.env.EMISION;
-        const estab = process.env.ESTAB;
-        const ptoEmi = process.env.PTOEMI;
+        const ambiente = req.body.emisor.ambiente;
+        const tipoEmision = req.body.emisor.tipoEmision;
+        const estab = req.body.emisor.estab;
+        const ptoEmi = req.body.emisor.ptoEmi;
         const clienteId = req.body.clienteId;
         console.log(`Intentando obtener datos del cliente con ID: ${clienteId}`);
         const receptor = await obtenerDatosReceptor(clienteId);
@@ -93,14 +92,14 @@ exports.crearYEnviarFactura = async (req, res) => {
             const xmlFirmado = firmarResponse.data.xmlFirmado;
 
             // Enviar el XML firmado al SRI
-            const enviado = await enviarFactura(xmlFirmado, process.env.AMBIENTE);
+            const enviado = await enviarFactura(xmlFirmado, ambiente);
 
             if (enviado) {
                 // Retrasar la consulta de autorización por 4 segundos
                 setTimeout(async () => {
                     // Realizar la consulta de autorización al SRI
-                    console.log(claveAcceso, process.env.AMBIENTE);
-                    const autorizacion = await consultarfactura(claveAcceso, process.env.AMBIENTE);
+                    console.log(claveAcceso, ambiente);
+                    const autorizacion = await consultarfactura(claveAcceso, ambiente);
                     console.log(autorizacion);
                     // Verificar si la factura fue autorizada
                     if (autorizacion && autorizacion.estado === 'AUTORIZADO') {
@@ -123,7 +122,7 @@ exports.crearYEnviarFactura = async (req, res) => {
 
         const autorizacion = consultarfactura(
             claveAcceso,
-            process.env.AMBIENTE
+            ambiente
         );
         console.log('La factura fue ', autorizacion);
 
@@ -149,7 +148,7 @@ exports.reenviarFacturasPendientes = async (req, res) => {
                 console.warn(`Factura no encontrada: ${facturaPendiente.facturaId}`);
                 continue;
             }
-            const reenviado = await reintentarEnvio(factura, facturaPendiente.xmlFirmado, process.env.AMBIENTE);
+            const reenviado = await reintentarEnvio(factura, facturaPendiente.xmlFirmado, ambiente);
 
             if (reenviado) {
                 await FacturaPendiente.findByIdAndDelete(facturaPendiente._id);
