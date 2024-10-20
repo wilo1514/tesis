@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getAuthData } from './auth'; // Asegúrate de que tienes un servicio de autenticación
 
 const invoiceClient = axios.create({
-    baseURL: 'http://localhost:3000/api', // Cambia la URL base si es necesario
+    baseURL: 'http://localhost:3001/api', // Cambia la URL base si es necesario
 });
 
 // Obtener todas las facturas

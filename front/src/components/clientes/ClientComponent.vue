@@ -393,7 +393,6 @@ export default {
         <h2 class="mb-0 text-primary">Lista de Clientes</h2>
       </div>
       <div>
-{{flagInvoice}}
         <b-button variant="primary" class="align-self-center m-2" @click="showModalNew">
           Nuevo cliente</b-button>
 

@@ -1,11 +1,6 @@
 <template>
   <b-container fluid>
-    <h2 class="my-4">Gestión de Facturas</h2>
-
-    <!-- Formulario para crear y enviar una nueva factura -->
     <b-card class="mb-4">
-
-
       <div class="mb-3 d-flex justify-content-between align-items-end">
         <b-form-group label="Número de Factura" label-for="fac">
           <b-form-input disabled id="fac" v-model="newInvoice.emisor.fac" required></b-form-input>
@@ -26,14 +21,23 @@
           <b-card-title>Información del Emisor</b-card-title>
 
           <div class="d-flex justify-content-between">
-
-
-            <b-form-group label="RUC del Emisor" label-for="emisorRuc" class="w-30 m-1">
+            <b-form-group label="RUC del Emisor" label-for="emisorRuc" class="w-40 m-1">
               <b-form-input id="emisorRuc" v-model="newInvoice.emisor.ruc" required></b-form-input>
             </b-form-group>
-
             <b-form-group label="Razón Social" label-for="razonSocial" class="w-100 m-1">
               <b-form-input id="razonSocial" v-model="newInvoice.emisor.razonSocial" required></b-form-input>
+            </b-form-group>
+            <b-form-group label="Ambiente" label-for="ambiente" class="w-10 m-1">
+              <b-form-input id="ambiente" v-model="newInvoice.emisor.ambiente" required></b-form-input>
+            </b-form-group>
+            <b-form-group label="Tipo emision" label-for="tipoEmision" class="w-10 m-1">
+              <b-form-input id="tipoEmision" v-model="newInvoice.emisor.tipoEmision" required></b-form-input>
+            </b-form-group>
+            <b-form-group label="Establecimiento" label-for="estab" class="w-10 m-1">
+              <b-form-input id="estab" v-model="newInvoice.emisor.estab" required type="number"></b-form-input>
+            </b-form-group>
+            <b-form-group label="Punto emisión" label-for="ptoEmi" class="w-10 m-1">
+              <b-form-input id="ptoEmi" v-model="newInvoice.emisor.ptoEmi" required type="number"></b-form-input>
             </b-form-group>
 
 
@@ -41,12 +45,12 @@
         </b-card>
       </b-collapse>
 
-
+      <pre>{{ newInvoice }}</pre>
       <!--      <b-card-title>Crear y Enviar Factura</b-card-title>-->
       <b-form @submit.prevent="createInvoice">
         <!-- Cliente ID -->
         <b-row>
-          <b-col lg="2">
+          <b-col lg="3">
             <b-button class="w-100 mt-4" variant="primary" @click="showModalClient">Seleccionar cliente</b-button>
           </b-col>
           <b-col>
@@ -71,7 +75,7 @@
             <th>Descripción</th>
             <th>Cantidad</th>
             <th>Precio</th>
-            <th>Descuento</th>
+            <th>%Descuento | Valor</th>
             <th>Impuesto</th>
             <th>Subtotal</th>
             <th>Acción</th>
@@ -79,7 +83,7 @@
           </thead>
           <tbody>
           <tr v-for="(detalle, index) in newInvoice.detalles" :key="index">
-            <td>
+            <td style="width: 250px">
               <Select2
                   v-model="detalle.codigoPrincipal"
                   :options="products.map(p => ({ id: p.codigoPrincipal, text: `${p.codigoPrincipal} - ${p.descripcion}` }))"
@@ -94,14 +98,21 @@
                             required></b-form-input>
             </td>
             <td>
-              <b-form-input v-model="detalle.precioUnitario" type="number" @input="calculateSubtotal(detalle)"
+              <b-form-input v-model="detalle.precioUnitario"  @input="calculateSubtotal(detalle)"
                             required></b-form-input>
             </td>
             <td class="d-flex justify-content-between align-items-center">
-              <b-form-input v-model="porcentajeDescuento" type="number" @input="calculateSubtotal(detalle)"
-                            required></b-form-input>
-              <span>{{ (detalle.descuento).toFixed(2) }}</span>
+              <div>
+
+                <b-form-input v-model="detalle.porcentajeDescuento"  @input="calculateSubtotal(detalle)"
+                              required></b-form-input>
+              </div>
+              <div>
+                <span v-if="detalle.descuento">{{ (detalle.descuento).toFixed(2) }}</span>
+
+              </div>
             </td>
+
             <td>
 
               <b-form-select
@@ -114,7 +125,8 @@
 
             </td>
             <td>
-              <b-form-input v-model="detalle.precioTotalSinImpuesto" disabled></b-form-input>
+              <span>{{ (detalle.precioTotalSinImpuesto).toFixed(2) }}</span>
+              <!--              <b-form-input v-model="detalle.precioTotalSinImpuesto" disabled></b-form-input>-->
             </td>
             <td>
               <b-button variant="white" @click="removeProductRow(index)">
@@ -124,7 +136,12 @@
           </tr>
           </tbody>
         </table>
-        <b-button variant="success" @click="addNewProductRow">Agregar Producto</b-button>
+        <div>
+          <b-button variant="success" @click="addNewProductRow">Agregar Producto
+            <b-icon icon="plus"></b-icon>
+          </b-button>
+
+        </div>
 
         <!-- Tabla para Resumen de la Factura -->
         <h4 class="mt-4 d-flex justify-content-start">Resumen de la Factura</h4>
@@ -146,21 +163,65 @@
         </b-table>
 
         <h4 class="mt-4 d-flex justify-content-start">Métodos de pago</h4>
-        <div>
-          <b-form-select
-              class="form-control"
-              v-model="newInvoice.pagos[0].formaPago"
-              :options="formasDePago.map(p => ({ value: p.codigo, text: `${p.codigo} - ${p.name}` }))"
-              required
-          />
-        </div>
+
+        <!-- Tabla para Métodos de Pago -->
+        <b-table :items="newInvoice.pagos" small :fields="fieldsPagos">
+          <template #cell(formaPago)="data">
+            <b-form-select
+                class="form-control"
+                v-model="data.item.formaPago"
+                :options="formasDePago.map(p => ({ value: p.codigo, text: `${p.codigo} - ${p.name}` }))"
+                required
+            />
+          </template>
+          <template #cell(plazo)="data">
+            <b-form-input v-model="data.item.plazo" class="text-end w-100" size="sm" type="number"></b-form-input>
+          </template>
+          <template #cell(unidadTiempo)="data">
+            <b-form-input v-model="data.item.unidadTiempo" class="text-end w-100" size="sm"></b-form-input>
+          </template>
+          <template #cell(acciones)="data">
+            <b-button variant="white" @click="removePaymentRow(data.index)">
+              <b-icon icon="trash" variant="danger"></b-icon>
+            </b-button>
+          </template>
+        </b-table>
+
+        <!-- Botón para agregar más métodos de pago -->
+        <b-button variant="success" @click="addNewPaymentRow">Agregar Método de Pago
+          <b-icon icon="plus"></b-icon>
+        </b-button>
+
+
+        <h4 class="mt-4 d-flex justify-content-start">Información Adicional</h4>
+
+        <!-- Tabla para Información Adicional -->
+        <b-table :items="newInvoice.informacionAdicional" small :fields="fieldsInformacionAdicional">
+          <template #cell(nombre)="data">
+            <b-form-input v-model="data.item.nombre" placeholder="Nombre" required></b-form-input>
+          </template>
+          <template #cell(valor)="data">
+            <b-form-input v-model="data.item.valor" placeholder="Valor" required></b-form-input>
+          </template>
+          <template #cell(acciones)="data">
+            <b-button variant="white" @click="removeInfoAdicionalRow(data.index)">
+              <b-icon icon="trash" variant="danger"></b-icon>
+            </b-button>
+          </template>
+        </b-table>
+
+        <!-- Botón para agregar más filas de información adicional -->
+        <b-button variant="success" @click="addNewInfoAdicionalRow">Agregar Información Adicional
+          <b-icon icon="plus"></b-icon>
+        </b-button>
+
+        <hr>
+        <br>
 
         <b-button variant="primary" type="submit">Enviar Factura</b-button>
       </b-form>
     </b-card>
 
-
-    <pre>{{ newInvoice }}</pre>
 
     <b-modal ref="modal-client" title="Agregar cliente" size="xl" centered hide-header-close>
       <ClientComponent :flagInvoice="flagInvoice" @clientSelected="clientSelected"></ClientComponent>
@@ -168,6 +229,7 @@
     </b-modal>
     <b-modal ref="modal-products" title="Agregar productos o servicios" size="xl" centered hide-header-close>
       <InventarioComponent :flagInvoice="flagInvoice" @clientSelected="clientSelected"></InventarioComponent>
+
 
     </b-modal>
     <!--    <pre>{{products}}</pre>-->
@@ -188,6 +250,17 @@ export default {
   components: {ClientComponent, InventarioComponent, Select2},
   data() {
     return {
+      fieldsInformacionAdicional: [
+        {key: 'nombre', label: 'Nombre'},
+        {key: 'valor', label: 'Valor'},
+        {key: 'acciones', label: 'Acciones'}
+      ],
+      fieldsPagos: [
+        {key: 'formaPago', label: 'Forma de Pago'},
+        {key: 'plazo', label: 'Plazo'},
+        {key: 'unidadTiempo', label: 'Unidad de Tiempo'},
+        {key: 'acciones', label: 'Acciones'}
+      ],
       fieldsSummaryInvoice: [
         {key: 'label', label: '', tdClass: 'col-md-10 text-end'},
         {key: 'value', label: '', tdClass: 'text-end'}
@@ -304,8 +377,15 @@ export default {
       this.newInvoice.totalSinImpuestos = newValue;
     },
     importeTotal(newValue) {
-      this.newInvoice.importeTotal = newValue + this.newInvoice.totalSinImpuestos;
-      this.newInvoice.pagos[0].total = newValue + this.newInvoice.totalSinImpuestos;
+      this.newInvoice.importeTotal = newValue;
+      this.newInvoice.pagos[0].total = newValue;
+    },
+    'newInvoice.propina'(newValue) {
+      // Asegurarse de que la propina sea un número válido
+      this.newInvoice.propina = parseFloat(newValue) || 0;
+      // No necesitas llamar a importeTotal como función, ya es un `computed property`
+      // Solo accede a la propiedad para que Vue detecte los cambios
+      this.newInvoice.importeTotal = this.importeTotal;
     },
     totalDescuento(newValue) {
       // Asignar el valor calculado a newInvoice.totalSinImpuestos
@@ -313,6 +393,7 @@ export default {
     },
     totalSumaImpuestos(newValue) {
       // Asignar el valor calculado a newInvoice.totalSinImpuestos
+
       this.totalSumaImpuestosValue = newValue;
     },
 
@@ -326,7 +407,7 @@ export default {
         {label: 'DESCUENTO:', value: this.totalDescuento.toFixed(2)},
         {label: 'PROPINA:', value: 'input'}, // La celda para PROPINA contendrá el input
         {label: 'IMPUESTO 15%:', value: this.totalSumaImpuestosValue.toFixed(2)},
-        {label: 'VALOR TOTAL:', value: this.importeTotal.toFixed(2)}
+        {label: 'VALOR TOTAL:', value: this.importeTotal}
       ];
     },
     fechaEnDDMMYYYY() {
@@ -339,6 +420,7 @@ export default {
           total += impuesto.valor;
         });
       });
+
       return total;
     },
     totalSinImpuestos() {
@@ -351,14 +433,11 @@ export default {
       return total;
     },
     importeTotal() {
-      let total = 0;
-      this.newInvoice.detalles.forEach(detalle => {
-        detalle.impuestos.forEach(impuesto => {
-          total += impuesto.valor;
-        });
-      });
-      return total;
+      // Asegurarse de sumar correctamente el subtotal sin impuestos más el total de impuestos
+      const total = this.totalSinImpuestos + this.totalSumaImpuestos + this.newInvoice.propina;
+      return parseFloat(total).toFixed(2); // Retornar con dos decimales
     },
+
     totalDescuento() {
       let total = 0;
       this.newInvoice.detalles.forEach(detalle => {
@@ -374,6 +453,29 @@ export default {
     },
   },
   methods: {
+
+    addNewInfoAdicionalRow() {
+      this.newInvoice.informacionAdicional.push({
+        nombre: "",
+        valor: ""
+      });
+    },
+    removeInfoAdicionalRow(index) {
+      this.newInvoice.informacionAdicional.splice(index, 1);
+    },
+
+    addNewPaymentRow() {
+      this.newInvoice.pagos.push({
+        formaPago: "01", // Puedes establecer un valor por defecto o dejarlo vacío
+        total: this.newInvoice.importeTotal,
+        plazo: "0",
+        unidadTiempo: "dias"
+      });
+    },
+    removePaymentRow(index) {
+      this.newInvoice.pagos.splice(index, 1);
+    },
+
     updateTaxDetails(detalle) {
       const codigoPorcentaje = detalle.impuestos[0].codigoPorcentaje;
       const tarifa = this.getTarifa(codigoPorcentaje);
@@ -401,6 +503,7 @@ export default {
         cantidad: 1,
         precioUnitario: 0,
         descuento: 0,
+        porcentajeDescuento: 0, // Nuevo campo para porcentaje de descuento individual
         precioTotalSinImpuesto: 0,
         impuestos: [
           {
@@ -412,38 +515,45 @@ export default {
           }
         ]
       });
+
     },
     removeProductRow(index) {
       this.newInvoice.detalles.splice(index, 1);
     },
 
     calculateSubtotal(detalle) {
+
+
       // Calcular el precio total sin descuento
       detalle.precioTotalSinImpuesto = detalle.cantidad * detalle.precioUnitario;
 
-      // Aplicar el descuento basado en el porcentaje ingresado
-      detalle.descuento = (this.porcentajeDescuento / 100) * detalle.precioTotalSinImpuesto;
+      // Aplicar el descuento basado en el porcentaje ingresado para el detalle específico
+      detalle.descuento = (detalle.porcentajeDescuento / 100) * detalle.precioTotalSinImpuesto;
 
       detalle.descuento = (detalle.descuento).toFixed(2);
+
       // Restar el descuento del precio total sin impuestos
       detalle.precioTotalSinImpuesto -= detalle.descuento;
 
+      // Convertir el resultado a dos decimales
+      detalle.precioTotalSinImpuesto = parseFloat(detalle.precioTotalSinImpuesto.toFixed(2));
+
       // Calcular los impuestos después del descuento
       this.calculateTax(detalle);
-    },
-
+    }
+    ,
 
     calculateTax(detalle, tax = null) {
-
-      console.log("tax", tax);
       const tarifa = tax ? tax : parseFloat(detalle.impuestos[0].tarifa);
-      const baseImponible = detalle.cantidad * detalle.precioUnitario;
+      const baseImponible = parseFloat(detalle.precioTotalSinImpuesto.toFixed(2));
 
-      // Actualizamos los valores de impuestos
-      //detalle.impuestos[0].tarifa = tarifa;
+      // Actualizar el valor de baseImponible a dos decimales
       detalle.impuestos[0].baseImponible = baseImponible;
-      detalle.impuestos[0].valor = baseImponible * (tarifa / 100);
+
+      // Actualizar el valor del impuesto basado en la tarifa
+      detalle.impuestos[0].valor = parseFloat((baseImponible * (tarifa / 100)).toFixed(2));
     },
+
     updateProductDetails(detalle, index) {
       const product = this.products.find(p => p.codigoPrincipal === detalle.codigoPrincipal);
       if (product) {
@@ -479,7 +589,14 @@ export default {
 
     async createInvoice() {
       try {
-        await createAndSendInvoice(this.newInvoice);
+
+        this.newInvoice.detalles.forEach(detalle => {
+          detalle.precioUnitario = parseFloat(detalle.precioUnitario).toFixed(2);  // Convertir a float y asegurar dos decimales
+          detalle.precioUnitario = parseFloat(detalle.precioUnitario); // Asegurarse de que se guarde como número
+        });
+         const facturaCreada=  await createAndSendInvoice(this.newInvoice);
+
+
         this.resetInvoiceForm();
       } catch (error) {
         console.error("Error al crear y enviar factura:", error);

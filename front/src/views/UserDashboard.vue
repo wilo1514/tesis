@@ -19,7 +19,8 @@
 
 
           <div v-show="activeNavItem === 'Facturación'">
-            <FacturacionComponent></FacturacionComponent>
+            <PrincipalFacturacionComponent></PrincipalFacturacionComponent>
+<!--            <FacturacionComponent></FacturacionComponent>-->
           </div>
 
 
@@ -74,6 +75,7 @@ import ClientComponent from '@/components/clientes/ClientComponent.vue';
 import PrincipalComponent from '@/components/principal/principalComponent.vue';
 import InventarioComponent from '@/components/inventario/InventarioComponent.vue';
 import FacturacionComponent from '@/components/clientes/FacturacionComponent.vue';
+import PrincipalFacturacionComponent from '@/components/facturacion/PrincipalFacturacionComponent.vue';
 import SupplierComponent from '@/components/proveedores/proveedorComponent.vue';
 import AdminUsuariosComponent from '@/components/administrador/usuarios/AdminUsuariosComponent.vue';
 
@@ -90,7 +92,8 @@ export default {
     InventarioComponent,
     FacturacionComponent,
     SupplierComponent,
-    AdminUsuariosComponent
+    AdminUsuariosComponent,
+    PrincipalFacturacionComponent
   },
   data() {
     return {

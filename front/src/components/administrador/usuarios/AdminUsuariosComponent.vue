@@ -66,7 +66,7 @@ export default {
     };
   },
   mounted() {
-    this.fetchUsers();
+   // this.fetchUsers();
   },
   methods: {
     async fetchUsers() {

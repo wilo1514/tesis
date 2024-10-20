@@ -36,7 +36,7 @@
                     <div class="text-primary p-3"><h5 class="text-primary">Welcome Back !</h5>
                       <p>Skote Dashboard</p></div>
                   </div>
-                  <div class="col-5 align-self-end"><img src="/skote/vuejs/v-light/img/profile-img.f9b6a076.png" alt=""
+                  <div class="col-5 align-self-end"><img src="https://via.placeholder.com/250x180" alt=""
                                                          class="img-fluid"></div>
                 </div>
               </div>
@@ -44,7 +44,7 @@
                 <div class="row">
                   <div class="col-sm-4">
                     <div class="avatar-md profile-user-wid mb-4"><img
-                        src="/skote/vuejs/v-light/img/avatar-1.eaa06c3b.jpg" alt=""
+                        src="https://via.placeholder.com/250x180" alt=""
                         class="img-thumbnail rounded-circle"></div>
                     <h5 class="font-size-15 text-truncate">Henry Price</h5>
                     <p class="text-muted mb-0 text-truncate">UI/UX Designer</p></div>
