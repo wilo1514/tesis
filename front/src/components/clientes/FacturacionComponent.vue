@@ -60,117 +60,118 @@
             </b-form-group>
           </b-col>
         </b-row>
-        <pre>{{ newInvoice.detalles }}</pre>
+        <!--        <pre>{{ newInvoice.detalles }}</pre>-->
 
         <!-- Detalles de la factura -->
         <b-card-title class="mt-4">Detalles de la Factura</b-card-title>
+        <table class="table table-bordered">
+          <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Descuento</th>
+            <th>Impuesto</th>
+            <th>Subtotal</th>
+            <th>Acción</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr v-for="(detalle, index) in newInvoice.detalles" :key="index">
+            <td>
+              <Select2
+                  v-model="detalle.codigoPrincipal"
+                  :options="products.map(p => ({ id: p.codigoPrincipal, text: `${p.codigoPrincipal} - ${p.descripcion}` }))"
+                  @change="updateProductDetails(detalle, index)"
+              />
+            </td>
+            <td>
+              <b-form-input v-model="detalle.descripcion" required></b-form-input>
+            </td>
+            <td>
+              <b-form-input v-model="detalle.cantidad" type="number" min="1" @input="calculateSubtotal(detalle)"
+                            required></b-form-input>
+            </td>
+            <td>
+              <b-form-input v-model="detalle.precioUnitario" type="number" @input="calculateSubtotal(detalle)"
+                            required></b-form-input>
+            </td>
+            <td class="d-flex justify-content-between align-items-center">
+              <b-form-input v-model="porcentajeDescuento" type="number" @input="calculateSubtotal(detalle)"
+                            required></b-form-input>
+              <span>{{ (detalle.descuento).toFixed(2) }}</span>
+            </td>
+            <td>
 
-        <b-row>
-          <b-col>Producto</b-col>
-          <b-col>Descripción</b-col>
-          <b-col>Cantidad</b-col>
-          <b-col>Precio</b-col>
-          <b-col>Impuesto</b-col>
-          <b-col>Subtotal</b-col>
-          <b-col>Acción</b-col>
-        </b-row>
-        <!-- Filas dinámicas para los productos -->
-        <b-row v-for="(detalle, index) in newInvoice.detalles" :key="index">
-          <b-col>
-            <Select2
-                v-model="detalle.codigoPrincipal"
-                :options="products.map(p => ({ id: p.codigoPrincipal, text: `${p.codigoPrincipal} - ${p.descripcion}` }))"
-                @change="updateProductDetails(detalle, index)"
-            />
-          </b-col>
-          <b-col>
-            <b-form-input v-model="detalle.descripcion" required></b-form-input>
-          </b-col>
-          <b-col>
-            <b-form-input v-model="detalle.cantidad" type="number" min="1" @input="calculateSubtotal(detalle)"
-                          required></b-form-input>
-          </b-col>
-          <b-col>
-            <b-form-input v-model="detalle.precioUnitario" type="number" @input="calculateSubtotal(detalle)"
-                          required></b-form-input>
-          </b-col>
-          <b-col>
-            <b-form-select class="form-control" v-model="detalle.impuestos[0].codigoPorcentaje" :options="taxOptions"
-                           @change="calculateTax(detalle)" required></b-form-select>
-          </b-col>
-          <b-col>
-            <b-form-input v-model="detalle.precioTotalSinImpuesto" disabled></b-form-input>
-          </b-col>
-          <b-col>
-            <b-button variant="white" @click="removeProductRow(index)">
-              <b-icon icon="trash" variant="danger"></b-icon>
-            </b-button>
-          </b-col>
-        </b-row>
+              <!--              <b-form-select-->
+              <!--                  class="form-control"-->
+              <!--                  v-model="impuesto.codigoPorcentaje"-->
+              <!--                  :options="listTarifas.map(p => ({ value: p.codigo, text: p.name }))"-->
+              <!--                  @change="updateImpuestosDetails(impuesto, index)"-->
+              <!--                  required-->
+              <!--              />-->
+              <!--              codigoPorcentaje: {{ detalle.impuestos[0].codigoPorcentaje }}-->
 
-        <!-- Botón para agregar más productos -->
+              <!--              set:              {{ getTarifa(detalle.impuestos[0].codigoPorcentaje) }}-->
+              <b-form-select
+                  class="form-control"
+                  v-model="detalle.impuestos[0].codigoPorcentaje"
+                  :options="listTarifas.map(p => ({ value: p.codigo, text: p.name }))"
+                  @change="updateTaxDetails(detalle)"
+                  required
+              />
+
+
+              <!--              <b-form-select v-model="detalle.impuestos[0].codigoPorcentaje" :options="taxOptions"-->
+              <!--                             @change="calculateTax(detalle)" required></b-form-select>-->
+            </td>
+            <td>
+              <b-form-input v-model="detalle.precioTotalSinImpuesto" disabled></b-form-input>
+            </td>
+            <td>
+              <b-button variant="white" @click="removeProductRow(index)">
+                <b-icon icon="trash" variant="danger"></b-icon>
+              </b-button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
         <b-button variant="success" @click="addNewProductRow">Agregar Producto</b-button>
-        <b-row>
-          <b-col>Total sin Impuestos: {{ totalSinImpuestos }}....{{ newInvoice.totalSinImpuestos }}</b-col>
-        </b-row>
-        <b-row>
-          <b-col>To: {{ importeTotal }} .......... {{ newInvoice.importeTotal }}</b-col>
-        </b-row>
 
-
-        <!--
-                <b-form-group label="Cliente" label-for="clienteId">
-                  <b-row>
-                    <b-col lg="10">
-                      <b-form-input id="clienteId" v-model="razonSocial" required disabled></b-form-input>
-                    </b-col>
-                    <b-col>
-                      <b-button class="w-100" variant="warning" @click="showModalProducts">Productos / Servicios</b-button>
-                    </b-col>
-                  </b-row>
-                </b-form-group>
-                <b-form-group label="Descripción del Producto" label-for="descripcionProducto">
-                  <b-form-input id="descripcionProducto" v-model="newInvoice.detalles[0].descripcion" required></b-form-input>
-                </b-form-group>
-
-                <b-form-group label="Cantidad" label-for="cantidadProducto">
-                  <b-form-input id="cantidadProducto" v-model="newInvoice.detalles[0].cantidad" type="number"
-                                required></b-form-input>
-                </b-form-group>
-
-                <b-form-group label="Precio Unitario" label-for="precioUnitarioProducto">
-                  <b-form-input id="precioUnitarioProducto" v-model="newInvoice.detalles[0].precioUnitario" type="number"
-                                required></b-form-input>
-                </b-form-group>
-
-                -->
-
-
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-
-        <!-- Información del pago -->
-        <b-card-title>Información del Pago</b-card-title>
-        <b-form-group label="Forma de Pago" label-for="formaPago">
-          <b-form-input id="formaPago" v-model="newInvoice.pagos[0].formaPago" required></b-form-input>
-        </b-form-group>
-
-        <b-form-group label="Total Pago" label-for="totalPago">
-          <b-form-input id="totalPago" v-model="newInvoice.pagos[0].total" type="number" required></b-form-input>
-        </b-form-group>
-
-        <!-- Información adicional -->
-        <b-card-title>Información Adicional</b-card-title>
-        <b-form-group label="Teléfono" label-for="telefono">
-          <b-form-input id="telefono" v-model="newInvoice.informacionAdicional[0].valor" required></b-form-input>
-        </b-form-group>
+        <!-- Tabla para Resumen de la Factura -->
+        <b-card-title class="mt-4">Resumen de la Factura</b-card-title>
+        <table class="table table-bordered">
+          <tbody>
+          <tr>
+            <td>SUBTOTAL SIN IMPUESTO:</td>
+            <td>{{ totalSinImpuestos.toFixed(2) }}</td>
+          </tr>
+          <tr>
+            <td>DESCUENTO:</td>
+            <td>{{ totalDescuento.toFixed(2) }}</td>
+          </tr>
+          <tr>
+            <td>PROPINA:</td>
+            <td>
+              <b-form-input v-model="newInvoice.propina"></b-form-input>
+            </td>
+          </tr>
+          <tr>
+            <td>IMPUESTO 15%:</td>
+            <td>{{ totalSumaImpuestosValue }}</td>
+          </tr>
+          <tr>
+            <td>VALOR TOTAL:</td>
+            <td>{{ importeTotal.toFixed(2) }}</td>
+          </tr>
+          </tbody>
+        </table>
 
         <b-button variant="primary" type="submit">Enviar Factura</b-button>
       </b-form>
     </b-card>
+
 
     <pre>{{ newInvoice }}</pre>
 
@@ -200,6 +201,19 @@ export default {
   components: {ClientComponent, InventarioComponent, Select2},
   data() {
     return {
+      listTarifas: [
+        {name: "0%", tarifa: "0", codigo: "0"},
+        {name: "12%", tarifa: "12", codigo: "2"},
+        {name: "13%", tarifa: "13", codigo: "10"},
+        {name: "14%", tarifa: "14", codigo: "3"},
+        {name: "15%", tarifa: "15", codigo: "4"},
+        {name: "5%", tarifa: "5", codigo: "5"},
+        {name: "No objeto de Impuesto", tarifa: "0", codigo: "6"},
+        {name: "Excento de IVA", tarifa: "0", codigo: "7"},
+        {name: "IVA diferenciado", tarifa: "0", codigo: "8"},
+      ],
+      valorDescuento: 0,
+      porcentajeDescuento: 0,
       valorTotal: 0,
       fechaFormateada: '',
       products: [],
@@ -231,7 +245,11 @@ export default {
           direccionEstablecimiento: "DE LA MISTELA Y RAFAEL CARPIO ABAD",
           contribuyenteEspecial: "NO",
           obligadoContabilidad: "SI",
-          fac: "000000076"
+          fac: "000000076",
+          ambiente: "pruebas",
+          tipoEmision: "1",
+          estab: "001",
+          ptoEmi: "108",
         },
         detalles: [
           {
@@ -243,8 +261,8 @@ export default {
             precioTotalSinImpuesto: 0,
             impuestos: [
               {
-                codigo: "2",
-                codigoPorcentaje: "0",
+                codigo: "0",
+                codigoPorcentaje: 0,
                 tarifa: 0,
                 baseImponible: 0,
                 valor: 0
@@ -273,6 +291,7 @@ export default {
         ],
         firma: "AquiVaLaFirmaElectronica"
       },
+      totalSumaImpuestosValue: 0
 
     };
   },
@@ -283,8 +302,17 @@ export default {
       this.newInvoice.totalSinImpuestos = newValue;
     },
     importeTotal(newValue) {
-      this.newInvoice.importeTotal = newValue;
-    }
+      this.newInvoice.importeTotal = newValue + this.newInvoice.totalSinImpuestos;
+    },
+    totalDescuento(newValue) {
+      // Asignar el valor calculado a newInvoice.totalSinImpuestos
+      this.newInvoice.totalDescuento = newValue;
+    },
+    totalSumaImpuestos(newValue) {
+      // Asignar el valor calculado a newInvoice.totalSinImpuestos
+      this.totalSumaImpuestosValue = newValue;
+    },
+
 
   },
 
@@ -292,37 +320,64 @@ export default {
     fechaEnDDMMYYYY() {
       return this.fechaFormateada ? moment(this.fechaFormateada, 'YYYY-MM-DD').format('DD/MM/YYYY') : '';
     },
-    totalSinImpuestos() {
-      // Inicializamos el total en 0
+    totalSumaImpuestos() {
       let total = 0;
-
-      // Recorremos todos los detalles
       this.newInvoice.detalles.forEach(detalle => {
-        // Recorremos los impuestos de cada detalle y sumamos la base imponible
-        detalle.impuestos.forEach(impuesto => {
-          total += impuesto.baseImponible;
-        });
-      });
-
-      // Retornamos el total sin impuestos
-      return total;
-    },
-    importeTotal() {
-      let total = 0;
-
-      // Recorremos todos los detalles
-      this.newInvoice.detalles.forEach(detalle => {
-        // Recorremos los impuestos de cada detalle y sumamos la base imponible
         detalle.impuestos.forEach(impuesto => {
           total += impuesto.valor;
         });
       });
-
-      // Retornamos el total sin impuestos
       return total;
-    }
+    },
+    totalSinImpuestos() {
+      let total = 0;
+      this.newInvoice.detalles.forEach(detalle => {
+        detalle.impuestos.forEach(impuesto => {
+          total += impuesto.baseImponible;
+        });
+      });
+      return total;
+    },
+    importeTotal() {
+      let total = 0;
+      this.newInvoice.detalles.forEach(detalle => {
+        detalle.impuestos.forEach(impuesto => {
+          total += impuesto.valor;
+        });
+      });
+      return total;
+    },
+    totalDescuento() {
+      let total = 0;
+      this.newInvoice.detalles.forEach(detalle => {
+        detalle.descuento = parseFloat(detalle.descuento);
+
+        total += detalle.descuento;
+
+      });
+      return total;
+    },
+    propina() {
+      return this.newInvoice.propina || 0;
+    },
   },
   methods: {
+    updateTaxDetails(detalle) {
+      const codigoPorcentaje = detalle.impuestos[0].codigoPorcentaje;
+      const tarifa = this.getTarifa(codigoPorcentaje);
+
+      // Actualizar los valores de tarifa y código
+      detalle.impuestos[0].tarifa = tarifa;
+      //detalle.impuestos[0].codigo = codigoPorcentaje;
+
+      // Llamar a calculateTax para recalcular los impuestos
+      this.calculateTax(detalle, tarifa);
+    },
+    getTarifa(codigoPorcentaje) {
+      const tarifaObj = this.listTarifas.find(tarifa => tarifa.codigo === codigoPorcentaje);
+      return tarifaObj ? tarifaObj.tarifa : 0; // Retorna la tarifa o 0 si no la encuentra
+    },
+
     updateFechaFormateada() {
       // Convertir la fecha ingresada en el input al formato DD/MM/YYYY
       this.newInvoice.fechaEmision = moment(this.fechaFormateada, 'YYYY-MM-DD').format('DD/MM/YYYY');
@@ -337,8 +392,8 @@ export default {
         precioTotalSinImpuesto: 0,
         impuestos: [
           {
-            codigo: "2",
-            codigoPorcentaje: "0",
+            codigo: "0",
+            codigoPorcentaje: 0,
             tarifa: 0,
             baseImponible: 0,
             valor: 0
@@ -351,17 +406,29 @@ export default {
     },
 
     calculateSubtotal(detalle) {
+      // Calcular el precio total sin descuento
       detalle.precioTotalSinImpuesto = detalle.cantidad * detalle.precioUnitario;
 
+      // Aplicar el descuento basado en el porcentaje ingresado
+      detalle.descuento = (this.porcentajeDescuento / 100) * detalle.precioTotalSinImpuesto;
+
+
+      // Restar el descuento del precio total sin impuestos
+      detalle.precioTotalSinImpuesto -= detalle.descuento;
+
+      // Calcular los impuestos después del descuento
       this.calculateTax(detalle);
     },
 
-    calculateTax(detalle) {
-      const tarifa = parseFloat(detalle.impuestos[0].codigoPorcentaje);
+
+    calculateTax(detalle, tax = null) {
+
+      console.log("tax", tax);
+      const tarifa = tax ? tax : parseFloat(detalle.impuestos[0].tarifa);
       const baseImponible = detalle.cantidad * detalle.precioUnitario;
 
       // Actualizamos los valores de impuestos
-      detalle.impuestos[0].tarifa = tarifa;
+      //detalle.impuestos[0].tarifa = tarifa;
       detalle.impuestos[0].baseImponible = baseImponible;
       detalle.impuestos[0].valor = baseImponible * (tarifa / 100);
     },
@@ -370,6 +437,12 @@ export default {
       if (product) {
         detalle.descripcion = product.descripcion;
         detalle.precioUnitario = product.precioUnitario;
+        detalle.impuestos[0].tarifa = product.impuestos[0].tarifa;
+        detalle.impuestos[0].codigoPorcentaje = product.impuestos[0].codigoPorcentaje;
+        detalle.impuestos[0].codigo = product.impuestos[0].codigo;
+
+        console.log("producto", product.impuestos);
+        console.log("detalle", detalle.impuestos);
         this.calculateSubtotal(detalle);
       }
     },
@@ -431,8 +504,8 @@ export default {
             precioTotalSinImpuesto: 0,
             impuestos: [
               {
-                codigo: "2",
-                codigoPorcentaje: "0",
+                codigo: "0",
+                codigoPorcentaje: 0,
                 tarifa: 0,
                 baseImponible: 0,
                 valor: 0
