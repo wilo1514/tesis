@@ -20,7 +20,7 @@
 
           <div v-show="activeNavItem === 'Facturación'">
             <PrincipalFacturacionComponent></PrincipalFacturacionComponent>
-<!--            <FacturacionComponent></FacturacionComponent>-->
+            <!--            <FacturacionComponent></FacturacionComponent>-->
           </div>
 
 
@@ -35,7 +35,7 @@
             <InventarioComponent></InventarioComponent>
 
           </div>
-          <div v-show="activeNavItem === 'Proveedores'">
+          <div v-show="activeNavItem === 'Lista de Proveedores'">
             <SupplierComponent></SupplierComponent>
           </div>
           <div v-show="activeNavItem === 'Registros contables'">
@@ -125,12 +125,16 @@ export default {
           // {id: 42, name: 'Añadir Producto'}
           // ]
         },
+
         {
           id: 2,
           name: 'Proveedores',
           icon: 'people',
           color: 'primary',
-          subitems: null // No tiene subitems
+          subitems: [
+            {id: 21, name: 'Lista de Proveedores'},
+            {id: 22, name: 'Retenciones'}
+          ]
         },
         {
           id: 3,

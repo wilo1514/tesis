@@ -4,6 +4,7 @@ import {
 } from "@/services/productsService";
 import * as XLSX from "xlsx";
 import Select2 from 'v-select2-component';
+import Swal from "sweetalert2";
 
 export default {
   props: {flagInvoice: Boolean},
@@ -34,7 +35,7 @@ export default {
         {key: "descripcion", label: "Producto / Servicio"},
         {key: 'tarifa', label: 'Tarifa de Impuesto', tdClass: "text-center", sortable: true},
         {key: "precioUnitario", label: "Precio Unitario", tdClass: "text-center"},
-        {key: 'iva', label: 'Iva', tdClass: "text-center" },
+        {key: 'iva', label: 'Iva', tdClass: "text-center"},
       ],
       items: [
         {text: 'Productos', href: '#'},
@@ -107,6 +108,45 @@ export default {
 
   },
   methods: {
+    showSuccessAlertDeleted(clientName) {
+      Swal.fire({
+        title: '¡Eliminado!',
+        text: `El cliente "${clientName}" ha sido eliminado correctamente.`,
+        icon: 'success',
+        timer: 2500,
+        showConfirmButton: false
+      });
+    },
+
+    showErrorAlertDeleted(clientName) {
+      Swal.fire({
+        title: 'Error',
+        text: `No se pudo eliminar al cliente "${clientName}".`,
+        icon: 'error',
+        confirmButtonText: 'Intentar de nuevo'
+      });
+    },
+
+    showSuccessAlert(name, action) {
+      Swal.fire({
+        title: '¡Correcto!',
+        text: `El ${name} se ha ${action}.`,
+        icon: 'success',
+        timer: 2500,
+        showConfirmButton: false
+      });
+    },
+
+    // Alerta de error
+    showErrorAlert() {
+      Swal.fire({
+        title: '¡Error!',
+        text: 'Ocurrió un problema durante la operación.',
+        icon: 'error',
+        confirmButtonText: 'Intentar de nuevo'
+      });
+    },
+
 
     updateProductDetails(detalle, index) {
       console.log(detalle, index);
@@ -174,8 +214,10 @@ export default {
     async saveProduct() {
       try {
         if (this.editMode) {
+          this.showSuccessAlert('producto o servicio', 'actualizado');
           await updateProduct(this.productoActual._id, this.productoActual); // Actualizar producto existente
         } else {
+          this.showSuccessAlert('producto o servicio', 'creado');
           await createProduct(this.productoActual); // Crear nuevo producto
         }
         this.resetProduct();
@@ -184,17 +226,35 @@ export default {
         this.fetchProducts(); // Recargar la lista de productos
 
       } catch (error) {
+        this.showErrorAlert();
         console.error("Error al guardar el producto:", error);
       }
     },
-    async deleteProduct(productId) {
-      try {
-        await deleteProduct(productId);
-        this.fetchProducts();
-      } catch (error) {
-        console.error("Error al eliminar el producto:", error);
-      }
+    async deleteProduct(product) {
+      Swal.fire({
+        title: '¡Alerta!',
+        text: `¿Quieres eliminar el producto "${product.descripcion}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: 'gray',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            // Intentar eliminar el producto si se confirma
+            await deleteProduct(product._id);
+            this.fetchProducts(); // Recargar lista de productos
+            this.showSuccessAlertDeleted(product.nombre);
+          } catch (error) {
+            console.error("Error al eliminar el producto:", error);
+            this.showErrorAlertDeleted();
+          }
+        }
+      });
     },
+
     showModalNew() {
       this.editMode = false;
       this.resetProduct();
@@ -272,7 +332,7 @@ export default {
 
       <template #cell(actions)="data" v-if="!flagInvoice">
         <b-button variant="primary" size="sm" @click="showModalEdit(data.item)">Editar</b-button>
-        <b-button variant="danger" size="sm" @click="deleteProduct(data.item._id)">Eliminar</b-button>
+        <b-button variant="danger" size="sm" @click="deleteProduct(data.item)">Eliminar</b-button>
       </template>
     </b-table>
 

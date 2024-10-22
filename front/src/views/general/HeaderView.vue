@@ -11,12 +11,12 @@
                 <div v-if="isAuthenticated">
                     <b-row>
                         <b-col class="mt-1">
-                            <span><small class="text-muted"> Welcome,</small> {{ nameUser }}</span>
+                            <span><small class="text-muted"> Bienvenido,</small> {{ nameUser }}</span>
                         </b-col>
                         <b-col>
 
                             <div class="text-center">
-                                <img src="../../assets/login.png" alt="" width="30">
+                                <img src="@/assets/user_login.png" alt="" width="30">
                             </div>
                         </b-col>
                     </b-row>

@@ -1,6 +1,6 @@
 <template>
   <b-modal v-model="modalVisible" title="Welcome" hide-footer>
-    <p :class="messageClass">Welcome, {{ userName }}!</p>
+    <p :class="messageClass">Bienvenido, {{ userName }}!</p>
   </b-modal>
 </template>
 

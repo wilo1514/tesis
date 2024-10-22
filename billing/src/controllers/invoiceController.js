@@ -11,7 +11,7 @@ const generarClaveAcceso = require('../utils/generarClave'); // Importar la func
 
 async function obtenerDatosReceptor(clienteId) {
     try {
-        const url = `http://172.18.0.5:3005/api/clients/${clienteId}`;
+        const url = `http://172.18.0.1:3005/api/clients/${clienteId}`;
         const response = await axios.get(url);
         return response.data;
     } catch (error) {
@@ -84,7 +84,7 @@ exports.crearYEnviarFactura = async (req, res) => {
         }
 
         // Llamada al servicio de firmador
-        const firmarResponse = await axios.post('http://172.18.0.2:8081/firmar', {
+        const firmarResponse = await axios.post('http://172.18.0.1:8081/firmar', {
             xmlFilePath: filePath,
             ruc_empresa: req.body.emisor.ruc
         });
@@ -104,7 +104,7 @@ exports.crearYEnviarFactura = async (req, res) => {
                 // Retrasar la consulta de autorización por 4 segundos
                 setTimeout(async () => {
                     // Realizar la consulta de autorización al SRI
-                  //  console.log(claveAcceso, ambiente);
+                    //  console.log(claveAcceso, ambiente);
                     const autorizacion = await consultarfactura(claveAcceso, ambiente);
                     console.log(`Autorizacion: \n`, autorizacion);
                     // Verificar si la factura fue autorizada
@@ -180,7 +180,6 @@ exports.getInvoices = async (req, res) => {
     }
 };
 
-
 exports.getInvoicesPorPuntoEmision = async (req, res) => {
     try {
         const { ptoEmi } = req.query;  // Obtener el punto de emisión de los parámetros de consulta
@@ -205,5 +204,3 @@ exports.getInvoicesPorPuntoEmision = async (req, res) => {
         res.status(500).json({ error: 'Error al obtener facturas por punto de emisión.' });
     }
 };
-
-

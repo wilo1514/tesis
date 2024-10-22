@@ -9,8 +9,10 @@ import {
 } from "@/services/clientService";
 import * as XLSX from "xlsx";
 
+import Swal from 'sweetalert2';
+
 export default {
-  props:{ flagInvoice: Boolean},
+  props: {flagInvoice: Boolean},
   data() {
     return {
       clients: [],
@@ -100,7 +102,7 @@ export default {
     computedFields() {
       // Si flagInvoice es false, agregar la columna 'actions'
       if (!this.flagInvoice) {
-        return [...this.fields, { key: "actions", label: "Acciones" }];
+        return [...this.fields, {key: "actions", label: "Acciones"}];
       }
       // Si flagInvoice es true, no agregar la columna 'actions'
       return this.fields;
@@ -323,28 +325,89 @@ export default {
     async saveClient() {
       try {
         if (this.editMode) {
+          this.showSuccessAlert('cliente', 'actualizado');
           await updateClient(this.clienteActual._id, this.clienteActual); // Actualizar cliente existente
         } else {
+          this.showSuccessAlert('cliente', 'creado');
           await createClient(this.clienteActual); // Crear nuevo cliente
         }
         this.resetClient()
         this.hideModal();
-
         this.fetchClients(); // Recargar la lista de clientes
 
 
       } catch (error) {
+        this.showErrorAlert();
         console.error("Error al guardar el cliente:", error);
       }
     },
-    async deleteClient(clientId) {
-      try {
-        await deleteClient(clientId);
-        this.fetchClients();
-      } catch (error) {
-        console.error("Error al eliminar el cliente:", error);
-      }
+
+    async deleteClient(client) {
+      // Mostrar alerta de confirmación antes de eliminar
+      Swal.fire({
+        title: '¡Alerta!',
+        text: `¿Quieres eliminar al cliente "${client.razonSocial}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: 'gray',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            // Intentar eliminar el cliente si se confirma
+            await deleteClient(client._id);
+            this.fetchClients(); // Recargar lista de clientes
+            this.showSuccessAlertDeleted(client.razonSocial);
+          } catch (error) {
+            console.error("Error al eliminar el cliente:", error);
+            this.showErrorAlertDeleted();
+          }
+        }
+      });
     },
+
+    showSuccessAlertDeleted(clientName) {
+      Swal.fire({
+        title: '¡Eliminado!',
+        text: `El cliente "${clientName}" ha sido eliminado correctamente.`,
+        icon: 'success',
+        timer: 2500,
+        showConfirmButton: false
+      });
+    },
+
+    showErrorAlertDeleted(clientName) {
+      Swal.fire({
+        title: 'Error',
+        text: `No se pudo eliminar al cliente "${clientName}".`,
+        icon: 'error',
+        confirmButtonText: 'Intentar de nuevo'
+      });
+    },
+
+    showSuccessAlert(name, action) {
+      Swal.fire({
+        title: '¡Correcto!',
+        text: `El ${name} se ha ${action}.`,
+        icon: 'success',
+        timer: 2500,
+        showConfirmButton: false
+      });
+    },
+
+    // Alerta de error
+    showErrorAlert() {
+      Swal.fire({
+        title: '¡Error!',
+        text: 'Ocurrió un problema durante la operación.',
+        icon: 'error',
+        confirmButtonText: 'Intentar de nuevo'
+      });
+    },
+
+
     showModalNew() {
 
       this.editMode = false;
@@ -394,7 +457,8 @@ export default {
       </div>
       <div>
         <b-button variant="primary" class="align-self-center m-2" @click="showModalNew">
-          Nuevo cliente</b-button>
+          Nuevo cliente
+        </b-button>
 
       </div>
     </div>
@@ -429,13 +493,14 @@ export default {
       </b-row>
     </div>
 
-    <b-table class="mt-3" :items="paginatedClients" :fields="computedFields" responsive="sm" striped hover     @row-clicked="rowClicked" >
+    <b-table class="mt-3" :items="paginatedClients" :fields="computedFields" responsive="sm" striped hover
+             @row-clicked="rowClicked">
 
       <template #cell(index)="data">
         {{ (currentPage - 1) * perPage + data.index + 1 }}
       </template>
       <template #cell(obligadoContabilidad)="data">
-        <div class="d-flex justify-content-center align-items-center w-100" >
+        <div class="d-flex justify-content-center align-items-center w-100">
 
           <b-icon icon="circle-fill" variant="success" v-if="data.item.obligadoContabilidad === 'SI'"></b-icon>
           <b-icon v-else icon="circle-fill" variant="danger"></b-icon>
@@ -445,7 +510,7 @@ export default {
 
       <template #cell(actions)="data" v-if="!flagInvoice">
         <b-button variant="primary" size="sm" @click="showModalEdit(data.item)">Editar</b-button>
-        <b-button variant="danger" size="sm" @click="deleteClient(data.item._id)">Eliminar</b-button>
+        <b-button variant="danger" size="sm" @click="deleteClient(data.item)">Eliminar</b-button>
       </template>
     </b-table>
 
@@ -548,7 +613,7 @@ export default {
 
 <style scoped>
 /* Estilos para hacer la fila clicable */
-.rowClass{
+.rowClass {
   cursor: pointer;
 }
 

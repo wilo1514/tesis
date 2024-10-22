@@ -6,7 +6,8 @@
         <b-nav-item v-if="!item.subitems" @click="handleItemClick(item.name)"
                     :style="{ 'background-color': selectedMenuItem === item.name ? 'whitesmoke' : '' }">
           <b-icon :icon="item.icon" :variant="item.color" class="mr-2"/>
-          <span class="mr-3 text-small">{{ item.name }}</span>
+          <span v-if="item.name=='Home'" class="mr-3 text-small">Principal</span>
+          <span v-else> {{ item.name }}</span>
         </b-nav-item>
 
         <!-- Si el item tiene subitems, no emite el evento selectItem -->

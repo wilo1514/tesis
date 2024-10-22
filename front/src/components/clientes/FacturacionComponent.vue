@@ -1,6 +1,6 @@
 <template>
   <b-container fluid>
-    <b-card class="mb-4">
+    <b-card class="mb-4" style="height: 58vh; overflow-y: scroll">
       <div class="mb-3 d-flex justify-content-between align-items-end">
         <b-form-group label="Número de Factura" label-for="fac">
           <b-form-input
@@ -75,7 +75,6 @@
             </b-form-group>
           </b-col>
         </b-row>
-        <!--        <pre>{{ newInvoice.detalles }}</pre>-->
 
         <!-- Detalles de la factura -->
         <h4 class="mt-4 d-flex justify-content-start">Detalles de la Factura</h4>
@@ -228,11 +227,13 @@
 
         <hr>
         <br>
+        <div class="d-flex justify-content-end">
 
-        <b-button variant="primary" type="submit">Enviar Factura</b-button>
+          <b-button variant="primary" type="submit">Enviar Factura  <b-icon icon="upload"></b-icon> </b-button>
+        </div>
       </b-form>
 
-      <pre>{{newInvoice}}</pre>
+      <!--      <pre>{{ newInvoice }}</pre>-->
     </b-card>
 
 
@@ -245,9 +246,6 @@
 
 
     </b-modal>
-    <!--    <pre>{{products}}</pre>-->
-
-    <!--    <pre>{{ newInvoice }}</pre>-->
   </b-container>
 </template>
 
@@ -258,6 +256,7 @@ import InventarioComponent from "@/components/inventario/InventarioComponent.vue
 import Select2 from 'v-select2-component';
 import {getProducts} from "@/services/productsService";
 import moment from 'moment';
+import Swal from "sweetalert2";
 
 export default {
   components: {ClientComponent, InventarioComponent, Select2},
@@ -339,25 +338,7 @@ export default {
           estab: "001",
           ptoEmi: "108",
         },
-        detalles: [
-          {
-            codigoPrincipal: "",
-            descripcion: "",
-            cantidad: 1,
-            precioUnitario: 0,
-            descuento: 0,
-            precioTotalSinImpuesto: 0,
-            impuestos: [
-              {
-                codigo: "0",
-                codigoPorcentaje: 0,
-                tarifa: 0,
-                baseImponible: 0,
-                valor: 0
-              }
-            ]
-          }
-        ],
+        detalles: [],
         totalSinImpuestos: 0,
         totalDescuento: 0,
         propina: 0,
@@ -466,6 +447,47 @@ export default {
     },
   },
   methods: {
+
+
+    showSuccessAlertDeleted(clientName) {
+      Swal.fire({
+        title: '¡Eliminado!',
+        text: `El cliente "${clientName}" ha sido eliminado correctamente.`,
+        icon: 'success',
+        timer: 2500,
+        showConfirmButton: false
+      });
+    },
+
+    showErrorAlertDeleted(clientName) {
+      Swal.fire({
+        title: 'Error',
+        text: `No se pudo eliminar al cliente "${clientName}".`,
+        icon: 'error',
+        confirmButtonText: 'Intentar de nuevo'
+      });
+    },
+
+    showSuccessAlert(name, action) {
+      Swal.fire({
+        title: '¡Correcto!',
+        text: `El ${name} se ha ${action}.`,
+        icon: 'success',
+        timer: 2500,
+        showConfirmButton: false
+      });
+    },
+
+    // Alerta de error
+    showErrorAlert() {
+      Swal.fire({
+        title: '¡Error!',
+        text: 'Ocurrió un problema durante la operación.',
+        icon: 'error',
+        confirmButtonText: 'Intentar de nuevo'
+      });
+    },
+
 
     async checkAndSetInvoiceNumber() {
       try {
@@ -648,15 +670,26 @@ export default {
     async createInvoice() {
       try {
 
+
+        Swal.fire({
+          title: 'Creando factura...',
+          text: 'Por favor espera mientras se genera y envía la factura.',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading(); // Mostrar el indicador de carga
+          }
+        });
+
         this.newInvoice.detalles.forEach(detalle => {
           detalle.precioUnitario = parseFloat(detalle.precioUnitario).toFixed(2);  // Convertir a float y asegurar dos decimales
           detalle.precioUnitario = parseFloat(detalle.precioUnitario); // Asegurarse de que se guarde como número
         });
         const facturaCreada = await createAndSendInvoice(this.newInvoice);
-
-
+        this.showSuccessAlert('factura', 'creado');
         this.resetInvoiceForm();
+
       } catch (error) {
+        this.showErrorAlert();
         console.error("Error al crear y enviar factura:", error);
       }
     },

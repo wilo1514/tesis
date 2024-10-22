@@ -1,8 +1,17 @@
 <template>
   <div>
     <div class="d-flex justify-content-end mr-4 mt-4">
-      <!-- Migas de pan (si las deseas mantener) -->
       <b-breadcrumb :items="breadcrumbItems"></b-breadcrumb>
+    </div>
+    <div class="d-flex justify-content-between align-items-center p-3">
+      <div>
+        <h2 class="mb-0 text-primary">Facturación</h2>
+      </div>
+      <div>
+        <b-button variant="white" class="align-self-center m-2" v-if="activeTab!==1" @click="loadInvoices">
+          <b-icon icon="arrow-counterclockwise"></b-icon>
+        </b-button>
+      </div>
     </div>
 
     <!-- Tabs para alternar entre vistas -->
@@ -10,7 +19,7 @@
       <b-tab title="Lista de Facturas" key="list" active>
         <template v-slot:default>
           <!-- Tabla para mostrar las facturas -->
-          <b-table striped hover :items="paginatedInvoices" :fields="fields" responsive="sm">
+          <b-table hover :items="paginatedInvoices" :fields="fields" responsive="sm">
 
             <template #cell(secuencial)="data">
               {{ `${data.item.estab}-${data.item.ptoEmi}-${data.item.secuencial}` }}
@@ -51,7 +60,7 @@
 </template>
 
 <script>
-import { getInvoices } from '@/services/invoiceServices';
+import {getInvoices} from '@/services/invoiceServices';
 import FacturacionComponent from '@/components/clientes/FacturacionComponent.vue';
 
 export default {
@@ -64,11 +73,11 @@ export default {
       invoices: [],
       activeTab: 'list', // Controlador de la pestaña activa
       fields: [
-        { key: 'secuencial', label: 'Secuencial' },
-        { key: 'emisorRazonSocial', label: 'Razón Social del Emisor' },
-        { key: 'fechaEmision', label: 'Fecha de Emisión' },
-        { key: 'importeTotal', label: 'Importe Total' },
-        { key: 'claveAcceso', label: 'Clave de Acceso' }
+        {key: 'secuencial', label: 'Secuencial'},
+        {key: 'emisorRazonSocial', label: 'Razón Social del Emisor'},
+        {key: 'fechaEmision', label: 'Fecha de Emisión'},
+        {key: 'importeTotal', label: 'Importe Total'},
+        {key: 'claveAcceso', label: 'Clave de Acceso'}
       ],
       perPage: 10, // Número de elementos por página
       currentPage: 1, // Página actual
@@ -79,12 +88,12 @@ export default {
     breadcrumbItems() {
       return this.activeTab === 'list'
           ? [
-            { text: 'Facturación', href: '#' },
-            { text: 'Lista de Facturas', active: true }
+            {text: 'Facturación', href: '#'},
+            {text: 'Lista de Facturas', active: true}
           ]
           : [
-            { text: 'Facturación', href: '#' },
-            { text: 'Nueva Factura', active: true }
+            {text: 'Facturación', href: '#'},
+            {text: 'Nueva Factura', active: true}
           ];
     },
     paginatedInvoices() {
