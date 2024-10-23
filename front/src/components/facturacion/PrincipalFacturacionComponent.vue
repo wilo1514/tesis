@@ -3,20 +3,28 @@
     <div class="d-flex justify-content-end mr-4 mt-4">
       <b-breadcrumb :items="breadcrumbItems"></b-breadcrumb>
     </div>
-    <div class="d-flex justify-content-between align-items-center p-3">
-      <div>
-        <h2 class="mb-0 text-primary">Facturación</h2>
-      </div>
-      <div>
-        <b-button variant="white" class="align-self-center m-2" v-if="activeTab!==1" @click="loadInvoices">
-          <b-icon icon="arrow-counterclockwise"></b-icon>
-        </b-button>
-      </div>
-    </div>
+<!--    <div class="d-flex justify-content-between align-items-center p-3">-->
+<!--      <div>-->
+<!--        <h2 class="mb-0 text-primary">Facturación</h2>-->
+<!--      </div>-->
+<!--      <div>-->
+<!--        <b-button variant="white" class="align-self-center m-2" v-if="activeTab!==1" @click="loadInvoices">-->
+<!--          <b-icon icon="arrow-counterclockwise"></b-icon>-->
+<!--        </b-button>-->
+<!--      </div>-->
+<!--    </div>-->
 
     <!-- Tabs para alternar entre vistas -->
     <b-tabs content-class="mt-3" v-model="activeTab">
       <b-tab title="Lista de Facturas" key="list" active>
+
+        <template #title>
+          Lista de facturas
+          <b-button variant="white" class="align-self-center" v-if="activeTab!==1" @click="loadInvoices" size="sm">
+            <b-icon icon="arrow-counterclockwise"></b-icon>
+          </b-button>
+        </template>
+
         <template v-slot:default>
           <!-- Tabla para mostrar las facturas -->
           <b-table hover :items="paginatedInvoices" :fields="fields" responsive="sm">

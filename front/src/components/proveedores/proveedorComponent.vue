@@ -7,7 +7,7 @@ import Select2 from 'v-select2-component';
 import Swal from "sweetalert2";
 
 export default {
-  props: {flagSupplier: Boolean},
+  props: {flagInvoice: Boolean},
   components: {Select2},
   data() {
     return {
@@ -20,7 +20,7 @@ export default {
         {key: "identificacion", label: "Identificación", tdClass: "text-center"},
         {key: "direccion", label: "Dirección"},
         // {key: 'tipoIdentificacion', label: 'Tipo de Identificación', tdClass: "text-center", sortable: true},
-        {key: 'regimen', label: 'Régimen', tdClass: "text-center"},
+        //{key: 'regimen', label: 'Régimen', tdClass: "text-center"},
         {key: 'obligadoContabilidad', label: 'Obligado Contabilidad', tdClass: "text-center"},
       ],
       items: [
@@ -39,7 +39,7 @@ export default {
       },
       editMode: false,
       searchQuery: "",
-      perPage: 10,
+      perPage: 5,
       currentPage: 1,
       modalTitle: '',
       file: null,
@@ -69,15 +69,20 @@ export default {
       return this.filteredSuppliers.slice(start, end);
     },
     computedFields() {
-      // Si flagSupplier es false, agregar la columna 'actions'
-      if (!this.flagSupplier) {
+      // Si flagInvoice es false, agregar la columna 'actions'
+      if (!this.flagInvoice) {
         return [...this.fields, {key: "actions", label: "Acciones"}];
       }
-      // Si flagSupplier es true, no agregar la columna 'actions'
+      // Si flagInvoice es true, no agregar la columna 'actions'
       return this.fields;
     }
   },
   methods: {
+    rowClicked(client) {
+      // Aquí puedes emitir un evento o manejar la acción con la data
+      console.log("Fila seleccionada:", client);
+      this.$emit('supplierSelected', client); // Emitir el cliente seleccionado
+    },
 
     showSuccessAlertDeleted(clientName) {
       Swal.fire({
@@ -214,11 +219,11 @@ export default {
 
 <template>
   <b-container fluid>
-    <div class="d-flex justify-content-end  mr-4 mt-4" v-if="!flagSupplier">
-      <b-breadcrumb :items="items"></b-breadcrumb>
+    <div class="d-flex justify-content-end  mr-4 mt-4" v-if="!flagInvoice">
+      <b-breadcrumb class="m-0 p-0" :items="items"></b-breadcrumb>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center p-3" v-if="!flagSupplier">
+    <div class="d-flex justify-content-between align-items-center p-3" v-if="!flagInvoice">
       <div>
         <h2 class="mb-0 text-primary">Lista de Proveedores</h2>
       </div>
@@ -242,11 +247,12 @@ export default {
       </b-row>
     </div>
 
-    <b-table class="mt-3" :items="paginatedSuppliers" :fields="computedFields" responsive="sm" striped hover>
+    <b-table class="mt-3" :items="paginatedSuppliers" :fields="computedFields" responsive="sm" hover
+             @row-clicked="rowClicked">
       <template #cell(index)="data">
         {{ (currentPage - 1) * perPage + data.index + 1 }}
       </template>
-      <template #cell(actions)="data" v-if="!flagSupplier">
+      <template #cell(actions)="data" v-if="!flagInvoice">
         <b-button variant="primary" size="sm" @click="showModalEdit(data.item)">Editar</b-button>
         <b-button variant="danger" size="sm" @click="deleteSupplier(data.item)">Eliminar</b-button>
       </template>

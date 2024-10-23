@@ -52,7 +52,7 @@ export default {
       },
       editMode: false,
       searchQuery: "",
-      perPage: 10,
+      perPage: 5,
       currentPage: 1,
       modalTitle: '',
       file: null,
@@ -285,7 +285,7 @@ export default {
 <template>
   <b-container fluid>
     <div class="d-flex justify-content-end  mr-4 mt-4" v-if="!flagInvoice">
-      <b-breadcrumb :items="items"></b-breadcrumb>
+      <b-breadcrumb class="m-0 p-0" :items="items"></b-breadcrumb>
     </div>
 
     <div class="d-flex justify-content-between align-items-center p-3" v-if="!flagInvoice">

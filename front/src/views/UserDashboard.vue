@@ -17,26 +17,22 @@
             <ClientComponent></ClientComponent>
           </div>
 
-
           <div v-show="activeNavItem === 'Facturación'">
             <PrincipalFacturacionComponent></PrincipalFacturacionComponent>
-            <!--            <FacturacionComponent></FacturacionComponent>-->
           </div>
-
-
-          <!--          <div v-show="activeNavItem === 'Clientes'">-->
-          <!--            <ClientComponent></ClientComponent>-->
-
-          <!--          </div>-->
 
           <div v-show="activeNavItem === 'Inventario'">
-
-
             <InventarioComponent></InventarioComponent>
-
           </div>
+
           <div v-show="activeNavItem === 'Lista de Proveedores'">
             <SupplierComponent></SupplierComponent>
+          </div>
+
+          <div v-show="activeNavItem === 'Retenciones'">
+            <PrincipalRetencionComponent></PrincipalRetencionComponent>
+
+
           </div>
           <div v-show="activeNavItem === 'Registros contables'">
             PRUEBA REGISTROS
@@ -78,9 +74,11 @@ import FacturacionComponent from '@/components/clientes/FacturacionComponent.vue
 import PrincipalFacturacionComponent from '@/components/facturacion/PrincipalFacturacionComponent.vue';
 import SupplierComponent from '@/components/proveedores/proveedorComponent.vue';
 import AdminUsuariosComponent from '@/components/administrador/usuarios/AdminUsuariosComponent.vue';
+import PrincipalRetencionComponent from "@/components/retenciones/PrincipalRetencionComponent.vue";
 
 export default {
   components: {
+    PrincipalRetencionComponent,
     TaskForm,
     HeaderView,
     FooterView,
