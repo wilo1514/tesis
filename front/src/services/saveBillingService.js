@@ -38,6 +38,16 @@ export const getBillingByNumeroComprobante = async (numeroComprobante) => {
     });
     return response.data;
 };
+// Obtener factura por número de autorizacion
+export const getBillingByNumeroAutorizacion = async (numeroAutorizacion) => {
+    const { token } = getAuthData();
+    const response = await billingClient.get(`/numeroAutorizacion/${numeroAutorizacion}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};
 
 // Obtener factura por RUC
 export const getBillingByRUC = async (ruc) => {
@@ -87,6 +97,7 @@ export default {
     getBillings,
     createBilling,
     getBillingByNumeroComprobante,
+    getBillingByNumeroAutorizacion,
     getBillingByRUC,
     getBillingById,
     deleteBilling,

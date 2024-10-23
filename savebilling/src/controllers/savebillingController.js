@@ -143,6 +143,19 @@ exports.getBillingByNumeroComprobante = async (req, res) => {
 };
 
 
+exports.getBillingByNumeroAutorizacion = async (req, res) => {
+    try {
+        const factura = await Factura.findOne({ numeroAutorizacion: req.params.numeroAutorizacion });
+        if (!factura) {
+            return res.status(404).json({ error: 'Factura not found with the provided descripcion' });
+        }
+        res.status(200).json(factura);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 
 exports.getBillingByRUC = async (req, res) => {
     try {

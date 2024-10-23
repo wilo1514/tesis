@@ -1,6 +1,6 @@
 <template>
   <b-container fluid>
-    <b-card class="mb-4" style="height: 50vh; overflow-y: scroll">
+    <b-card class="mb-4" style="height: 80vh; overflow-y: scroll">
       <div class="mb-3 d-flex justify-content-between align-items-end">
         <b-form-group label="Número de Retención" label-for="fac">
           <b-form-input
@@ -10,6 +10,11 @@
               required
           ></b-form-input>
         </b-form-group>
+        <b-col lg="2">
+          <b-form-group label="Fecha de emisión" label-for="rucEmpresa">
+            <b-input type="date" v-model="fechaFormateada" @input="updateFechaFormateada"></b-input>
+          </b-form-group>
+        </b-col>
         <b-button v-b-toggle.my-collapse>Configurar emisor
           <b-icon icon="wrench" scale="0.8"></b-icon>
         </b-button>
@@ -59,37 +64,34 @@
 
 
       <b-form @submit.prevent="createInvoice">
-        <hr>
-        <h4 class="mt-4 d-flex justify-content-start">Proveedor</h4>
-        <b-row>
-          <b-col lg="3">
-            <b-button class="w-100 mt-4" variant="primary" @click="showModalProveedor">Seleccionar proveedor</b-button>
-          </b-col>
-          <b-col>
-            <b-form-group label="Proveedor" label-for="supplierId">
-              <b-form-input id="supplierId" v-model="razonSocial" required disabled></b-form-input>
-            </b-form-group>
-          </b-col>
+        <!--        <b-row>-->
+        <!--                  <h4 class="mt-4 d-flex justify-content-start">Proveedor</h4>-->
+        <!--                    <b-col lg="3">-->
+        <!--                      <b-button class="w-100 mt-4" variant="primary" @click="showModalProveedor">Seleccionar proveedor</b-button>-->
+        <!--                    </b-col>-->
+        <!--                    <b-col>-->
+        <!--                      <b-form-group label="Proveedor" label-for="supplierId">-->
+        <!--                        <b-form-input id="supplierId" v-model="razonSocial" required disabled></b-form-input>-->
+        <!--                      </b-form-group>-->
+        <!--                    </b-col>-->
+        <!--          <b-col lg="2">-->
+        <!--           -->
+        <!--          </b-col>-->
+        <!--        </b-row>-->
+
+        <h4 class="mt-4 d-flex justify-content-start">Cargar factura mediante número de autorización</h4>
+        <b-row class="d-flex justify-content-start align-items-center">
+
           <b-col lg="2">
-            <b-form-group label="Fecha de emisión" label-for="rucEmpresa">
-              <b-input type="date" v-model="fechaFormateada" @input="updateFechaFormateada"></b-input>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <hr>
-        <h4 class="mt-4 d-flex justify-content-start">Agregar factura ingresando número de documento</h4>
-        <b-row class="d-flex justify-content-center align-items-center">
-          <b-col lg="6">
-            <b-form-input id="supplierId" v-model="numeroAutorizacion" required></b-form-input>
-          </b-col>
-          <b-col lg="2">
-            <b-button class="w-100" variant="primary" @click="searchInvoiceByAutorizacion">Agregar
-              <b-icon icon="save" scale="0.7"></b-icon>
+            <b-button class="w-100" variant="primary" @click="showModalFacturasCompras">Seleccionar factura
+              <b-icon icon="file-arrow-down" scale="0.7"></b-icon>
             </b-button>
           </b-col>
-
+          <b-col lg="6">
+            <b-form-input id="supplierId" v-model="numeroAutorizacion" required disabled></b-form-input>
+          </b-col>
         </b-row>
-        <pre>{{ invoiceData }}</pre>
+
         <!-- Detalles de la factura -->
         <h4 class="mt-4 d-flex justify-content-start">Detalles de la Factura</h4>
         <table class="table table-bordered">
@@ -201,19 +203,16 @@
         </div>
       </b-form>
 
-      <!--      <pre>{{ newRetencion }}</pre>-->
+
     </b-card>
+    <pre>{{ newRetencion }}</pre>
 
 
-    <b-modal ref="modal-proveedor" title="Agregar proveedor" size="xl" centered hide-header-close>
-      <!--      <ClientComponent :flagInvoice="flagInvoice" @supplierSelected="supplierSelected"></ClientComponent>-->
-      <ProveedorComponent :flagInvoice="flagInvoice" @supplierSelected="supplierSelected"></ProveedorComponent>
+    <b-modal ref="my-modal" title="Seleccionar factura de compra" size="xl" centered hide-header-close >
+      <FacturasCompraComponent :flagInvoice="true" ></FacturasCompraComponent>
     </b-modal>
-    <b-modal ref="modal-products" title="Agregar productos o servicios" size="xl" centered hide-header-close>
-      <InventarioComponent :flagInvoice="flagInvoice" @supplierSelected="supplierSelected"></InventarioComponent>
 
 
-    </b-modal>
   </b-container>
 </template>
 
@@ -223,16 +222,18 @@ import ClientComponent from "@/components/clientes/ClientComponent.vue";
 import InventarioComponent from "@/components/inventario/InventarioComponent.vue";
 import Select2 from 'v-select2-component';
 import {getProducts} from "@/services/productsService";
-import {createBilling, getBillings} from "@/services/saveBillingService";
+import {createBilling, getBillings, getBillingByNumeroAutorizacion} from "@/services/saveBillingService";
 import moment from 'moment';
 import Swal from "sweetalert2";
 import ProveedorComponent from "@/components/proveedores/proveedorComponent.vue";
+import FacturasCompraComponent from "@/components/proveedores/FacturasCompraComponent.vue";
 
 export default {
   name: 'RetencionComponent',
-  components: {ProveedorComponent, ClientComponent, InventarioComponent, Select2},
+  components: {FacturasCompraComponent, ProveedorComponent, ClientComponent, InventarioComponent, Select2},
   data() {
     return {
+
       invoiceData: [],
       numeroAutorizacion: "",
       listBillings: [],
@@ -407,47 +408,8 @@ export default {
     },
   },
   methods: {
-    async searchInvoiceByAutorizacion() {
-      try {
-        // Asegúrate de que el campo numeroAutorizacion esté definido en tu componente
-        const autorizacionData = {
-          numeroAutorizacion: this.numeroAutorizacion // Crear el objeto con el número de autorización
-        };
-
-        // Mostrar un mensaje de carga (opcional)
-        Swal.fire({
-          title: 'Enviando factura...',
-          text: 'Por favor espera mientras se procesa la factura.',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading(); // Mostrar el indicador de carga
-          }
-        });
-
-        // Llamar a la función createBilling pasando el objeto con numeroAutorizacion
-        const response = await createBilling(autorizacionData);
-        this.invoiceData = response.factura;
-        // Si todo sale bien, mostrar un mensaje de éxito
-        Swal.fire({
-          title: 'Factura enviada',
-          text: 'La factura ha sido procesada exitosamente.',
-          icon: 'success',
-          timer: 2500,
-          showConfirmButton: false
-        });
-
-        console.log('Factura enviada con éxito:', response);
-      } catch (error) {
-        // Manejar cualquier error que ocurra durante la solicitud
-        Swal.fire({
-          title: 'Error',
-          text: 'No se pudo enviar la factura. Intenta de nuevo.',
-          icon: 'error',
-          confirmButtonText: 'Intentar de nuevo'
-        });
-
-        console.error('Error al enviar la factura:', error);
-      }
+    showModalFacturasCompras(){
+      this.$refs['my-modal'].show()
     },
     showSuccessAlertDeleted(clientName) {
       Swal.fire({

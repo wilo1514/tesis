@@ -30,8 +30,11 @@
           </div>
 
           <div v-show="activeNavItem === 'Retenciones'">
-            <PrincipalRetencionComponent></PrincipalRetencionComponent>
+            <RetencionComponent></RetencionComponent>
+          </div>
 
+          <div v-show="activeNavItem === 'Facturas de compra'">
+            <FacturasCompraComponent></FacturasCompraComponent>
 
           </div>
           <div v-show="activeNavItem === 'Registros contables'">
@@ -75,9 +78,13 @@ import PrincipalFacturacionComponent from '@/components/facturacion/PrincipalFac
 import SupplierComponent from '@/components/proveedores/proveedorComponent.vue';
 import AdminUsuariosComponent from '@/components/administrador/usuarios/AdminUsuariosComponent.vue';
 import PrincipalRetencionComponent from "@/components/retenciones/PrincipalRetencionComponent.vue";
+import FacturasCompraComponent from "@/components/proveedores/FacturasCompraComponent.vue";
+import RetencionComponent from "@/components/retenciones/RetencionComponent.vue";
 
 export default {
   components: {
+    RetencionComponent,
+    FacturasCompraComponent,
     PrincipalRetencionComponent,
     TaskForm,
     HeaderView,
@@ -131,7 +138,8 @@ export default {
           color: 'primary',
           subitems: [
             {id: 21, name: 'Lista de Proveedores'},
-            {id: 22, name: 'Retenciones'}
+            {id: 22, name: 'Facturas de compra'},
+            {id: 23, name: 'Retenciones'}
           ]
         },
         {

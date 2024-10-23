@@ -1,81 +1,86 @@
 <template>
   <div>
-    <div class="d-flex justify-content-end mr-4 mt-4">
+    <div class="d-flex justify-content-end mr-4 mt-4" v-if="!flagInvoice">
       <b-breadcrumb class="m-0 p-0" :items="breadcrumbItems"></b-breadcrumb>
     </div>
+    <div class="d-flex justify-content-between align-items-center p-3" v-if="!flagInvoice">
+      <div>
+        <h2 class="mb-0 text-primary">Lista de facturas de compra</h2>
+      </div>
+      <div>
+        <b-button variant="primary" class="align-self-center m-2" @click="showModalNew">Nuevo factura de compra
+        </b-button>
+      </div>
+    </div>
+
 
     <!-- Pestañas principales -->
-    <b-tabs content-class="mt-3" v-model="activeTab">
-      <b-tab title="Lista de Facturas de Compra" key="list" active>
-        <template #title>
-          Lista de facturas de compra
-          <b-button variant="white" class="align-self-center" v-if="activeTab!==1" @click="loadBillings" size="sm">
-            <b-icon icon="arrow-counterclockwise"></b-icon>
-          </b-button>
-        </template>
-        <template v-slot:default>
-          <!-- Formulario para agregar factura -->
-          <h4 class="mt-4 d-flex justify-content-start">Agregar factura ingresando número de autorización</h4>
-          <b-row class="d-flex justify-content-center align-items-center">
-            <b-col lg="6">
-              <b-form-input id="supplierId" v-model="numeroAutorizacion" required></b-form-input>
-            </b-col>
-            <b-col lg="2">
-              <b-button class="w-100" variant="primary" @click="searchInvoiceByAutorizacion">Agregar
-                <b-icon icon="save" scale="0.7"></b-icon>
-              </b-button>
-            </b-col>
-          </b-row>
+    <div class="d-flex justify-content-center align-items-center mt-4">
+      <div class="w-50">
+        <b-form-input
+            v-model="searchQuery"
+            placeholder="Buscar por número de comprobante o razón social"
+        ></b-form-input>
+      </div>
+      <div>
+        <b-button variant="white" class="align-self-center" v-if="activeTab!==1" @click="loadBillings" size="sm">
+          <b-icon icon="arrow-counterclockwise"></b-icon>
+        </b-button>
+      </div>
+    </div>
+    <!-- Tabla de facturas -->
 
-          <b-row class="d-flex justify-content-center align-items-center mt-4">
-            <b-col lg="6">
-              <b-form-input
-                  v-model="searchQuery"
-                  placeholder="Buscar por número de comprobante o razón social"
-              ></b-form-input>
-            </b-col>
-          </b-row>
+    <b-table hover :items="paginatedRetenciones" :fields="computedFields" responsive="sm">
+      <template #cell(secuencial)="data">
+        {{ `${data.item.estab}-${data.item.ptoEmi}-${data.item.secuencial}` }}
+      </template>
+      <template #cell(emisorRazonSocial)="data">
+        {{ data.item.emisor.razonSocial }}
+      </template>
+      <template #cell(fechaEmision)="data">
+        {{ data.item.fechaEmision }}
+      </template>
+      <template #cell(importeTotal)="data">
 
-          <!-- Tabla de facturas -->
-          <h4 class="mt-4 d-flex justify-content-start">Lista de Facturas de Compra</h4>
-          <b-table hover :items="paginatedRetenciones" :fields="fields" responsive="sm">
-            <template #cell(secuencial)="data">
-              {{ `${data.item.estab}-${data.item.ptoEmi}-${data.item.secuencial}` }}
-            </template>
-            <template #cell(emisorRazonSocial)="data">
-              {{ data.item.emisor.razonSocial }}
-            </template>
-            <template #cell(fechaEmision)="data">
-              {{ data.item.fechaEmision }}
-            </template>
-            <template #cell(importeTotal)="data">
+        ${{ data.item.importeTotal.toFixed(2) }}
+      </template>
+      <template #cell(claveAcceso)="data">
+        {{ data.item.numeroAutorizacion }}
+      </template>
+      <template #cell(actions)="data" v-if="!flagInvoice">
+        <b-button variant="danger" size="sm" @click="deleteInvoice(data.item)">Eliminar</b-button>
+      </template>
+    </b-table>
 
-              ${{ data.item.importeTotal.toFixed(2) }}
-            </template>
-            <template #cell(claveAcceso)="data">
-              {{ data.item.numeroAutorizacion }}
-            </template>
-            <template #cell(actions)="data">
-              <b-button variant="danger" size="sm" @click="deleteInvoice(data.item)">Eliminar</b-button>
-            </template>
-          </b-table>
+    <b-pagination
+        v-model="currentPage"
+        :total-rows="filteredRetenciones.length"
+        :per-page="perPage"
+        align="center"
+        class="mt-3"
+    ></b-pagination>
 
-          <b-pagination
-              v-model="currentPage"
-              :total-rows="filteredRetenciones.length"
-              :per-page="perPage"
-              align="center"
-              class="mt-3"
-          ></b-pagination>
-        </template>
-      </b-tab>
 
-      <b-tab title="Nueva Retención" key="create-retencion">
-        <template v-slot:default>
-          <RetencionComponent></RetencionComponent>
-        </template>
-      </b-tab>
-    </b-tabs>
+    <b-modal ref="my-modal" title="Agregar nueva factura de compra" size="xl" centered hide-header-close>
+
+      <b-row class="d-flex justify-content-center align-items-center">
+        <b-col>
+          <b-form-input id="supplierId" v-model="numeroAutorizacion"
+                        placeholder="Agregar factura ingresando número de autorización" required></b-form-input>
+        </b-col>
+
+      </b-row>
+
+      <template #modal-footer>
+
+        <b-button class="mt-2" variant="outline-secondary" block @click="hideModal">Cancelar</b-button>
+        <b-button class="mt-2" variant="outline-success" block @click="searchInvoiceByAutorizacion">Guardar factura
+        </b-button>
+
+      </template>
+
+
+    </b-modal>
   </div>
 </template>
 
@@ -85,12 +90,17 @@ import Swal from "sweetalert2";
 import RetencionComponent from "@/components/retenciones/RetencionComponent.vue";
 
 export default {
-  name: 'PrincipalRetencionComponent',
+  name: 'FacturasCompraComponent',
+  props: {flagInvoice: Boolean},
   components: {
     RetencionComponent,
   },
   data() {
     return {
+      breadcrumbItems: [
+        {text: 'Facturas de compra', href: '#'},
+        {text: 'Proveedores', active: true}
+      ],
       listRetenciones: [],
       activeTab: 'list', // Controlador de la pestaña activa
       fields: [
@@ -99,7 +109,6 @@ export default {
         {key: 'emisorRazonSocial', label: 'Razón Social del Emisor'},
         {key: 'importeTotal', label: 'Importe Total', tdClass: "text-center"},
         {key: 'claveAcceso', label: 'Clave de Acceso'},
-        {key: 'actions', label: 'Acción'}
       ],
       perPage: 5, // Número de elementos por página
       currentPage: 1, // Página actual
@@ -109,21 +118,13 @@ export default {
     };
   },
   computed: {
-    breadcrumbItems() {
-      return this.activeTab === 'list'
-          ? [
-            {text: 'Retenciones', href: '#'},
-            {text: 'Lista de Facturas', active: true}
-          ]
-          : this.activeTab === 'create-factura'
-              ? [
-                {text: 'Retenciones', href: '#'},
-                {text: 'Nueva Factura de Compra', active: true}
-              ]
-              : [
-                {text: 'Retenciones', href: '#'},
-                {text: 'Nueva Retención', active: true}
-              ];
+    computedFields() {
+      // Si flagInvoice es false, agregar la columna 'actions'
+      if (!this.flagInvoice) {
+        return [...this.fields, {key: "actions", label: "Acciones"}];
+      }
+      // Si flagInvoice es true, no agregar la columna 'actions'
+      return this.fields;
     },
     filteredRetenciones() {
       if (this.searchQuery) {
@@ -142,6 +143,15 @@ export default {
 
   },
   methods: {
+
+
+    showModalNew() {
+      this.$refs['my-modal'].show()
+    },
+    hideModal() {
+      this.numeroAutorizacion = "";
+      this.$refs['my-modal'].hide()
+    },
 
     async deleteInvoice(invoice) {
       Swal.fire({
@@ -226,27 +236,18 @@ export default {
           numeroAutorizacion: this.numeroAutorizacion
         };
 
-        Swal.fire({
-          title: 'Enviando factura...',
-          text: 'Por favor espera mientras se procesa la factura.',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
-
         const response = await createBilling(autorizacionData);
         this.invoiceData = response.factura;
 
         Swal.fire({
-          title: 'Factura enviada',
+          title: 'Factura agregada',
           text: 'La factura ha sido procesada exitosamente.',
           icon: 'success',
           timer: 2500,
           showConfirmButton: false
         });
         await this.loadBillings();
-
+        this.hideModal();
 
       } catch (error) {
         Swal.fire({
