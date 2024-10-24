@@ -80,7 +80,6 @@ export default {
   methods: {
     rowClicked(client) {
       // Aquí puedes emitir un evento o manejar la acción con la data
-      console.log("Fila seleccionada:", client);
       this.$emit('supplierSelected', client); // Emitir el cliente seleccionado
     },
 

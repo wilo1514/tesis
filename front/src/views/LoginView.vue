@@ -61,7 +61,6 @@ export default {
     async Identifylogin() {
       try {
         const userLoeado = await identifyLogin();
-        console.log("user identifyLogin", userLoeado);
         this.responseIdLogin = userLoeado;
       } catch (error) {
         if (error.response) {

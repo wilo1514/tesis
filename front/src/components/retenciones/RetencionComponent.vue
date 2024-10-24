@@ -63,37 +63,34 @@
       </b-collapse>
 
 
-      <b-form @submit.prevent="createInvoice">
-        <!--        <b-row>-->
-        <!--                  <h4 class="mt-4 d-flex justify-content-start">Proveedor</h4>-->
-        <!--                    <b-col lg="3">-->
-        <!--                      <b-button class="w-100 mt-4" variant="primary" @click="showModalProveedor">Seleccionar proveedor</b-button>-->
-        <!--                    </b-col>-->
-        <!--                    <b-col>-->
-        <!--                      <b-form-group label="Proveedor" label-for="supplierId">-->
-        <!--                        <b-form-input id="supplierId" v-model="razonSocial" required disabled></b-form-input>-->
-        <!--                      </b-form-group>-->
-        <!--                    </b-col>-->
-        <!--          <b-col lg="2">-->
-        <!--           -->
-        <!--          </b-col>-->
-        <!--        </b-row>-->
+      <b-form @submit.prevent="createRetencion">
 
-        <h4 class="mt-4 d-flex justify-content-start">Cargar factura mediante número de autorización</h4>
+        <h4 class="mt-4 d-flex justify-content-start">Cargar factura de compra a retener</h4>
         <b-row class="d-flex justify-content-start align-items-center">
 
           <b-col lg="2">
-            <b-button class="w-100" variant="primary" @click="showModalFacturasCompras">Seleccionar factura
+            <b-button class="w-100 mt-4 " variant="primary" @click="showModalFacturasCompras">Seleccionar factura
               <b-icon icon="file-arrow-down" scale="0.7"></b-icon>
             </b-button>
           </b-col>
-          <b-col lg="6">
-            <b-form-input id="supplierId" v-model="numeroAutorizacion" required disabled></b-form-input>
+          <b-col lg="">
+
+            <b-form-group label="Número de comprobante" label-for="supplierId">
+              <b-form-input id="supplierId" v-model="newRetencion.detalles[0].numeroComprobante" required
+                            disabled></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col lg="4">
+
+            <b-form-group label="Razon Social" label-for="supplierId" v-if="dataSupplier.razonSocial">
+              <b-form-input id="supplierId" v-model="dataSupplier.razonSocial" required
+                            disabled></b-form-input>
+            </b-form-group>
           </b-col>
         </b-row>
 
-        <!-- Detalles de la factura -->
-        <h4 class="mt-4 d-flex justify-content-start">Detalles de la Factura</h4>
+
+        <h4 class="mt-4 d-flex justify-content-start">Detalles de la retención</h4>
         <table class="table table-bordered">
           <thead>
           <tr>
@@ -105,70 +102,24 @@
             <th>Impuesto</th>
             <th>Porcentaje de retención</th>
             <th>Valor retenido</th>
-            <th>Acción</th>
           </tr>
           </thead>
           <tbody>
-          <tr v-for="(detalle, index) in newRetencion.detalles" :key="index">
-            <td style="width: 250px">
-              <Select2
-                  v-model="detalle.codigoPrincipal"
-                  :options="products.map(p => ({ id: p.codigoPrincipal, text: `${p.codigoPrincipal} - ${p.descripcion}` }))"
-                  @change="updateProductDetails(detalle, index)"
-              />
-            </td>
-            <td>
-              <b-form-input v-model="detalle.descripcion" required></b-form-input>
-            </td>
-            <td>
-              <b-form-input v-model="detalle.cantidad" type="number" min="1" @input="calculateSubtotal(detalle)"
-                            required></b-form-input>
-            </td>
-            <td>
-              <b-form-input v-model="detalle.precioUnitario" @input="calculateSubtotal(detalle)"
-                            required></b-form-input>
-            </td>
-            <td class="d-flex justify-content-between align-items-center">
-              <div>
-
-                <b-form-input v-model="detalle.porcentajeDescuento" @input="calculateSubtotal(detalle)"
-                              required></b-form-input>
-              </div>
-              <div>
-                <span v-if="detalle.descuento">{{ (detalle.descuento).toFixed(2) }}</span>
-
-              </div>
-            </td>
-
-            <td>
-
-              <b-form-select
-                  class="form-control"
-                  v-model="detalle.impuestos[0].codigoPorcentaje"
-                  :options="listTarifas.map(p => ({ value: p.codigo, text: p.name }))"
-                  @change="updateTaxDetails(detalle)"
-                  required
-              />
-
-            </td>
-            <td>
-              <span>{{ (detalle.precioTotalSinImpuesto).toFixed(2) }}</span>
-              <!--              <b-form-input v-model="detalle.precioTotalSinImpuesto" disabled></b-form-input>-->
-            </td>
-            <td>
-              <b-button variant="white" @click="removeProductRow(index)">
-                <b-icon icon="trash" variant="danger"></b-icon>
-              </b-button>
-            </td>
+          <!-- Usamos la propiedad computada "listaImpuestos" en el v-for -->
+          <tr v-for="(impuesto, index) in listaImpuestos" :key="index">
+            <td>{{ newRetencion.detalles[0].numeroComprobante }}</td>
+            <td>{{ newRetencion.detalles[0].numeroComprobante }}</td>
+            <td>{{ newRetencion.detalles[0].fechaEmisionComprobante }}</td>
+            <td>{{ newRetencion.detalles[0].periodoFiscal }}</td>
+            <!--            <td>{{ periodoFiscal }}</td>-->
+            <td>{{ impuesto.baseImponible }}</td>
+            <td>{{ impuesto.codigoPorcentaje }}</td>
+            <td>{{ (impuesto.codigoPorcentaje === '2' ? '15%' : '10%') }}</td>
+            <td>{{ impuesto.valor }}</td>
           </tr>
           </tbody>
         </table>
-        <div>
-          <b-button variant="success" @click="addNewProductRow">Agregar Retención
-            <b-icon icon="plus"></b-icon>
-          </b-button>
 
-        </div>
 
 
         <h4 class="mt-4 d-flex justify-content-start">Información Adicional</h4>
@@ -197,7 +148,7 @@
         <br>
         <div class="d-flex justify-content-end">
 
-          <b-button variant="primary" type="submit">Enviar Factura
+          <b-button variant="primary" type="submit">Enviar Retención
             <b-icon icon="upload"></b-icon>
           </b-button>
         </div>
@@ -205,11 +156,14 @@
 
 
     </b-card>
-    <pre>{{ newRetencion }}</pre>
+    <div style="height: 50vh; overflow-y: scroll">
+      <pre>{{ newRetencion }}</pre>
+    </div>
 
 
-    <b-modal ref="my-modal" title="Seleccionar factura de compra" size="xl" centered hide-header-close >
-      <FacturasCompraComponent :flagInvoice="true" ></FacturasCompraComponent>
+    <b-modal ref="my-modal" title="Seleccionar factura de compra" size="xl" centered hide-header-close>
+      <FacturasCompraComponent :flagInvoice="true"
+                               @invoiceCompraSelected="invoiceCompraSelected"></FacturasCompraComponent>
     </b-modal>
 
 
@@ -222,6 +176,7 @@ import ClientComponent from "@/components/clientes/ClientComponent.vue";
 import InventarioComponent from "@/components/inventario/InventarioComponent.vue";
 import Select2 from 'v-select2-component';
 import {getProducts} from "@/services/productsService";
+import {getSupplierById} from "@/services/supplierService";
 import {createBilling, getBillings, getBillingByNumeroAutorizacion} from "@/services/saveBillingService";
 import moment from 'moment';
 import Swal from "sweetalert2";
@@ -233,7 +188,8 @@ export default {
   components: {FacturasCompraComponent, ProveedorComponent, ClientComponent, InventarioComponent, Select2},
   data() {
     return {
-
+      dataSupplier: [],
+      dataInvoiceCompra: [],
       invoiceData: [],
       numeroAutorizacion: "",
       listBillings: [],
@@ -311,8 +267,26 @@ export default {
           ptoEmi: "108",
         },
         supplierId: "",
+        detalles: [
+          {
+            "numeroComprobante": "",
+            "precioTotalSinImpuesto": 0,
+            "impuestos": [
+              {
+                "codigo": "2",
+                "codigoPorcentaje": "2",
+                "baseImponible": 0
+              },
+              {
+                "codigo": "1",
+                "codigoPorcentaje": "3440",
+                "baseImponible": 0
+              }
+            ],
+            "fechaEmisionComprobante": "12/10/2024"
+          }
+        ],
         fechaEmision: "",
-        detalles: [],
         periodoFiscal: "10/2024",
         informacionAdicional: [
           {
@@ -356,6 +330,18 @@ export default {
   },
 
   computed: {
+    periodoFiscal() {
+      // Captura el mes y el año actual en formato "MM/YYYY"
+      return moment().format('MM/YYYY');
+    },
+    listaImpuestos() {
+      // Verificamos que los detalles existan y tengan impuestos
+      if (this.newRetencion && this.newRetencion.detalles && this.newRetencion.detalles.length > 0) {
+        return this.newRetencion.detalles[0].impuestos || [];
+      }
+      // Si no existen impuestos, devolvemos un array vacío para evitar errores
+      return [];
+    },
     summaryInvoiceItems() {
       return [
         {label: 'SUBTOTAL SIN IMPUESTO:', value: this.totalSinImpuestos.toFixed(2)},
@@ -393,22 +379,49 @@ export default {
       return parseFloat(total).toFixed(2); // Retornar con dos decimales
     },
 
-    totalDescuento() {
-      let total = 0;
-      this.newRetencion.detalles.forEach(detalle => {
-        detalle.descuento = parseFloat(detalle.descuento);
-
-        total += detalle.descuento;
-      });
-      // Aplicar toFixed(2) y devolverlo como número flotante
-      return parseFloat(total.toFixed(2));
-    },
+    // totalDescuento() {
+    //   let total = 0;
+    //   this.newRetencion.detalles.forEach(detalle => {
+    //     detalle.descuento = parseFloat(detalle.descuento);
+    //
+    //     total += detalle.descuento;
+    //   });
+    //   return parseFloat(total.toFixed(2));
+    // },
     propina() {
       return this.newRetencion.propina || 0;
     },
   },
   methods: {
-    showModalFacturasCompras(){
+
+
+    async getSupplierById(supplierId) {
+      try {
+        this.dataSupplier = [await getSupplierById(supplierId)];
+      } catch (error) {
+        console.error("Error al obtener la lista de clientes:", error);
+      }
+    },
+    invoiceCompraSelected(data) {
+
+      this.dataInvoiceCompra = data;
+
+      this.newRetencion.supplierId = data.emisor._id;
+      this.newRetencion.detalles[0].numeroComprobante = data.numeroComprobante;
+      this.newRetencion.detalles[0].periodoFiscal = data.periodoFiscal;
+      this.newRetencion.detalles[0].precioTotalSinImpuesto = data.totalSinImpuestos;
+      this.newRetencion.detalles[0].impuestos[0].baseImponible = data.totalConImpuestos[0].baseImponible;
+      this.newRetencion.detalles[0].impuestos[1].baseImponible = data.totalConImpuestos[1].baseImponible;
+      this.newRetencion.detalles[0].impuestos[0].codigo = data.totalConImpuestos[0].codigo;
+      this.newRetencion.detalles[0].impuestos[1].codigo = data.totalConImpuestos[1].codigo;
+      this.getSupplierById(this.newRetencion.supplierId);
+      console.log("RECIBE", data);
+      this.hideModal();
+
+    },
+
+
+    showModalFacturasCompras() {
       this.$refs['my-modal'].show()
     },
     showSuccessAlertDeleted(clientName) {
@@ -461,7 +474,6 @@ export default {
 
         // Obtener las facturas para el punto de emisión ingresado
         const invoices = await getInvoicesPorPuntoEmision(this.newRetencion.emisor.ptoEmi);
-        console.log("Facturas encontradas para el punto de emisión:", invoices);
 
         if (invoices.length > 0) {
           // Filtrar facturas por punto de emisión específico y ordenarlas por secuencial de forma descendente
@@ -625,11 +637,11 @@ export default {
 
     },
     hideModal() {
-      this.$refs['modal-proveedor'].hide()
+      this.$refs['my-modal'].hide()
     },
 
 
-    async createInvoice() {
+    async createRetencion() {
       try {
 
 
@@ -664,9 +676,6 @@ export default {
 
     resetInvoiceForm() {
       this.newRetencion = {
-        supplierId: "",
-        fechaEmision: "",
-        ruc_empresa: "0190412040001",
         emisor: {
           ruc: "0190412040001",
           razonSocial: "AUDITORES CONTABLES & CONSULTORES ENRIQUETA SARMIENTO ACCESCONT CIA. LTDA.",
@@ -681,45 +690,26 @@ export default {
           estab: "001",
           ptoEmi: "108",
         },
+        supplierId: "",
         detalles: [
           {
-            codigoPrincipal: "",
-            descripcion: "",
-            cantidad: 1,
-            precioUnitario: 0,
-            descuento: 0,
-            precioTotalSinImpuesto: 0,
-            impuestos: [
+            "numeroComprobante": "",
+            "precioTotalSinImpuesto": 0,
+            "impuestos": [
               {
-                codigo: "0",
-                codigoPorcentaje: 0,
-                tarifa: 0,
-                baseImponible: 0,
-                valor: 0
+                "codigo": "2",
+                "codigoPorcentaje": "2",
+                "baseImponible": 0
+              },
+              {
+                "codigo": "1",
+                "codigoPorcentaje": "3440",
+                "baseImponible": 0
               }
-            ]
+            ],
+            "fechaEmisionComprobante": "12/10/2024"
           }
-        ],
-        totalSinImpuestos: 0,
-        totalDescuento: 0,
-        propina: 0,
-        importeTotal: 0,
-        moneda: "USD",
-        pagos: [
-          {
-            formaPago: "20",
-            total: 0,
-            plazo: "0",
-            unidadTiempo: "dias"
-          }
-        ],
-        informacionAdicional: [
-          {
-            nombre: "Teléfono",
-            valor: ""
-          }
-        ],
-        firma: "AquiVaLaFirmaElectronica"
+        ]
       }
     },
     async fetchProducts() {

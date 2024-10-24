@@ -426,7 +426,6 @@ export default {
       this.editMode = false;
       this.resetClient();
       this.$refs['my-modal'].hide()
-      console.log("ocultar modal", this.clienteActual)
     },
 
     rowClicked(client) {

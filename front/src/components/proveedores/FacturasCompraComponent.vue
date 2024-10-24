@@ -30,7 +30,7 @@
     </div>
     <!-- Tabla de facturas -->
 
-    <b-table hover :items="paginatedRetenciones" :fields="computedFields" responsive="sm">
+    <b-table hover :items="paginatedRetenciones" :fields="computedFields" responsive="sm"  @row-clicked="rowClicked">>
       <template #cell(secuencial)="data">
         {{ `${data.item.estab}-${data.item.ptoEmi}-${data.item.secuencial}` }}
       </template>
@@ -59,6 +59,7 @@
         align="center"
         class="mt-3"
     ></b-pagination>
+
 
 
     <b-modal ref="my-modal" title="Agregar nueva factura de compra" size="xl" centered hide-header-close>
@@ -108,6 +109,8 @@ export default {
         {key: 'numeroComprobante', label: 'Número Comprobante'},
         {key: 'emisorRazonSocial', label: 'Razón Social del Emisor'},
         {key: 'importeTotal', label: 'Importe Total', tdClass: "text-center"},
+        {key: 'totalSinImpuestos', label: 'totalSinImpuestos', tdClass: "text-center"},
+        //{key: 'totalConImpuestos', label: 'totalConImpuestos', tdClass: "text-center"},
         {key: 'claveAcceso', label: 'Clave de Acceso'},
       ],
       perPage: 5, // Número de elementos por página
@@ -144,6 +147,10 @@ export default {
   },
   methods: {
 
+
+    rowClicked(client) {
+      this.$emit('invoiceCompraSelected', client); // Emitir el cliente seleccionado
+    },
 
     showModalNew() {
       this.$refs['my-modal'].show()

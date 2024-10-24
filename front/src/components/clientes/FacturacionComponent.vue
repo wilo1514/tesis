@@ -499,7 +499,6 @@ export default {
 
         // Obtener las facturas para el punto de emisión ingresado
         const invoices = await getInvoicesPorPuntoEmision(this.newInvoice.emisor.ptoEmi);
-        console.log("Facturas encontradas para el punto de emisión:", invoices);
 
         if (invoices.length > 0) {
           // Filtrar facturas por punto de emisión específico y ordenarlas por secuencial de forma descendente
