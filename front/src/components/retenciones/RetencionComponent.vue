@@ -99,6 +99,7 @@
             <th>Fecha Emisión</th>
             <th>Ejercicio Fiscal</th>
             <th>Base imponible para la retención</th>
+            <th>Lista de impuestos</th>
             <th>Impuesto</th>
             <th>Porcentaje de retención</th>
             <th>Valor retenido</th>
@@ -113,12 +114,24 @@
             <td>{{ newRetencion.detalles[0].periodoFiscal }}</td>
             <!--            <td>{{ periodoFiscal }}</td>-->
             <td>{{ impuesto.baseImponible }}</td>
+            <td >
+              <Select2
+                  v-model=" impuesto.codigoPorcentaje"
+                  :options="codesRetencion.map(p => ({ id: p.codigo, text: `${p.codigo} : ${p.porcentaje}% - ${p.type} - ${p.type == 1 ? 'RENTA':'IVA'}`  }))"
+
+              />
+
+
+            </td>
             <td>{{ impuesto.codigoPorcentaje }}</td>
             <td>{{ (impuesto.codigoPorcentaje === '2' ? '15%' : '10%') }}</td>
             <td>{{ impuesto.valor }}</td>
           </tr>
           </tbody>
         </table>
+        <pre>
+                {{codesRetencion}}
+              </pre>
 
 
 
@@ -177,6 +190,7 @@ import InventarioComponent from "@/components/inventario/InventarioComponent.vue
 import Select2 from 'v-select2-component';
 import {getProducts} from "@/services/productsService";
 import {getSupplierById} from "@/services/supplierService";
+import {getCodes} from "@/services/codeService";
 import {createBilling, getBillings, getBillingByNumeroAutorizacion} from "@/services/saveBillingService";
 import moment from 'moment';
 import Swal from "sweetalert2";
@@ -188,6 +202,7 @@ export default {
   components: {FacturasCompraComponent, ProveedorComponent, ClientComponent, InventarioComponent, Select2},
   data() {
     return {
+      codesRetencion:[],
       dataSupplier: [],
       dataInvoiceCompra: [],
       invoiceData: [],
@@ -719,6 +734,15 @@ export default {
         console.error("Error al obtener productos:", error);
       }
     },
+    async fetchCodes() {
+      try {
+
+        console.log("cargar codes");
+        this.codesRetencion = await getCodes();
+      } catch (error) {
+        console.error("Error al obtener productos:", error);
+      }
+    },
     async fetchBillings() {
       try {
         this.listBillings = await getBillings();
@@ -728,6 +752,7 @@ export default {
     },
   },
   mounted() {
+    this.fetchCodes();
     this.fetchProducts();
     this.fechaFormateada = moment().format('YYYY-MM-DD');
     // Establecer la fecha interna en el formato DD/MM/YYYY
