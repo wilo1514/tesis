@@ -22,9 +22,18 @@ async function calcularRetencion(detalles) {
         const impuestosCalculados = await Promise.all(detalle.impuestos.map(async (impuesto) => {
             const baseImponible = impuesto.baseImponible;
 
+
             // Obtener el porcentaje de retención del microservicio según el código del impuesto y porcentaje
             const porcentajeRetener = await obtenerPorcentajeRetencion(impuesto.codigo, impuesto.codigoPorcentaje);
-            const valorRetenido = (baseImponible * porcentajeRetener) / 100;
+
+
+
+
+            let valorRetenido = (baseImponible * porcentajeRetener) / 100;
+
+
+            valorRetenido= parseFloat(valorRetenido.toFixed(2));
+
 
             console.log(`Código de impuesto: ${impuesto.codigo}, Código de porcentaje: ${impuesto.codigoPorcentaje}, Base Imponible: ${baseImponible}, Porcentaje a Retener: ${porcentajeRetener}, Valor Retenido: ${valorRetenido}`);
 

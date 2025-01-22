@@ -58,7 +58,7 @@ exports.crearYEnviarRetencion = async (req, res) => {
         }
 
         // Calcular el total retenido basado en el valor retenido total
-        const totalRetenido = impuestosRetenidos.reduce((total, impuesto) => total + impuesto.valorRetenido, 0);
+        const totalRetenido = impuestosRetenidos.reduce((total, impuesto) => total + impuesto.valorRetenido, 0).toFixed(2);
 
         // Crear la retención con la clave de acceso y la fecha de emisión
         const secuencial = emisor.ret;
@@ -73,7 +73,7 @@ exports.crearYEnviarRetencion = async (req, res) => {
             fechaEmision: fechaEmisionFormateada,
             claveAcceso,
             impuestosRetenidos,
-            totalRetenido // Agregamos el total retenido
+            totalRetenido:  parseFloat(totalRetenido)  // Agregamos el total retenido
         });
 
         console.log('Retención guardada en la base de datos:', retencion._id);
