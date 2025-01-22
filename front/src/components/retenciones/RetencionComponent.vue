@@ -88,7 +88,10 @@
             </b-form-group>
           </b-col>
         </b-row>
+<h1>
 
+        {{periodoFiscal}}
+</h1>
 
         <h4 class="mt-4 d-flex justify-content-start">Detalles de la retención</h4>
         <table class="table table-bordered">
@@ -120,6 +123,7 @@
                   :options="codesRetencion.map(p => ({ id: p.codigo, text: `${p.codigo} : ${p.porcentaje}% - ${p.type} - ${p.type == 1 ? 'RENTA':'IVA'}`  }))"
 
               />
+              {{impuesto}}
 
 
             </td>
@@ -130,7 +134,8 @@
           </tbody>
         </table>
         <pre>
-                {{codesRetencion}}
+{{listaImpuestos}}
+<!--                {{codesRetencion}}-->
               </pre>
 
 
@@ -274,6 +279,7 @@ export default {
           direccionMatriz: "TOMÁS ORDOÑEZ 14-31 Y PIO BRAVO",
           direccionEstablecimiento: "DE LA MISTELA Y RAFAEL CARPIO ABAD",
           contribuyenteEspecial: "NO",
+          tipoContribuyente:"Persona Jurídíca",
           obligadoContabilidad: "SI",
           ret: "000000002",
           ambiente: "pruebas",
@@ -298,11 +304,10 @@ export default {
                 "baseImponible": 0
               }
             ],
-            "fechaEmisionComprobante": "12/10/2024"
+            "fechaEmisionComprobante": ""
           }
         ],
-        fechaEmision: "",
-        periodoFiscal: "10/2024",
+        periodoFiscal:  "",
         informacionAdicional: [
           {
             nombre: "Observación",
@@ -318,7 +323,7 @@ export default {
   watch: {
     totalSinImpuestos(newValue) {
       // Asignar el valor calculado a newRetencion.totalSinImpuestos
-      this.newRetencion.totalSinImpuestos = newValue;
+      //this.newRetencion.totalSinImpuestos = newValue;
     },
     importeTotal(newValue) {
       this.newRetencion.importeTotal = newValue;
@@ -420,11 +425,13 @@ export default {
     invoiceCompraSelected(data) {
 
       this.dataInvoiceCompra = data;
+      console.log("DATOS PROVEEDOR FACTURA", this.dataInvoiceCompra);
 
       this.newRetencion.supplierId = data.emisor._id;
+      this.newRetencion.periodoFiscal = this.periodoFiscal;
       this.newRetencion.detalles[0].numeroComprobante = data.numeroComprobante;
-      this.newRetencion.detalles[0].periodoFiscal = data.periodoFiscal;
       this.newRetencion.detalles[0].precioTotalSinImpuesto = data.totalSinImpuestos;
+      this.newRetencion.detalles[0].fechaEmisionComprobante =  moment(this.fechaFormateada, 'YYYY-MM-DD').format('DD/MM/YYYY');
       this.newRetencion.detalles[0].impuestos[0].baseImponible = data.totalConImpuestos[0].baseImponible;
       this.newRetencion.detalles[0].impuestos[1].baseImponible = data.totalConImpuestos[1].baseImponible;
       this.newRetencion.detalles[0].impuestos[0].codigo = data.totalConImpuestos[0].codigo;
@@ -563,7 +570,7 @@ export default {
 
     updateFechaFormateada() {
       // Convertir la fecha ingresada en el input al formato DD/MM/YYYY
-      this.newRetencion.fechaEmision = moment(this.fechaFormateada, 'YYYY-MM-DD').format('DD/MM/YYYY');
+      this.newRetencion.detalles[0].numeroComprobante= moment(this.fechaFormateada, 'YYYY-MM-DD').format('DD/MM/YYYY');
     },
     addNewProductRow() {
       this.newRetencion.detalles.push({
@@ -698,6 +705,7 @@ export default {
           direccionMatriz: "TOMÁS ORDOÑEZ 14-31 Y PIO BRAVO",
           direccionEstablecimiento: "DE LA MISTELA Y RAFAEL CARPIO ABAD",
           contribuyenteEspecial: "NO",
+          tipoContribuyente:"Persona Jurídíca",
           obligadoContabilidad: "SI",
           ret: "000000002",
           ambiente: "pruebas",
@@ -722,7 +730,7 @@ export default {
                 "baseImponible": 0
               }
             ],
-            "fechaEmisionComprobante": "12/10/2024"
+            "fechaEmisionComprobante": ""
           }
         ]
       }
@@ -756,7 +764,7 @@ export default {
     this.fetchProducts();
     this.fechaFormateada = moment().format('YYYY-MM-DD');
     // Establecer la fecha interna en el formato DD/MM/YYYY
-    this.newRetencion.fechaEmision = moment(this.fechaFormateada, 'YYYY-MM-DD').format('DD/MM/YYYY');
+
     this.fetchBillings();
     this.checkAndSetInvoiceNumber();
 
