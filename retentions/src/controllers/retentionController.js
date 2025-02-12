@@ -12,7 +12,7 @@ const calcularRetencion = require('../utils/calcularRetencion'); // Nueva utilid
 
 async function obtenerDatosReceptor(supplierId) {
     try {
-        const url = `http://172.18.0.1:3003/api/suppliers/${supplierId}`;
+        const url = `http://localhost:3003/api/suppliers/${supplierId}`;
         const response = await axios.get(url);
         return response.data;
     } catch (error) {
@@ -21,6 +21,8 @@ async function obtenerDatosReceptor(supplierId) {
     }
 }
 exports.crearYEnviarRetencion = async (req, res) => {
+
+    console.log("recibe",req.body);
     try {
         const ambiente = req.body.emisor.ambiente;
         const tipoEmision = req.body.emisor.tipoEmision;

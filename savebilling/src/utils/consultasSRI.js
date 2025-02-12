@@ -1,10 +1,11 @@
 const axios = require('axios');
-const { parseStringPromise } = require('xml2js');
+const {parseStringPromise} = require('xml2js');
 
 async function consultarAutorizacion(claveAcceso, ambiente) {
     const url = ambiente === 'produccion'
-        ? 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl'
-        : 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
+        ? 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl'
+        : 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
+
 
     const soapRequest = `
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ec="http://ec.gob.sri.ws.autorizacion">
@@ -18,7 +19,7 @@ async function consultarAutorizacion(claveAcceso, ambiente) {
     `;
 
     try {
-        const { data } = await axios.post(url, soapRequest, {
+        const {data} = await axios.post(url, soapRequest, {
             headers: {
                 'Content-Type': 'text/xml',
                 'SOAPAction': ''
@@ -26,7 +27,7 @@ async function consultarAutorizacion(claveAcceso, ambiente) {
         });
 
         // Parsear la respuesta SOAP
-        const parsedResult = await parseStringPromise(data, { explicitArray: false });
+        const parsedResult = await parseStringPromise(data, {explicitArray: false});
 
         // Acceder al resultado de autorización
         const autorizacion = parsedResult['soap:Envelope']['soap:Body']['ns2:autorizacionComprobanteResponse']['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion'];
@@ -67,7 +68,7 @@ async function consultarAutorizacion(claveAcceso, ambiente) {
         }
     } catch (error) {
         console.error('Error al consultar la autorización:', error.message);
-        return { error: 'No se pudo obtener la autorización.', detalles: error.message };
+        return {error: 'No se pudo obtener la autorización.', detalles: error.message};
     }
 }
 

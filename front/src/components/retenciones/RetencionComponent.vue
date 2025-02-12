@@ -4,7 +4,6 @@
       <div class="mb-3 d-flex justify-content-between align-items-end">
         <b-form-group label="Número de Retención" label-for="fac">
           <b-form-input
-
               id="fac"
               v-model="newRetencion.emisor.ret"
               required
@@ -63,7 +62,7 @@
       </b-collapse>
 
 
-      <b-form @submit.prevent="createRetencion">
+
 
         <h4 class="mt-4 d-flex justify-content-start">Cargar factura de compra a retener</h4>
         <b-row class="d-flex justify-content-start align-items-center">
@@ -133,10 +132,11 @@
           </tr>
           </tbody>
         </table>
-        <pre>
-{{listaImpuestos}}
-<!--                {{codesRetencion}}-->
-              </pre>
+<!--        <h2>CODIGOS</h2>-->
+<!--        <pre>-->
+<!--{{listaImpuestos}}-->
+<!--&lt;!&ndash;                {{codesRetencion}}&ndash;&gt;-->
+<!--              </pre>-->
 
 
 
@@ -166,18 +166,18 @@
         <br>
         <div class="d-flex justify-content-end">
 
-          <b-button variant="primary" type="submit">Enviar Retención
+          <b-button variant="primary" @click="sendRetencion" >Enviar Retención
             <b-icon icon="upload"></b-icon>
           </b-button>
         </div>
-      </b-form>
+
 
 
     </b-card>
+    <h2> POSTMAN </h2>
     <div style="height: 50vh; overflow-y: scroll">
       <pre>{{ newRetencion }}</pre>
     </div>
-
 
     <b-modal ref="my-modal" title="Seleccionar factura de compra" size="xl" centered hide-header-close>
       <FacturasCompraComponent :flagInvoice="true"
@@ -190,6 +190,7 @@
 
 <script>
 import {createAndSendInvoice, getInvoicesPorPuntoEmision} from "@/services/invoiceServices";
+import {createRetencion} from "@/services/retencionService";
 import ClientComponent from "@/components/clientes/ClientComponent.vue";
 import InventarioComponent from "@/components/inventario/InventarioComponent.vue";
 import Select2 from 'v-select2-component';
@@ -281,7 +282,7 @@ export default {
           contribuyenteEspecial: "NO",
           tipoContribuyente:"Persona Jurídíca",
           obligadoContabilidad: "SI",
-          ret: "000000002",
+          ret: "000000006",
           ambiente: "pruebas",
           tipoEmision: "1",
           estab: "001",
@@ -425,7 +426,6 @@ export default {
     invoiceCompraSelected(data) {
 
       this.dataInvoiceCompra = data;
-      console.log("DATOS PROVEEDOR FACTURA", this.dataInvoiceCompra);
 
       this.newRetencion.supplierId = data.emisor._id;
       this.newRetencion.periodoFiscal = this.periodoFiscal;
@@ -437,7 +437,6 @@ export default {
       this.newRetencion.detalles[0].impuestos[0].codigo = data.totalConImpuestos[0].codigo;
       this.newRetencion.detalles[0].impuestos[1].codigo = data.totalConImpuestos[1].codigo;
       this.getSupplierById(this.newRetencion.supplierId);
-      console.log("RECIBE", data);
       this.hideModal();
 
     },
@@ -508,16 +507,16 @@ export default {
               .sort((a, b) => b.secuencial - a.secuencial); // Ordenar en orden descendente
 
           // Verificar que las facturas filtradas y ordenadas no estén vacías
-          if (facturasOrdenadas.length > 0) {
-            // Obtener el secuencial más alto de las facturas del punto de emisión
-            const maxSecuencial = facturasOrdenadas[0].secuencial;
-
-            // Asignar el siguiente número de secuencial incrementado en 1
-            this.newRetencion.emisor.fac = (maxSecuencial + 1).toString().padStart(9, "0");
-          } else {
-            // Si no existen facturas después de filtrar, asignar el secuencial inicial
-            this.newRetencion.emisor.fac = "000000001";
-          }
+          // if (facturasOrdenadas.length > 0) {
+          //   // Obtener el secuencial más alto de las facturas del punto de emisión
+          //  // const maxSecuencial = facturasOrdenadas[0].secuencial;
+          //
+          //   // Asignar el siguiente número de secuencial incrementado en 1
+          //   this.newRetencion.emisor.fac = (maxSecuencial + 1).toString().padStart(9, "0");
+          // } else {
+          //   // Si no existen facturas después de filtrar, asignar el secuencial inicial
+          //   this.newRetencion.emisor.fac = "000000001";
+          // }
         } else {
           // Si no existen facturas, asignar el secuencial inicial
           this.newRetencion.emisor.fac = "000000001";
@@ -639,8 +638,6 @@ export default {
         detalle.impuestos[0].codigoPorcentaje = product.impuestos[0].codigoPorcentaje;
         detalle.impuestos[0].codigo = product.impuestos[0].codigo;
 
-        console.log("producto", product.impuestos);
-        console.log("detalle", detalle.impuestos);
         this.calculateSubtotal(detalle);
       }
     },
@@ -654,7 +651,6 @@ export default {
     supplierSelected(data) {
       this.newRetencion.supplierId = data._id;
       this.razonSocial = data.razonSocial;
-      console.log("RECIBE", data);
       this.hideModal();
 
     },
@@ -663,24 +659,25 @@ export default {
     },
 
 
-    async createRetencion() {
+    async sendRetencion() {
       try {
 
 
         Swal.fire({
-          title: 'Creando factura...',
-          text: 'Por favor espera mientras se genera y envía la factura.',
+          title: 'Creando retención...',
+          text: 'Por favor espera...',
           allowOutsideClick: false,
           didOpen: () => {
             Swal.showLoading(); // Mostrar el indicador de carga
           }
         });
 
-        this.newRetencion.detalles.forEach(detalle => {
-          detalle.precioUnitario = parseFloat(detalle.precioUnitario).toFixed(2);  // Convertir a float y asegurar dos decimales
-          detalle.precioUnitario = parseFloat(detalle.precioUnitario); // Asegurarse de que se guarde como número
-        });
-        const facturaCreada = await createAndSendInvoice(this.newRetencion);
+        // this.newRetencion.detalles.forEach(detalle => {
+        //   detalle.precioUnitario = parseFloat(detalle.precioUnitario).toFixed(2);  // Convertir a float y asegurar dos decimales
+        //   detalle.precioUnitario = parseFloat(detalle.precioUnitario); // Asegurarse de que se guarde como número
+        // });
+        const retencionCreada = await createRetencion(this.newRetencion);
+        console.log("retencion creada", retencionCreada);
         this.showSuccessAlert('factura', 'creado');
         this.resetInvoiceForm();
 
@@ -745,7 +742,6 @@ export default {
     async fetchCodes() {
       try {
 
-        console.log("cargar codes");
         this.codesRetencion = await getCodes();
       } catch (error) {
         console.error("Error al obtener productos:", error);
